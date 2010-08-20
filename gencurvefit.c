@@ -23,6 +23,7 @@ struct waveStats {
 };
 typedef struct waveStats waveStats;
 typedef struct waveStats* waveStatsPtr;
+
 struct genoptStruct {
 	/*total number of datapoints*/
 	long datapoints;
@@ -37,8 +38,8 @@ struct genoptStruct {
 	//the number of dimensions for the fit
 	int numDataDims;
 	
-	/*place to put model data*/
-	double *modeldata;
+	/*place to put model once it's been calculated with the fitfunction*/
+	double *model;
 	
 	//short array to hold the parameters that are being held
     const int *holdvector;
@@ -630,11 +631,11 @@ int initialiseFit(genoptStruct *p){
 			goto done;
 		
 		//calculate the model
-		if(err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->modeldata, p->xdata, p->datapoints))
+		if(err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->model, p->xdata, p->datapoints, p->numDataDims))
 			goto done;
 		
 		/*calculate the costfunction*/
-		chi2 = (*(p->costfun))(p->userdata, p->temp_coefs, p->numcoefs, p->ydata, p->modeldata, p->edata, p->datapoints);
+		chi2 = (*(p->costfun))(p->userdata, p->temp_coefs, p->numcoefs, p->ydata, p->model, p->edata, p->datapoints);
 		
 		*(p->chi2Array+ii)= chi2;
 	}
@@ -686,11 +687,11 @@ int optimiseloop(genoptStruct *p){
 				goto done;
 
 			
-			if(err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->modeldata, p->xdata, p->datapoints))
+			if(err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->model, p->xdata, p->datapoints, p->numDataDims))
 				goto done;
 
 			/*calculate the costfunction*/
-			chi2trial = (*(p->costfun))(p->userdata, p->temp_coefs, p->numcoefs, p->ydata, p->modeldata, p->edata, p->datapoints);
+			chi2trial = (*(p->costfun))(p->userdata, p->temp_coefs, p->numcoefs, p->ydata, p->model, p->edata, p->datapoints);
 			
 			/*
 			 if the chi2 of the trial vector is less than the current populationvector then replace it
@@ -876,8 +877,8 @@ int genetic_optimisation(fitfunction fitfun,
 	memcpy(gos.temp_coefs, coefs, numcoefs*sizeof(double));
 	
 	//initialise space for a full array copy of the coefficients
-	gos.modeldata = (double*)malloc(datapoints* sizeof(double));
-	if(gos.modeldata == NULL){
+	gos.model = (double*)malloc(datapoints* sizeof(double));
+	if(gos.model == NULL){
 		err = NO_MEMORY;
 		goto done;
 	}	
@@ -909,8 +910,8 @@ done:
 		free(gos.gen_pvector);
 	if(gos.gen_trial)
 		free(gos.gen_trial);
-	if(gos.modeldata)
-		free(gos.modeldata);
+	if(gos.model)
+		free(gos.model);
 	if(gos.temp_coefs)
 		free(gos.temp_coefs);
 	if(gos.varparams)
