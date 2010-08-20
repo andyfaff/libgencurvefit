@@ -21,7 +21,7 @@ return an integer != 0 for an error.
 if you return an error the fit will finish immediately.
 This error will be returned from genetic_optimisation
 */
-typedef int (*fitfunction)(void *userdata, const double *coefs, double *modeldata, const double **xdata, long numpnts);
+typedef int (*fitfunction)(void *userdata, const double *coefs, double *model, const double **xdata, long numpnts, int numDataDims);
 
 typedef double (*costfunction)(void *userdata, const double *params, int numparams, const double *data, const double *model, const double *errors, long numpnts);
 
