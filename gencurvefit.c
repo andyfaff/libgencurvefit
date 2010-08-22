@@ -78,14 +78,12 @@ struct genoptStruct {
 	/*an array which holds all the different guesses for the fit.*/
 	/*it has dimensions popsize*numvarparams, numvarparams*/
 	double **gen_populationvector;
-	/*an array used in setting up an individual genetic guess.*/
-	double *gen_bprime;
 	/*an individual genetic guess.*/
 	double *gen_trial;
-	/*a utility array, same length as gen_trial.*/
-	double *gen_pvector;
 	/*which genetic strategy do you want?*/
 	int strategy;
+	/*Monte Carlo tempering parameter, set to NaN if not required*/
+	double MCtemp;
 	
 	/*an array which holds all the chi2 values for all the different guesses in the population vector.*/
 	double *chi2Array;
@@ -474,14 +472,6 @@ void createTrialVector(genoptStruct *p, int currentpvector){
 	theStrategy(p, currentpvector);
 }
 
-
-static int 
-setPvectorFromPop(genoptStruct *p, int vectors){
-	//p->gen_pvector[] = p->gen_populationvector[vector][p]
-	memcpy(p->gen_pvector, *(p->gen_populationvector+vectors), p->numvarparams*sizeof(double));
-	return 0;
-}
-
 static waveStats getWaveStats(double *sort, long length,int moment){
 	long ii=0;
 	double minval = *sort, maxval = *sort;
@@ -542,39 +532,28 @@ ensureConstraints(genoptStruct *p){
 }
 
 /*
- setPvector sets the pvector with a double array, checking to make sure the sizes are right
- returns 0 if no error
- returns errorcode otherwise
- */
-static int 
-setPvector(genoptStruct *p, double* vector, int vectorsize){
-	//gos->gen_pvector[] = vector[p]
-	memcpy(p->gen_pvector, vector, vectorsize*sizeof(double));
-	return 0;
-}
-/*
  insertVaryingParams inserts the current pvector into an array copy of the coefficients,
  then into a temporary wave
  returns 0 if no error
  returns errorcode otherwise
  */
 static int
-insertVaryingParams(genoptStruct *p){
+insertVaryingParams(genoptStruct *p, double *vector, int vectorsize){
 	int err=0,ii;
 	
-	for(ii=0 ; ii< p->numvarparams; ii+=1)
-		*(p->temp_coefs + *(p->varparams + ii)) =  *(p->gen_pvector + ii);
+	for(ii = 0 ; ii < p->numvarparams ; ii += 1)
+		*(p->temp_coefs + *(p->varparams + ii)) =  *(vector + ii);
 
 	return err;
 }
 
 /*
- setPopVectorFromPVector sets the populationvector with index replace, with a double array
+ setPopVector sets the populationvector with index replace, with a double array
  returns 0 if no error
  returns errorcode otherwise
  */
 static int 
-setPopVectorFromPVector(genoptStruct *p, double* vector, int vectorsize, int replace){
+setPopVector(genoptStruct *p, double* vector, int vectorsize, int replace){
 	//p->gen_populationvector[replace][] = vector[q]
 	memcpy(*(p->gen_populationvector + replace), vector, vectorsize * sizeof(double));
 	return 0;
@@ -624,14 +603,12 @@ int initialiseFit(genoptStruct *p){
 	}
 	
 	//initialise Chi2array, will require a bit of calculation of the model function for each of the initial guesses.
-	for(ii=0; ii<p->totalpopsize ; ii += 1){
-		if(err = setPvectorFromPop(p, ii))
-			goto done;
-		if(err = insertVaryingParams(p))
+	for(ii = 0 ; ii < p->totalpopsize ; ii += 1){
+		if(err = insertVaryingParams(p, *(p->gen_populationvector+ ii), p->numvarparams))
 			goto done;
 		
 		//calculate the model
-		if(err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->model, p->xdata, p->datapoints, p->numDataDims))
+		if(err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->numcoefs, p->model, p->xdata, p->datapoints, p->numDataDims))
 			goto done;
 		
 		/*calculate the costfunction*/
@@ -645,6 +622,12 @@ int initialiseFit(genoptStruct *p){
 	swapChi2values(p, 0, wavStats.V_minloc);
 	if(err = swapPopVector(p, p->totalpopsize, 0, wavStats.V_minloc))
 		goto done;
+	
+	//put the best fit from the intialisation into the coeffcients to return		   
+	if(err = insertVaryingParams(p,  *(p->gen_populationvector), p->numvarparams))
+		goto done;
+	memcpy(p->coefs, p->temp_coefs, p->numcoefs * sizeof(double));
+	
 	
 done:
 	return err;
@@ -660,6 +643,7 @@ int optimiseloop(genoptStruct *p){
 	int err=0;
 	int currentpvector;
 	double chi2pvector,chi2trial;
+	int acceptMoveGrudgingly;
 	waveStats wavStats;
 			
 	/* the user sets how many times through the entire population*/
@@ -680,24 +664,29 @@ int optimiseloop(genoptStruct *p){
 			/*
 			 find out the chi2 value of the trial vector		
 			 */
-			if(err = setPvector(p, p->gen_trial, p->numvarparams))
+			
+			if(err = insertVaryingParams(p, p->gen_trial, p->numvarparams))
 				goto done;
 			
-			if(err = insertVaryingParams(p))
-				goto done;
-
-			
-			if(err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->model, p->xdata, p->datapoints, p->numDataDims))
+			if(err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->numcoefs, p->model, p->xdata, p->datapoints, p->numDataDims))
 				goto done;
 
 			/*calculate the costfunction*/
 			chi2trial = (*(p->costfun))(p->userdata, p->temp_coefs, p->numcoefs, p->ydata, p->model, p->edata, p->datapoints);
 			
+			acceptMoveGrudgingly = 0;
+			if(isfinite(p->MCtemp) && (exp(-chi2trial / chi2pvector / p->MCtemp) < randomDouble(0, 1)) ){
+				acceptMoveGrudgingly = 1;				
+				if(p->updatefun)
+					if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial))
+						goto done;
+			}
+			
 			/*
 			 if the chi2 of the trial vector is less than the current populationvector then replace it
 			 */
-			if(chi2trial < chi2pvector){
-				if(err = setPopVectorFromPVector(p, p->gen_pvector, p->numvarparams, currentpvector))
+			if(chi2trial < chi2pvector  || (acceptMoveGrudgingly && ii)){
+				if(err = setPopVector(p, p->gen_trial, p->numvarparams, currentpvector))
 					goto done;
 				
 				*(p->chi2Array + ii) = chi2trial;
@@ -705,22 +694,15 @@ int optimiseloop(genoptStruct *p){
 				 if chi2 of the trial vector is less than that of the best fit, then replace the best fit vector
 				 */
 				if(chi2trial < *(p->chi2Array)){		/*if this trial vector is better than the current best then replace it*/
-					if(err = setPopVectorFromPVector(p, p->gen_pvector, p->numvarparams, 0))
+					if(err = setPopVector(p, p->gen_trial, p->numvarparams, 0))
 						goto done;
-					
-					/*
-					 put the best fit into the coeffcient array that will be returned to the user
-					*/
-					if(err = insertVaryingParams(p))
-						goto done;
-					memcpy(p->coefs, p->temp_coefs, p->numcoefs * sizeof(double));
 					
 					/*
 					 a user defined update function that can be used to halt the fit early, and keep 
 					  appraised of fit progress.
 					*/
 					if(p->updatefun)
-						if(err = (*(p->updatefun))(p->userdata, p->coefs, p->numcoefs, kk, chi2trial))
+						if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial))
 							goto done;
 	
 					/*
@@ -748,13 +730,13 @@ int genetic_optimisation(fitfunction fitfun,
 						 costfunction costfun,
 						 unsigned int numcoefs,
 						 double* coefs,
-						 long datapoints,
 						 const int *holdvector,
 						 const double** limits,
-						 int numDataDims,
+						 long datapoints,
 						 const double* ydata,
 						 const double** xdata,
 						 const double *edata,
+						 int numDataDims,
 						 double *chi2,
 						 int iterations,
 						 int popsizeMultiplier,
@@ -762,8 +744,10 @@ int genetic_optimisation(fitfunction fitfun,
 						 double recomb,
 						 double tolerance,
 						 unsigned int strategy,
+						 double MCtemp,
 						 updatefunction updatefun,
-						 void* userdata){
+						 void* userdata
+						 ){
 	int err = 0;
 	
 	long ii,jj;
@@ -783,8 +767,16 @@ int genetic_optimisation(fitfunction fitfun,
 	
 	//setup the function pointers
 	gos.fitfun = fitfun;
-	gos.costfun = costfun;
+	if(!costfun)
+		gos.costfun = &chisquared;
+	else
+		gos.costfun = costfun;
+
 	gos.updatefun = updatefun;
+	if(MCtemp == 0)
+		gos.MCtemp = NAN;
+	else
+		gos.MCtemp = MCtemp;
 	
 	//check that the total number of parameters matches the number of parameters in the holdvector
 	gos.numcoefs = numcoefs;
@@ -795,9 +787,9 @@ int genetic_optimisation(fitfunction fitfun,
 	gos.userdata = userdata;
 		
 	//work out which parameters are being held
-	for(ii=0 ; ii < numcoefs ; ii+=1)
+	for(ii = 0 ; ii < numcoefs ; ii += 1)
 		if(holdvector[ii] == 0)
-		    gos.numvarparams +=1;
+		    gos.numvarparams += 1;
 	
 	if(gos.numvarparams < 1){
 		err = NO_VARYING_PARAMS;
@@ -856,18 +848,7 @@ int genetic_optimisation(fitfunction fitfun,
 		err = NO_MEMORY;
 		goto done;
 	}
-	//initialise the bprime vector
-	gos.gen_bprime = (double*)malloc(gos.numvarparams * sizeof(double));
-	if(gos.gen_bprime == NULL){
-		err = NO_MEMORY;
-		goto done;
-	}
-	//initialise the pvector
-	gos.gen_pvector = (double*)malloc(gos.numvarparams * sizeof(double));
-	if(gos.gen_pvector == NULL){
-		err = NO_MEMORY;
-		goto done;
-	}
+
 	//initialise space for a full array copy of the coefficients
 	gos.temp_coefs = (double*)malloc(numcoefs * sizeof(double));
 	if(gos.temp_coefs == NULL){
@@ -888,26 +869,24 @@ int genetic_optimisation(fitfunction fitfun,
 		goto done;
 	
 	//now iterate through, fitting the data.
-	if(err = optimiseloop(&gos))
-		goto done;
-	
+	err = optimiseloop(&gos);
+
 	//at this point we have the best fit.  Now return the results
 	*chi2 = *(gos.chi2Array);
-	if(err = setPvectorFromPop(&gos, 0))
-		goto done;
-	if(err = insertVaryingParams(&gos))
-		goto done;
-	memcpy(coefs, gos.temp_coefs, numcoefs*sizeof(double));
+	
+	/*
+	 put the best fit into the coeffcient array that will be returned to the user
+	 */
+	insertVaryingParams(&gos,  *(gos.gen_populationvector), gos.numvarparams);
+	memcpy(gos.coefs, gos.temp_coefs, gos.numcoefs * sizeof(double));
+	
 	
 done:
+
 	if(gos.chi2Array)
 		free(gos.chi2Array);
-	if(gos.gen_bprime)
-		free(gos.gen_bprime);
 	if(gos.gen_populationvector)
 		free(gos.gen_populationvector);
-	if(gos.gen_pvector)
-		free(gos.gen_pvector);
 	if(gos.gen_trial)
 		free(gos.gen_trial);
 	if(gos.model)
