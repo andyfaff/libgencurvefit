@@ -7,6 +7,10 @@
  *
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+	
 #define NO_MEMORY -1
 #define INCORRECT_LIMITS -2
 #define HOLDVECTOR_COEFS_MISMATCH -3
@@ -15,14 +19,30 @@
 
 #define PI 3.14159265358979323846
 
-/*function type for a typical fitfunction
-return 0 for no error.
-return an integer != 0 for an error.
-if you return an error the fit will finish immediately.
-This error will be returned from genetic_optimisation
-*/
-typedef int (*fitfunction)(void *userdata, const double *coefs, double *model, const double **xdata, long numpnts, int numDataDims);
+/*
+ a function that calculates the dependent variable, given input parameters and independent variables. 
+ If you return a non-zero value from this function the fit will stop, returning the same error code from genetic_optimisation.
 
+	userdata				- an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction.  Use this pointer to give extra
+								information to your functions.
+ 
+	coefs[numcoefs]			- an array containing all the parameters for calculating the model data.
+ 
+	numcoefs				- total number of fit parameters.
+ 
+	model[numpnts]			- the fitfunction should populate this array with the model data, calculated using the coefficients.
+ 
+	xdata[numpnts][numDataDims] - a 2D array containing the independent variables that correspond to each of the datapoints.
+										One can fit multidimensional data, e.g. y = f(n, m).  In this case numDataDims = 2.
+ 
+	numpnts					- the number of datapoints to be calculated.
+	
+	numDataDims				- the number of independent variables in the fit. For y = f(x) numDataDims = 1.  For y = f(n, m), numDataDims = 2, etc.
+*/
+typedef int (*fitfunction)(void *userdata, const double *coefs, int numcoefs, double *model, const double **xdata, long numpnts, int numDataDims);
+
+	
+	
 typedef double (*costfunction)(void *userdata, const double *params, int numparams, const double *data, const double *model, const double *errors, long numpnts);
 
 /*
@@ -31,17 +51,97 @@ typedef double (*costfunction)(void *userdata, const double *params, int numpara
  */
 typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int numcoefs, unsigned int iterations, double cost);
 
+/*
+ genetic_optimisation - perform curvefitting with differential evolution.  Fitting is not limited to 1 independent variable,
+  you can have as many as you like.  The function is threadsafe as long as you supply unique copies of the inputs to each instance.
+ 
+	fitfun					- a function that calculates the dependent variable, given input parameters and independent variables. 
+								If you return a non-zero value from this function the fit will stop. 
+ 
+    costfun					- a function that calculates the costfunction to be minimised.  This is normally a chi2 type function.
+								i.e. sum (((model[i] - data[i]) / dataerrors[i])^2 )
+								If costfun == NULL then a default chi2 function is used.
+ 
+	numcoefs				- total number of fit parameters.
+ 
+	coefs[numcoefs]			- an array containing all the parameters for the fit.  After genetic_optimisation this is populated by the parameters
+								that best fit the data.
+ 
+	holdvector[numcoefs]	- an array (with numcoefs elements) that specifies which parameters are going to be held during the fit. 
+								 0 = vary
+								 1 = hold
+
+	limits[numcoefs][2]		- a 2D array which contains the lower and upper limits for each parameter. The lower limit must be lower than the upper limit,
+								but only for those parameters that are being varied.
+ 
+	datapoints				- the total number of data points in the fit.
+ 
+	ydata[datapoints]		- an array containing the dependent variable (i.e. the data one is trying to fit).
+
+	xdata[datapoints][numDataDims] - a 2D array containing the independent variables that correspond to each of the datapoints.
+										One can fit multidimensional data, e.g. y = f(n, m).  In this case numDataDims = 2.
+ 
+	edata[datapoints]		- an array containing the experimental uncertainties for each of the datapoints.  If you use the default chi2 costfunction
+								then it should contain standard deviations.  Set each element to 1 if you do not wish to weight the fit by the experimental
+								uncertainties.  
+ 
+	numDataDims				- the number of independent variables in the fit. For y = f(x) numDataDims = 1.  For y = f(n, m), numDataDims = 2, etc.
+ 
+	chi2					- the final value of the cost function.
+ 
+	iterations				- the maximum number of times the population is evolved during the fit (unless convergence is reached).
+ 
+	popsizemultiplier		- the total size of the genetic population is popsizemultiplier multiplied by the number of varying parameters.
+ 
+	k_m						- the mutation constant 0 < k_m < 2.  A typical value is 0.7.  Make larger to get more mutation.
+ 
+	recomb					- the recombination constant, 0 < recomb < 1.  A typical value is 0.5.  Make smaller to get more exploration of parameter space.
+ 
+	tolerance				- specifies the stopping tolerance for the fit, which is when the standard deviation of the chi2 values of the entire population
+								divided by its mean is less than tolerance.
+ 
+	strategy				- Choose the Differential Evolution strategy (see http://www.icsi.berkeley.edu/~storn/code.html#prac)
+								 0 = Best1Bin;
+								 1 = Best1Exp;
+								 2 = Rand1Exp;
+								 3 = RandToBest1Exp;
+								 4 = Best2Exp;
+								 5 = Rand2Exp;
+								 6 = RandToBest1Bin;
+								 7 = Best2Bin;
+								 8 = Rand2Bin;
+								 9 = Rand1Bin;
+								 Try Best1Bin to start with.
+ 
+	MCtemp					- Normally if the chi2 value of the trial vector is lower than vector i from the population then the trial vector replaces vector i. 
+								However, if you specify temp  is specified then the probability of the trial vector being accepted is now done on a Monte Carlo basis. I.e.:
+								accept if
+									chi2(trial) < chi2(i)
+								or accept if
+								exp(-chi2(trial) / chi2(i) / MCtemp) < enoise(1) 
+								This has the effect of exploring wider parameter space, and is more likely to find a global minimum, but may take longer to converge. 
+								One should use more iterations with MCtemp. If one records the history of the fit using updatefun, then one can use the history for use in calculating
+								a covariance matrix or use as the posterior probability distribution for Bayesian model selection.  
+								IF YOU DON'T WANT THIS TEMPERING SET MCtemp TO NAN (e.g. sqrt(-1)) .
+ 
+	updatefun				- an (optional) function that is called each time the costfunction improves.  Use this function to keep track of the fit.
+								If you return a non-zero value from this function the fit will stop. This function will also be called if a move is accepted on a monte carlo basis (see MCtemp). 
+ 
+	userdata				- an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction.  Use this pointer to give extra
+								information to your functions.
+ */
+	
 int genetic_optimisation(fitfunction fitfun,
 						 costfunction costfun,
 						 unsigned int numcoefs,
 						 double* coefs,
-						 long datapoints,
 						 const int *holdvector,
 						 const double** limits,
-						 int numDataDims,
+						 long datapoints,
 						 const double* ydata,
 						 const double** xdata,
 						 const double *edata,
+						 int numDataDims,
 						 double *chi2,
 						 int iterations,
 						 int popsizeMultiplier,
@@ -49,6 +149,7 @@ int genetic_optimisation(fitfunction fitfun,
 						 double recomb,
 						 double tolerance,
 						 unsigned int strategy,
+						 double temp,
 						 updatefunction updatefun,
 						 void* userdata
 						 );
@@ -59,4 +160,6 @@ double chisquared(void *userdata, const double *params, int numparams, const dou
 double robust(void *userdata, const double *params, int numparams, const double *data, const double *model, const double *errors, long numpnts);
 
 
-
+#ifdef __cplusplus
+}
+#endif
