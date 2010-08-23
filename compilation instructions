@@ -1,4 +1,4 @@
-g++ -O3 -funroll-loops -c -fopenmp gencurvefit.cpp memutils.cpp
+g++ -O3 -funroll-loops -c -fopenmp gencurvefit.c
 ar -rvs libgencurvefit.a *.o 
-cp libgencurvefit.a /usr/local/lib
-cp gencurvefit.h /usr/local/include
+sudo cp libgencurvefit.a /usr/local/lib
+sudo cp gencurvefit.h /usr/local/include

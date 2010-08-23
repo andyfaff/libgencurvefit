@@ -130,13 +130,13 @@ typedef struct genoptStruct* genoptStructPtr;
  In addition *(p+i) points to a whole row.
  */
 
-void* malloc2d(int ii, int jj, int sz)
+ void* malloc2d(int ii, int jj, int sz)
 {
 	void** p;
 	int sz_ptr_array;
 	int sz_elt_array;
 	int sz_allocation;
-	int i;
+	long i;
 	
 	sz_ptr_array = ii * sizeof(void*);
 	sz_elt_array = jj * sz;
@@ -148,7 +148,7 @@ void* malloc2d(int ii, int jj, int sz)
 	memset(p, 0, sz_allocation);
 	for (i = 0; i < ii; ++i)
 	{
-		*(p+i) = (void*) ((int)p + sz_ptr_array + i * sz_elt_array);
+		*(p+i) = (void*) ((long)p + sz_ptr_array + i * sz_elt_array);
 	}
 	return p;
 }
