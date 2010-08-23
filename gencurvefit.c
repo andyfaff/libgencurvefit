@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 #include <stdio.h>
+#include <time.h>
 #include "math.h"
 #include "string.h"
 
@@ -757,7 +758,7 @@ int genetic_optimisation(fitfunction fitfun,
 	memset(&gos, 0, sizeof(gos));
 		
 	//initialise the random number generators
-	srandomdev();
+	srandom(clock());
 	
 	//setup the data.
 	gos.xdata = xdata;
