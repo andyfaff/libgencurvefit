@@ -19,6 +19,37 @@ extern "C" {
 
 #define PI 3.14159265358979323846
 
+	/*
+	 Create a two-dimensional array in a single allocation
+	 *
+	 * The effect is the same as an array of "element p[ii][jj];
+	 * The equivalent declaration is "element** p;"
+	 * The array is created as an array of pointer to element, followed by an array of arrays of elements.
+	 * \param ii first array bound
+	 * \param jj second array bound
+	 * \param sz size in bytes of an element of the 2d array
+	 * \return NULL on error or pointer to array
+	 *
+	 * assign return value to (element**)
+	 */
+	
+	/* to use this in practice one would write 
+	 
+	 double **pp = NULL;
+	 pp = (double**)malloc2d(5, 11, sizeof(double));
+	 if(pp==NULL)
+	 return NOMEM;
+	 
+	 <use pp as required>
+	 free(pp);
+	 
+	 Note you can access elements by
+	 *(*(p+i)+j) is equivalent to p[i][j]
+	 In addition *(p+i) points to a whole row.
+	 */
+	
+	void* malloc2d(int ii, int jj, int sz);
+	
 /*
  a function that calculates the dependent variable, given input parameters and independent variables. 
  If you return a non-zero value from this function the fit will stop, returning the same error code from genetic_optimisation.
