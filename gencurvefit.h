@@ -63,9 +63,15 @@ extern "C" {
  
 	model[numpnts]			- the fitfunction should populate this array with the model data, calculated using the coefficients.
  
-	xdata[numpnts][numDataDims] - a 2D array containing the independent variables that correspond to each of the datapoints.
-										One can fit multidimensional data, e.g. y = f(n, m).  In this case numDataDims = 2.
- 
+	xdata[numDataDims][numpnts] - a 2D array containing the independent variables that correspond to each of the datapoints.
+									 One can fit multidimensional data, e.g. y = f(n, m).  In this case numDataDims = 2.
+									 You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)).
+									 If you want to pass in a 1D dataset simply pass a pointer to the array.
+									 e.g. if your array is:
+									 double *xP;
+									 then pass in:
+									 &xP
+									 
 	numpnts					- the number of datapoints to be calculated.
 	
 	numDataDims				- the number of independent variables in the fit. For y = f(x) numDataDims = 1.  For y = f(n, m), numDataDims = 2, etc.
@@ -109,8 +115,14 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
  
 	ydata[datapoints]		- an array containing the dependent variable (i.e. the data one is trying to fit).
 
-	xdata[datapoints][numDataDims] - a 2D array containing the independent variables that correspond to each of the datapoints.
+	xdata[numDataDims][datapoints]  - a 2D array containing the independent variables that correspond to each of the datapoints.
 										One can fit multidimensional data, e.g. y = f(n, m).  In this case numDataDims = 2.
+										You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)).
+										If you want to pass in a 1D dataset simply pass a pointer to the array.
+										e.g. if your array is:
+										double *xP;
+										then pass in:
+										&xP
  
 	edata[datapoints]		- an array containing the experimental uncertainties for each of the datapoints.  If you use the default chi2 costfunction
 								then it should contain standard deviations.  Set each element to 1 if you do not wish to weight the fit by the experimental
