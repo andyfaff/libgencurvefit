@@ -65,19 +65,20 @@ extern "C" {
  
 	xdata[numDataDims][numpnts] - a 2D array containing the independent variables that correspond to each of the datapoints.
 									 One can fit multidimensional data, e.g. y = f(n, m).  In this case numDataDims = 2.
-									 You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)).
+									 You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)) (2 rows, m columns)
 									 If you want to pass in a 1D dataset simply pass a pointer to the array.
 									 e.g. if your array is:
 									 double *xP;
 									 then pass in:
 									 &xP
-									 
-	numpnts					- the number of datapoints to be calculated.
+									BUT YOU HAVE TO REMEMBER TO DEREFERENCE THE POINTER IN THE FIT FUNCTION BEFORE YOU USE THE ARRAY.
+									model[ii] = (*xP)[ii]
+ 
+ numpnts					- the number of datapoints to be calculated.
 	
 	numDataDims				- the number of independent variables in the fit. For y = f(x) numDataDims = 1.  For y = f(n, m), numDataDims = 2, etc.
 */
 typedef int (*fitfunction)(void *userdata, const double *coefs, int numcoefs, double *model, const double **xdata, long numpnts, int numDataDims);
-
 	
 	
 typedef double (*costfunction)(void *userdata, const double *params, int numparams, const double *data, const double *model, const double *errors, long numpnts);
@@ -120,9 +121,11 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 										You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)).
 										If you want to pass in a 1D dataset simply pass a pointer to the array.
 										e.g. if your array is:
-										double *xP;
-										then pass in:
-										&xP
+										 double *xP;
+										 then pass in:
+										 &xP
+										 BUT YOU HAVE TO REMEMBER TO DEREFERENCE THE POINTER IN THE FIT FUNCTION BEFORE YOU USE THE ARRAY.
+										 model[ii] = (*xP)[ii]
  
 	edata[datapoints]		- an array containing the experimental uncertainties for each of the datapoints.  If you use the default chi2 costfunction
 								then it should contain standard deviations.  Set each element to 1 if you do not wish to weight the fit by the experimental
