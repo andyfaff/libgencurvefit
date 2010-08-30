@@ -794,13 +794,13 @@ int genetic_optimisation(fitfunction fitfun,
 	}
 	
 	//put the parameter numbers that are being held into an array
-	gos.varparams = (unsigned int*)malloc(gos.numvarparams * sizeof(int));
+	gos.varparams = (unsigned int*) malloc (gos.numvarparams * sizeof(int));
 	if(gos.varparams == NULL){
 		err = NO_MEMORY;
 		goto done;
 	}
 	jj=0;
-	for(ii=0 ; ii < numcoefs ; ii+=1){
+	for(ii = 0 ; ii < numcoefs ; ii += 1){
 		if(holdvector[ii] == 0){
 		    gos.varparams[jj] = ii;
 			jj+=1;
