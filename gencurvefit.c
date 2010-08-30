@@ -172,7 +172,8 @@ static int randomInteger (int upper){
  randomDouble returns a double value between lower <= x <= upper OR [lower,upper]
  */
 static double randomDouble(double lower, double upper){
-	return lower + random()/(((double)RAND_MAX + 1)/(upper-lower));
+	double val = lower + random()/(((double)RAND_MAX + 1)/(upper-lower));
+	return val;
 }
 
 
@@ -674,7 +675,7 @@ int optimiseloop(genoptStruct *p){
 
 			/*calculate the costfunction*/
 			chi2trial = (*(p->costfun))(p->userdata, p->temp_coefs, p->numcoefs, p->ydata, p->model, p->edata, p->datapoints);
-			
+
 			acceptMoveGrudgingly = 0;
 			if(isfinite(p->MCtemp) && (exp(-chi2trial / chi2pvector / p->MCtemp) < randomDouble(0, 1)) ){
 				acceptMoveGrudgingly = 1;				
@@ -728,28 +729,21 @@ done:
 }
 
 int genetic_optimisation(fitfunction fitfun,
-						 costfunction costfun,
-						 unsigned int numcoefs,
-						 double* coefs,
-						 const int *holdvector,
-						 const double** limits,
-						 long datapoints,
-						 const double* ydata,
-						 const double** xdata,
-						 const double *edata,
-						 int numDataDims,
-						 double *chi2,
-						 int iterations,
-						 int popsizeMultiplier,
-						 double k_m,
-						 double recomb,
-						 double tolerance,
-						 unsigned int strategy,
-						 double MCtemp,
-						 updatefunction updatefun,
-						 void* userdata
-						 ){
-	int err = 0;
+							 costfunction costfun,
+							 unsigned int numcoefs,
+							 double* coefs,
+							 const int *holdvector,
+							 const double** limits,
+							 long datapoints,
+							 const double* ydata,
+							 const double** xdata,
+							 const double *edata,
+							 int numDataDims,
+							 double *chi2,
+							 gencurvefitOptions* gco,	 
+							 void* userdata
+							){
+	int err = 0, popsizeMultiplier = 20;
 	
 	long ii,jj;
 	
@@ -765,6 +759,7 @@ int genetic_optimisation(fitfunction fitfun,
 	gos.ydata = ydata;
 	gos.edata = edata;
 	gos.datapoints = datapoints;
+	gos.numDataDims = numDataDims;
 	
 	//setup the function pointers
 	gos.fitfun = fitfun;
@@ -773,12 +768,6 @@ int genetic_optimisation(fitfunction fitfun,
 	else
 		gos.costfun = costfun;
 
-	gos.updatefun = updatefun;
-	if(MCtemp == 0)
-		gos.MCtemp = NAN;
-	else
-		gos.MCtemp = MCtemp;
-	
 	//check that the total number of parameters matches the number of parameters in the holdvector
 	gos.numcoefs = numcoefs;
 	gos.coefs = coefs;
@@ -820,13 +809,32 @@ int genetic_optimisation(fitfunction fitfun,
 	}
 	gos.limits = limits;
 	
+	//optional parameters
+	if(!gco){
+		gos.updatefun = NULL;
+		gos.MCtemp = NAN;
+		popsizeMultiplier = 20;
+		gos.k_m = 0.7;
+		gos.recomb = 0.5;
+		gos.popsizeMultiplier = 20;
+		gos.iterations = 100;
+		gos.tolerance = 0.001;		
+	} else {
+		gos.updatefun = gco->updatefun;
+		if(gco->temp == 0)
+			gos.MCtemp = NAN;
+		else
+			gos.MCtemp = gco->temp;
+		popsizeMultiplier = gco->popsizeMultiplier;
+		gos.popsizeMultiplier = gco->popsizeMultiplier;
+		gos.k_m = gco->k_m;
+		gos.recomb = gco->recomb;
+		gos.iterations = gco->iterations;
+		gos.tolerance = gco->tolerance;		
+	}
+		
 	gos.totalpopsize = gos.numvarparams * popsizeMultiplier;
-	gos.numDataDims = numDataDims;
-	gos.recomb = recomb;
-	gos.k_m = k_m;
-	gos.tolerance = tolerance;
-	gos.popsizeMultiplier = popsizeMultiplier;
-	gos.iterations = iterations;
+
 	
 	//now we can allocate memory for the rest of the structure members in gos.
 	//initialise population vector
@@ -905,9 +913,15 @@ double chisquared(void *userdata, const double *params, int numparams, const dou
 	double chi2 = 0;
 	double val=0;
 	for (ii=0; ii<numpnts; ii+=1){
+		double temp1, temp2, temp3;
+		temp1 = data[ii];
+		temp2 = model[ii];
+		temp3 = errors[ii];
 		val = pow((fabs((data[ii] - model[ii])/errors[ii])),2);
 		if(isfinite(val))
 			chi2 += val;
+		else 
+			printf("%d", ii);
 	}
 	
 	return chi2;

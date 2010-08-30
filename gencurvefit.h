@@ -176,6 +176,19 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 	userdata				- an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction.  Use this pointer to give extra
 								information to your functions.
  */
+
+//contains options for the genetic optimisation
+struct gencurvefitOptions {
+	int iterations;
+	int popsizeMultiplier;
+	double k_m;
+	double recomb;
+	double tolerance;
+	unsigned int strategy;
+	double temp;
+	updatefunction updatefun;
+};
+typedef struct gencurvefitOptions gencurvefitOptions;
 	
 int genetic_optimisation(fitfunction fitfun,
 						 costfunction costfun,
@@ -189,14 +202,7 @@ int genetic_optimisation(fitfunction fitfun,
 						 const double *edata,
 						 int numDataDims,
 						 double *chi2,
-						 int iterations,
-						 int popsizeMultiplier,
-						 double k_m,
-						 double recomb,
-						 double tolerance,
-						 unsigned int strategy,
-						 double temp,
-						 updatefunction updatefun,
+						 gencurvefitOptions *gco,
 						 void* userdata
 						 );
 
