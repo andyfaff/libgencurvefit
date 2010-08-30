@@ -43,7 +43,7 @@ struct genoptStruct {
 	double *model;
 	
 	//short array to hold the parameters that are being held
-    const int *holdvector;
+    const unsigned int *holdvector;
 	
 	/*a place to put a temporary copy of the coefficients, used to calculate the model*/
 	double *temp_coefs;
@@ -56,25 +56,26 @@ struct genoptStruct {
 	
 	/*an optional user defined update function to keep appraised of the current fit status.*/
 	updatefunction updatefun;
+	unsigned int updatefrequency;
 	
 	/*how many parameters are being varied*/
-	int numvarparams;
+	unsigned int numvarparams;
 	
 	/*total number of parameters*/
-	int numcoefs;
+	unsigned int numcoefs;
 	
 	/*parameters for the optimisation*/
-	long popsizeMultiplier;
+	unsigned int popsizeMultiplier;
 	double k_m;
 	double recomb;
 	double tolerance;
-	long iterations;
+	unsigned int iterations;
 	
 	/*totalsize of the population = popsizeMultiplier * numvarparams*/
-	int totalpopsize;
+	long totalpopsize;
 	
 	/*which parameters are varying*/
-	int *varparams;
+	unsigned int *varparams;
 	
 	/*an array which holds all the different guesses for the fit.*/
 	/*it has dimensions popsize*numvarparams, numvarparams*/
@@ -172,7 +173,7 @@ static int randomInteger (int upper){
  randomDouble returns a double value between lower <= x <= upper OR [lower,upper]
  */
 static double randomDouble(double lower, double upper){
-	double val = lower + random()/(((double)RAND_MAX + 1)/(upper-lower));
+	double val = lower + random()/(((double)RAND_MAX + 1)/(upper - lower));
 	return val;
 }
 
@@ -187,11 +188,11 @@ double gnoise(double sd){
 	} while(en0==1);
 	do{
 		en1 = randomDouble(0, 1);
-	} while(en1==1);
-	return sd*sqrt(-2*log(en0))*cos(2*PI*en1);
+	} while(en1 == 1);
+	return sd * sqrt(-2 * log(en0))*cos(2 * PI * en1);
 }
 
-void SelectSamples(int popsize, int candidate,int *r1,int *r2, int *r3,int *r4,int *r5){
+void SelectSamples(long popsize, long candidate, long *r1, long *r2, long *r3, long *r4, long *r5){
 	if (r1){
 		do
 			*r1 = randomInteger(popsize);	
@@ -227,9 +228,9 @@ void SelectSamples(int popsize, int candidate,int *r1,int *r2, int *r3,int *r4,i
 }
 
 
-void Best1Bin(genoptStruct *p, int candidate){
-	int r1, r2;
-	int n, i;
+void Best1Bin(genoptStruct *p, long candidate){
+	long r1, r2;
+	long n, i;
 	
 	SelectSamples(p->totalpopsize, candidate, &r1, &r2, NULL, NULL, NULL);
 	n = randomInteger( p->numvarparams);
@@ -246,9 +247,9 @@ void Best1Bin(genoptStruct *p, int candidate){
 	return;
 }
 
-void Best1Exp(genoptStruct *p, int candidate){
-	int r1, r2;
-	int n, i;
+void Best1Exp(genoptStruct *p, long candidate){
+	long r1, r2;
+	long n, i;
 	
 	SelectSamples( p->totalpopsize, candidate, &r1, &r2, NULL, NULL, NULL);
 	n = randomInteger(p->numvarparams);
@@ -264,9 +265,9 @@ void Best1Exp(genoptStruct *p, int candidate){
 	return;
 }
 
-void Rand1Exp(genoptStruct *p, int candidate){
-	int r1, r2, r3;
-	int n, i;
+void Rand1Exp(genoptStruct *p, long candidate){
+	long r1, r2, r3;
+	long n, i;
 	
 	SelectSamples(p->totalpopsize, candidate,&r1,&r2,&r3, NULL, NULL);
 	n = randomInteger( p->numvarparams);
@@ -283,9 +284,9 @@ void Rand1Exp(genoptStruct *p, int candidate){
 	return;
 }
 
-void RandToBest1Exp(genoptStruct *p, int candidate){
-	int r1, r2;
-	int n,  i;
+void RandToBest1Exp(genoptStruct *p, long candidate){
+	long r1, r2;
+	long n,  i;
 	
 	SelectSamples(p->totalpopsize, candidate,&r1,&r2, NULL, NULL, NULL);
 	n = randomInteger(p->numvarparams);
@@ -302,9 +303,9 @@ void RandToBest1Exp(genoptStruct *p, int candidate){
 	return;
 }
 
-void Best2Exp(genoptStruct *p, int candidate){
-	int r1, r2, r3, r4;
-	int n, i;
+void Best2Exp(genoptStruct *p, long candidate){
+	long r1, r2, r3, r4;
+	long n, i;
 	
 	SelectSamples(p->totalpopsize, candidate,&r1,&r2,&r3,&r4, NULL);
 	n = randomInteger(p->numvarparams);
@@ -323,9 +324,9 @@ void Best2Exp(genoptStruct *p, int candidate){
 	return;
 }
 
-void Rand2Exp(genoptStruct *p, int candidate){
-	int r1, r2, r3, r4, r5;
-	int n, i;
+void Rand2Exp(genoptStruct *p, long candidate){
+	long r1, r2, r3, r4, r5;
+	long n, i;
 	
 	SelectSamples(p->totalpopsize, candidate,&r1,&r2,&r3,&r4,&r5);
 	n = randomInteger(p->numvarparams);
@@ -344,11 +345,11 @@ void Rand2Exp(genoptStruct *p, int candidate){
 	return;
 }
 
-void RandToBest1Bin(genoptStruct *p, int candidate){
-	int r1, r2;
-	int n, i;
+void RandToBest1Bin(genoptStruct *p, long candidate){
+	long r1, r2;
+	long n, i;
 	
-	SelectSamples(p->totalpopsize, candidate,&r1,&r2, NULL, NULL, NULL);
+	SelectSamples(p->totalpopsize, candidate, &r1, &r2, NULL, NULL, NULL);
 	n = randomInteger(p->numvarparams);
 	
 	memcpy(p->gen_trial, *(p->gen_populationvector + candidate), p->numvarparams * sizeof(double));
@@ -364,9 +365,9 @@ void RandToBest1Bin(genoptStruct *p, int candidate){
 	return;
 }
 
-void Best2Bin(genoptStruct *p, int candidate){
-	int r1, r2, r3, r4;
-	int n, i;
+void Best2Bin(genoptStruct *p, long candidate){
+	long r1, r2, r3, r4;
+	long n, i;
 	
 	SelectSamples(p->totalpopsize, candidate,&r1,&r2,&r3,&r4, NULL);
 	n = randomInteger(p->numvarparams);
@@ -386,9 +387,9 @@ void Best2Bin(genoptStruct *p, int candidate){
 	return;
 }
 
-void Rand2Bin(genoptStruct *p, int candidate){
-	int r1, r2, r3, r4, r5;
-	int n, i;
+void Rand2Bin(genoptStruct *p, long candidate){
+	long r1, r2, r3, r4, r5;
+	long n, i;
 	
 	SelectSamples(p->totalpopsize, candidate,&r1,&r2,&r3,&r4,&r5);
 	n = randomInteger(p->numvarparams);
@@ -408,9 +409,9 @@ void Rand2Bin(genoptStruct *p, int candidate){
 	return;
 }
 
-void Rand1Bin(genoptStruct *p, int candidate){
-	int r1, r2, r3;
-	int n, i;
+void Rand1Bin(genoptStruct *p, long candidate){
+	long r1, r2, r3;
+	long n, i;
 	
 	SelectSamples(p->totalpopsize, candidate,&r1,&r2,&r3,NULL, NULL);
 	n = randomInteger(p->numvarparams);
@@ -433,8 +434,8 @@ void Rand1Bin(genoptStruct *p, int candidate){
  in modulo.
  bPrime is created from two random population vectors and the best fit vector.
  */
-void createTrialVector(genoptStruct *p, int currentpvector){
-	void (*theStrategy)(genoptStruct*, int);
+void createTrialVector(genoptStruct *p, long currentpvector){
+	void (*theStrategy)(genoptStruct*, long);
 	
 	switch(p->strategy){
 		case 0:
@@ -475,21 +476,21 @@ void createTrialVector(genoptStruct *p, int currentpvector){
 }
 
 static waveStats getWaveStats(double *sort, long length,int moment){
-	long ii=0;
+	long ii = 0;
 	double minval = *sort, maxval = *sort;
-	long minpos=0,maxpos=0;
-	double nx2=0,nx=0;
+	long minpos = 0, maxpos = 0;
+	double nx2 = 0, nx = 0;
 	struct waveStats retval;
 	
 	switch(moment){
 		case 0:
-			for(ii=0;ii<length;ii+=1){
-				if(*(sort+ii)>maxval){
-					maxval = *(sort+ii);
+			for(ii = 0 ; ii < length ; ii += 1){
+				if(*(sort + ii) > maxval){
+					maxval = *(sort + ii);
 					maxpos = ii;
 				}
-				if(*(sort+ii)<minval){
-					minval = *(sort+ii);
+				if(*(sort + ii) < minval){
+					minval = *(sort + ii);
 					minpos = ii;
 				}
 			}
@@ -497,22 +498,22 @@ static waveStats getWaveStats(double *sort, long length,int moment){
 			retval.V_minloc = minpos;
 			break;
 		case 1:
-			for(ii=0;ii<length;ii+=1){
-				nx += (*(sort+ii));
-				nx2 += *(sort+ii)*(*(sort+ii));
-				if(*(sort+ii)>maxval){
-					maxval = *(sort+ii);
+			for(ii = 0 ; ii < length ; ii += 1){
+				nx += (*(sort + ii));
+				nx2 += *(sort + ii) * (*(sort + ii));
+				if(*(sort + ii) > maxval){
+					maxval = *(sort + ii);
 					maxpos = ii;
 				}
-				if(*(sort+ii)<minval){
-					minval = *(sort+ii);
+				if(*(sort + ii) < minval){
+					minval = *(sort + ii);
 					minpos = ii;
 				}
 			}
 			retval.V_maxloc = maxpos;
 			retval.V_minloc = minpos;
 			retval.V_avg = nx/(double)length;
-			retval.V_stdev = sqrt((nx2/(double)length)-(retval.V_avg*retval.V_avg));
+			retval.V_stdev = sqrt((nx2 / (double)length) - (retval.V_avg * retval.V_avg));
 			break;
 	}
 	return retval;
@@ -525,12 +526,10 @@ static waveStats getWaveStats(double *sort, long length,int moment){
  */
 static void
 ensureConstraints(genoptStruct *p){
-	int ii;	
-	for(ii=0 ; ii < p->numvarparams ; ii+=1){
-		if(*(p->gen_trial + ii) < p->limits[*(p->varparams + ii)][0] || *(p->gen_trial + ii) > (p->limits[*(p->varparams + ii)][1])){
+	unsigned int ii;	
+	for(ii = 0 ; ii < p->numvarparams ; ii+=1)
+		if(*(p->gen_trial + ii) < p->limits[*(p->varparams + ii)][0] || *(p->gen_trial + ii) > (p->limits[*(p->varparams + ii)][1]))
 			*(p->gen_trial + ii) = randomDouble(p->limits[*(p->varparams + ii)][0], p->limits[*(p->varparams + ii)][1]);
-		}
-	}
 }
 
 /*
@@ -555,7 +554,7 @@ insertVaryingParams(genoptStruct *p, double *vector, int vectorsize){
  returns errorcode otherwise
  */
 static int 
-setPopVector(genoptStruct *p, double* vector, int vectorsize, int replace){
+setPopVector(genoptStruct *p, double* vector, int vectorsize, long replace){
 	//p->gen_populationvector[replace][] = vector[q]
 	memcpy(*(p->gen_populationvector + replace), vector, vectorsize * sizeof(double));
 	return 0;
@@ -565,7 +564,7 @@ setPopVector(genoptStruct *p, double* vector, int vectorsize, int replace){
  swapChi2values swaps two values (i,j) in the p->chi2array 
  */
 static void
-swapChi2values(genoptStruct *p, int i, int j){
+swapChi2values(genoptStruct *p, long i, long j){
 	double temp = *(p->chi2Array+i);
 	*(p->chi2Array + i) = *(p->chi2Array + j);
 	*(p->chi2Array + j) = temp;
@@ -577,7 +576,7 @@ swapChi2values(genoptStruct *p, int i, int j){
  returns errorcode otherwise
  */
 static int
-swapPopVector(genoptStruct *p,int popsize, int i, int j){
+swapPopVector(genoptStruct *p, long popsize, long i, long j){
 	double *tempparams = NULL;
 	//do swap with pointers
 	tempparams = *(p->gen_populationvector + j);
@@ -596,13 +595,13 @@ int initialiseFit(genoptStruct *p){
 	waveStats wavStats;
 	
 	//initialise population vector guesses, from between the limits
-	for(ii=0; ii < p->totalpopsize ; ii+=1){
-		for(jj=0 ; jj<p->numvarparams ; jj+=1){
-			bot = p->limits[*(p->varparams + jj)][0];
-			top = p->limits[*(p->varparams + jj)][1];
+	for(jj = 0 ; jj < p->numvarparams ; jj += 1){
+		bot = p->limits[*(p->varparams + jj)][0];
+		top = p->limits[*(p->varparams + jj)][1];
+		for(ii = 0 ; ii < p->totalpopsize ; ii += 1)
 			p->gen_populationvector[ii][jj] = randomDouble(bot, top);
-		}
 	}
+	
 	
 	//initialise Chi2array, will require a bit of calculation of the model function for each of the initial guesses.
 	for(ii = 0 ; ii < p->totalpopsize ; ii += 1){
@@ -616,7 +615,7 @@ int initialiseFit(genoptStruct *p){
 		/*calculate the costfunction*/
 		chi2 = (*(p->costfun))(p->userdata, p->temp_coefs, p->numcoefs, p->ydata, p->model, p->edata, p->datapoints);
 		
-		*(p->chi2Array+ii)= chi2;
+		*(p->chi2Array + ii)= chi2;
 	}
 	//find best chi2 and put that into number 0 pos.
 	wavStats = getWaveStats(p->chi2Array, p->totalpopsize, 0);
@@ -628,6 +627,11 @@ int initialiseFit(genoptStruct *p){
 	//put the best fit from the intialisation into the coeffcients to return		   
 	if(err = insertVaryingParams(p,  *(p->gen_populationvector), p->numvarparams))
 		goto done;
+	
+	if(p->updatefun)
+		if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, 0, *(p->chi2Array)))
+			goto done;
+	
 	memcpy(p->coefs, p->temp_coefs, p->numcoefs * sizeof(double));
 	
 	
@@ -641,9 +645,8 @@ done:
  returns errorcode otherwise.
  */
 int optimiseloop(genoptStruct *p){
-	long ii,kk;
-	int err=0;
-	int currentpvector;
+	long ii, kk, currentpvector;
+	int err = 0;
 	double chi2pvector,chi2trial;
 	int acceptMoveGrudgingly;
 	waveStats wavStats;
@@ -651,6 +654,14 @@ int optimiseloop(genoptStruct *p){
 	/* the user sets how many times through the entire population*/
 	for(kk = 1; kk <= p->iterations ; kk += 1){
 		p->numfititers = kk;
+		
+		if(p->updatefun){
+			if(err = insertVaryingParams(p, *(p->gen_populationvector), p->numvarparams))
+				goto done;
+			
+			if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array)))
+				goto done;
+		}
 		
 		/*iterate over all the individual members of the population*/
 		for(ii = 0 ; ii < p->totalpopsize ; ii += 1){			
@@ -732,7 +743,7 @@ int genetic_optimisation(fitfunction fitfun,
 							 costfunction costfun,
 							 unsigned int numcoefs,
 							 double* coefs,
-							 const int *holdvector,
+							 const unsigned int *holdvector,
 							 const double** limits,
 							 long datapoints,
 							 const double* ydata,
@@ -745,7 +756,7 @@ int genetic_optimisation(fitfunction fitfun,
 							){
 	int err = 0, popsizeMultiplier = 20;
 	
-	long ii,jj;
+	unsigned int ii,jj;
 	
 	/*the overall structure to contain the entire fit*/
 	genoptStruct gos;
@@ -787,7 +798,7 @@ int genetic_optimisation(fitfunction fitfun,
 	}
 	
 	//put the parameter numbers that are being held into an array
-	gos.varparams = (int*)malloc(gos.numvarparams * sizeof(int));
+	gos.varparams = (unsigned int*)malloc(gos.numvarparams * sizeof(int));
 	if(gos.varparams == NULL){
 		err = NO_MEMORY;
 		goto done;
@@ -801,8 +812,8 @@ int genetic_optimisation(fitfunction fitfun,
 	}
 	
 	//these are the upper and lower bounds for the limits, check them
-	for(ii=0 ; ii<numcoefs ; ii+=1){
-		if(holdvector[ii] == 0 && limits[ii][0]>limits[ii][1]){
+	for(ii = 0 ; ii < numcoefs ; ii += 1){
+		if(holdvector[ii] == 0 && limits[ii][0] > limits[ii][1]){
 			err = INCORRECT_LIMITS;
 			goto done;
 		}
@@ -818,7 +829,8 @@ int genetic_optimisation(fitfunction fitfun,
 		gos.recomb = 0.5;
 		gos.popsizeMultiplier = 20;
 		gos.iterations = 100;
-		gos.tolerance = 0.001;		
+		gos.tolerance = 0.001;
+		gos.updatefrequency = 1;
 	} else {
 		gos.updatefun = gco->updatefun;
 		if(gco->temp == 0)
@@ -830,7 +842,8 @@ int genetic_optimisation(fitfunction fitfun,
 		gos.k_m = gco->k_m;
 		gos.recomb = gco->recomb;
 		gos.iterations = gco->iterations;
-		gos.tolerance = gco->tolerance;		
+		gos.tolerance = gco->tolerance;
+		gos.updatefrequency = gco->updatefrequency;
 	}
 		
 	gos.totalpopsize = gos.numvarparams * popsizeMultiplier;
@@ -844,7 +857,7 @@ int genetic_optimisation(fitfunction fitfun,
 		goto done;
 	}
 	//initialise Chi2array
-	gos.chi2Array = (double*)malloc(gos.totalpopsize * sizeof(double));
+	gos.chi2Array = (double*) malloc (gos.totalpopsize * sizeof(double));
 	if(gos.chi2Array == NULL){
 		err = NO_MEMORY;
 		goto done;
@@ -908,7 +921,7 @@ done:
 	return err;
 }
 
-double chisquared(void *userdata, const double *params, int numparams, const double *data, const double *model, const double *errors, long numpnts){
+double chisquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts){
 	long ii;
 	double chi2 = 0;
 	double val=0;
@@ -920,14 +933,12 @@ double chisquared(void *userdata, const double *params, int numparams, const dou
 		val = pow((fabs((data[ii] - model[ii])/errors[ii])),2);
 		if(isfinite(val))
 			chi2 += val;
-		else 
-			printf("%d", ii);
 	}
 	
 	return chi2;
 }
 
-double robust(void *userdata, const double *params, int numparams, const double *data, const double *model, const double *errors, long numpnts){
+double robust(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts){
  long ii;
  double chi = 0;
  double val=0;

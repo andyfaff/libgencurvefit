@@ -78,10 +78,10 @@ extern "C" {
 	
 	numDataDims				- the number of independent variables in the fit. For y = f(x) numDataDims = 1.  For y = f(n, m), numDataDims = 2, etc.
 */
-typedef int (*fitfunction)(void *userdata, const double *coefs, int numcoefs, double *model, const double **xdata, long numpnts, int numDataDims);
+typedef int (*fitfunction)(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, int numDataDims);
 	
 	
-typedef double (*costfunction)(void *userdata, const double *params, int numparams, const double *data, const double *model, const double *errors, long numpnts);
+typedef double (*costfunction)(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
 
 /*
  an (optional) user defined hook function to keep themselves of the fit progress.  If the user wishes to halt the fit early, then they should return a non
@@ -89,6 +89,70 @@ typedef double (*costfunction)(void *userdata, const double *params, int numpara
  */
 typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int numcoefs, unsigned int iterations, double cost);
 
+
+	
+	
+/*contains options for the genetic optimisation
+	 iterations				- the maximum number of times the population is evolved during the fit (unless convergence is reached).
+	 
+	 popsizemultiplier		- the total size of the genetic population is popsizemultiplier multiplied by the number of varying parameters.
+	 
+	 k_m						- the mutation constant 0 < k_m < 2.  A typical value is 0.7.  Make larger to get more mutation.
+	 
+	 recomb					- the recombination constant, 0 < recomb < 1.  A typical value is 0.5.  Make smaller to get more exploration of parameter space.
+	 
+	 tolerance				- specifies the stopping tolerance for the fit, which is when the standard deviation of the chi2 values of the entire population
+							 divided by its mean is less than tolerance.
+	 
+	 strategy				- Choose the Differential Evolution strategy (see http://www.icsi.berkeley.edu/~storn/code.html#prac)
+	 0 = Best1Bin;
+	 1 = Best1Exp;
+	 2 = Rand1Exp;
+	 3 = RandToBest1Exp;
+	 4 = Best2Exp;
+	 5 = Rand2Exp;
+	 6 = RandToBest1Bin;
+	 7 = Best2Bin;
+	 8 = Rand2Bin;
+	 9 = Rand1Bin;
+	 Try Best1Bin to start with.
+	 
+	 temp					- Normally if the chi2 value of the trial vector is lower than vector i from the population then the trial vector replaces vector i. 
+							 However, if you specify temp  is specified then the probability of the trial vector being accepted is now done on a Monte Carlo basis. I.e.:
+							 accept if
+							 chi2(trial) < chi2(i)
+							 or accept if
+							 exp(-chi2(trial) / chi2(i) / temp) < enoise(1) 
+							 This has the effect of exploring wider parameter space, and is more likely to find a global minimum, but may take longer to converge. 
+							 One should use more iterations with temp. If one records the history of the fit using updatefun, then one can use the history for use in calculating
+							 a covariance matrix or use as the posterior probability distribution for Bayesian model selection.  
+							 IF YOU DON'T WANT THIS TEMPERING SET temp TO NAN (e.g. sqrt(-1)) .
+	 
+	 updatefun				- an (optional) function that is called each time the costfunction improves.  Use this function to keep track of the fit.
+							 If you return a non-zero value from this function the fit will stop. This function will also be called if a move is accepted on a monte carlo basis (see temp). 
+ 
+	 updatefrequency		- Bitwise operator that specifies how often the update function is called.
+								Bit No:
+									0 = everytime the fitfunction improves (default)
+									1 = everytime the fitfunction improves AND a monte carlo tempering move is accepted
+									2 = after the initialisation, but before the optimisation loop starts
+									3 = after each iteration finishes
+	 
+	 */																		  
+	struct gencurvefitOptions {
+		unsigned int iterations;
+		unsigned int popsizeMultiplier;
+		double k_m;
+		double recomb;
+		double tolerance;
+		unsigned int strategy;
+		double temp;
+		updatefunction updatefun;
+		unsigned int updatefrequency;
+	};
+	typedef struct gencurvefitOptions gencurvefitOptions;
+	
+	
 /*
  genetic_optimisation - perform curvefitting with differential evolution.  Fitting is not limited to 1 independent variable,
   you can have as many as you like.  The function is threadsafe as long as you supply unique copies of the inputs to each instance.
@@ -135,66 +199,17 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
  
 	chi2					- the final value of the cost function.
  
-	iterations				- the maximum number of times the population is evolved during the fit (unless convergence is reached).
- 
-	popsizemultiplier		- the total size of the genetic population is popsizemultiplier multiplied by the number of varying parameters.
- 
-	k_m						- the mutation constant 0 < k_m < 2.  A typical value is 0.7.  Make larger to get more mutation.
- 
-	recomb					- the recombination constant, 0 < recomb < 1.  A typical value is 0.5.  Make smaller to get more exploration of parameter space.
- 
-	tolerance				- specifies the stopping tolerance for the fit, which is when the standard deviation of the chi2 values of the entire population
-								divided by its mean is less than tolerance.
- 
-	strategy				- Choose the Differential Evolution strategy (see http://www.icsi.berkeley.edu/~storn/code.html#prac)
-								 0 = Best1Bin;
-								 1 = Best1Exp;
-								 2 = Rand1Exp;
-								 3 = RandToBest1Exp;
-								 4 = Best2Exp;
-								 5 = Rand2Exp;
-								 6 = RandToBest1Bin;
-								 7 = Best2Bin;
-								 8 = Rand2Bin;
-								 9 = Rand1Bin;
-								 Try Best1Bin to start with.
- 
-	MCtemp					- Normally if the chi2 value of the trial vector is lower than vector i from the population then the trial vector replaces vector i. 
-								However, if you specify temp  is specified then the probability of the trial vector being accepted is now done on a Monte Carlo basis. I.e.:
-								accept if
-									chi2(trial) < chi2(i)
-								or accept if
-								exp(-chi2(trial) / chi2(i) / MCtemp) < enoise(1) 
-								This has the effect of exploring wider parameter space, and is more likely to find a global minimum, but may take longer to converge. 
-								One should use more iterations with MCtemp. If one records the history of the fit using updatefun, then one can use the history for use in calculating
-								a covariance matrix or use as the posterior probability distribution for Bayesian model selection.  
-								IF YOU DON'T WANT THIS TEMPERING SET MCtemp TO NAN (e.g. sqrt(-1)) .
- 
-	updatefun				- an (optional) function that is called each time the costfunction improves.  Use this function to keep track of the fit.
-								If you return a non-zero value from this function the fit will stop. This function will also be called if a move is accepted on a monte carlo basis (see MCtemp). 
+	gco						- options for the genetic optimisation.  (see above).  If gco == NULL, then a default set of options are used.
  
 	userdata				- an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction.  Use this pointer to give extra
 								information to your functions.
  */
-
-//contains options for the genetic optimisation
-struct gencurvefitOptions {
-	int iterations;
-	int popsizeMultiplier;
-	double k_m;
-	double recomb;
-	double tolerance;
-	unsigned int strategy;
-	double temp;
-	updatefunction updatefun;
-};
-typedef struct gencurvefitOptions gencurvefitOptions;
 	
 int genetic_optimisation(fitfunction fitfun,
 						 costfunction costfun,
 						 unsigned int numcoefs,
 						 double* coefs,
-						 const int *holdvector,
+						 const unsigned int *holdvector,
 						 const double** limits,
 						 long datapoints,
 						 const double* ydata,
@@ -208,8 +223,8 @@ int genetic_optimisation(fitfunction fitfun,
 
 double gnoise(double sd);
 
-double chisquared(void *userdata, const double *params, int numparams, const double *data, const double *model, const double *errors, long numpnts);
-double robust(void *userdata, const double *params, int numparams, const double *data, const double *model, const double *errors, long numpnts);
+double chisquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
+double robust(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
 
 
 #ifdef __cplusplus
