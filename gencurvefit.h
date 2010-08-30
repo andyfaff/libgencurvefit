@@ -202,7 +202,7 @@ int genetic_optimisation(fitfunction fitfun,
 						 const double *edata,
 						 int numDataDims,
 						 double *chi2,
-						 gencurvefitOptions *gco,
+						 const gencurvefitOptions *gco,
 						 void* userdata
 						 );
 
