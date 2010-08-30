@@ -134,7 +134,7 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 	 updatefrequency		- Bitwise operator that specifies how often the update function is called.
 								Bit No:
 									0 = everytime the fitfunction improves (default)
-									1 = everytime the fitfunction improves AND a monte carlo tempering move is accepted
+									1 = everytime a monte carlo tempering move is accepted
 									2 = after the initialisation, but before the optimisation loop starts
 									3 = after each iteration finishes
 	 

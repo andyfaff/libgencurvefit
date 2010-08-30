@@ -624,7 +624,7 @@ int initialiseFit(genoptStruct *p){
 	if(err = insertVaryingParams(p,  *(p->gen_populationvector), p->numvarparams))
 		goto done;
 	
-	if(p->updatefun)
+	if(p->updatefun && (4 & p->updatefrequency))
 		if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, 0, *(p->chi2Array)))
 			goto done;
 	
@@ -651,7 +651,7 @@ int optimiseloop(genoptStruct *p){
 	for(kk = 1; kk <= p->iterations ; kk += 1){
 		p->numfititers = kk;
 		
-		if(p->updatefun){
+		if(p->updatefun && (8 & p->updatefrequency)){
 			if(err = insertVaryingParams(p, *(p->gen_populationvector), p->numvarparams))
 				goto done;
 			
@@ -686,7 +686,7 @@ int optimiseloop(genoptStruct *p){
 			acceptMoveGrudgingly = 0;
 			if(isfinite(p->MCtemp) && (exp(-chi2trial / chi2pvector / p->MCtemp) < randomDouble(0, 1)) ){
 				acceptMoveGrudgingly = 1;				
-				if(p->updatefun)
+				if(p->updatefun && (2 & p->updatefrequency))
 					if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial))
 						goto done;
 			}
@@ -710,7 +710,7 @@ int optimiseloop(genoptStruct *p){
 					 a user defined update function that can be used to halt the fit early, and keep 
 					  appraised of fit progress.
 					*/
-					if(p->updatefun)
+					if(p->updatefun && (1 & p->updatefrequency))
 						if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial))
 							goto done;
 	
