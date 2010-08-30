@@ -78,7 +78,7 @@ extern "C" {
 	
 	numDataDims				- the number of independent variables in the fit. For y = f(x) numDataDims = 1.  For y = f(n, m), numDataDims = 2, etc.
 */
-typedef int (*fitfunction)(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, int numDataDims);
+typedef int (*fitfunction)(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims);
 	
 	
 typedef double (*costfunction)(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
@@ -126,7 +126,7 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 							 This has the effect of exploring wider parameter space, and is more likely to find a global minimum, but may take longer to converge. 
 							 One should use more iterations with temp. If one records the history of the fit using updatefun, then one can use the history for use in calculating
 							 a covariance matrix or use as the posterior probability distribution for Bayesian model selection.  
-							 IF YOU DON'T WANT THIS TEMPERING SET temp TO NAN (e.g. sqrt(-1)) .
+							 IF YOU DON'T WANT THIS TEMPERING SET temp TO A NUMBER LESS THAN 0 (e.g. sqrt(-1)) .
 	 
 	 updatefun				- an (optional) function that is called each time the costfunction improves.  Use this function to keep track of the fit.
 							 If you return a non-zero value from this function the fit will stop. This function will also be called if a move is accepted on a monte carlo basis (see temp). 
@@ -215,7 +215,7 @@ int genetic_optimisation(fitfunction fitfun,
 						 const double* ydata,
 						 const double** xdata,
 						 const double *edata,
-						 int numDataDims,
+						 unsigned int numDataDims,
 						 double *chi2,
 						 const gencurvefitOptions *gco,
 						 void* userdata

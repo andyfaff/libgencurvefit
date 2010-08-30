@@ -35,7 +35,7 @@ struct genoptStruct {
 	const double *edata;
 	
 	//the number of dimensions for the fit
-	int numDataDims;
+	unsigned int numDataDims;
 	
 	/*place to put model once it's been calculated with the fitfunction*/
 	double *model;
@@ -684,7 +684,7 @@ int optimiseloop(genoptStruct *p){
 			chi2trial = (*(p->costfun))(p->userdata, p->temp_coefs, p->numcoefs, p->ydata, p->model, p->edata, p->datapoints);
 
 			acceptMoveGrudgingly = 0;
-			if(isfinite(p->MCtemp) && (exp(-chi2trial / chi2pvector / p->MCtemp) < randomDouble(0, 1)) ){
+			if(isfinite(p->MCtemp) && p->MCtemp > 0 && (exp(-chi2trial / chi2pvector / p->MCtemp) < randomDouble(0, 1)) ){
 				acceptMoveGrudgingly = 1;				
 				if(p->updatefun && (2 & p->updatefrequency))
 					if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial))
@@ -745,7 +745,7 @@ int genetic_optimisation(fitfunction fitfun,
 							 const double* ydata,
 							 const double** xdata,
 							 const double *edata,
-							 int numDataDims,
+							 unsigned int numDataDims,
 							 double *chi2,
 							 const gencurvefitOptions* gco,	 
 							 void* userdata
@@ -829,7 +829,7 @@ int genetic_optimisation(fitfunction fitfun,
 		gos.updatefrequency = 1;
 	} else {
 		gos.updatefun = gco->updatefun;
-		if(gco->temp == 0)
+		if(gco->temp <= 0)
 			gos.MCtemp = NAN;
 		else
 			gos.MCtemp = gco->temp;
@@ -841,7 +841,6 @@ int genetic_optimisation(fitfunction fitfun,
 		gos.tolerance = gco->tolerance;
 		gos.updatefrequency = gco->updatefrequency;
 	}
-		
 	gos.totalpopsize = gos.numvarparams * popsizeMultiplier;
 
 	
