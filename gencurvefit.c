@@ -6,8 +6,6 @@
  */
 #include "gencurvefit.h"
 #include <stdlib.h>
-
-#include <stdio.h>
 #include <time.h>
 #include "math.h"
 #include "string.h"
@@ -180,8 +178,6 @@ static double randomDouble(double lower, double upper){
 
 //returns gaussian noise, which is from a distribution with sd = 2.
 double gnoise(double sd){
-
-//double gnoise(Random *r, double sd){
 	double en0, en1;
 	do{
 		en0 = randomDouble(0, 1);
