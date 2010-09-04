@@ -11,7 +11,6 @@
 extern "C" {
 #endif
 
-#include "mt19937p.h"
 	
 #define NO_MEMORY -1
 #define INCORRECT_LIMITS -2
@@ -224,8 +223,6 @@ int genetic_optimisation(fitfunction fitfun,
 						 const gencurvefitOptions *gco,
 						 void* userdata
 						 );
-
-double gnoise(struct mt19937p *myMT19937, double sd);
 
 double chisquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
 double robust(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
