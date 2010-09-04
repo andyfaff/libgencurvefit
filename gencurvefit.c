@@ -5,6 +5,7 @@
  *
  */
 #include "gencurvefit.h"
+#include "mt19937p.h"
 #include <stdlib.h>
 #include <time.h>
 #include "math.h"
@@ -97,6 +98,8 @@ struct genoptStruct {
 	
 	//have a pointer to data that users can pass around.
 	void *userdata;
+	
+	struct mt19937p myMT19937;
 };
 typedef struct genoptStruct genoptStruct;
 typedef struct genoptStruct* genoptStructPtr;
@@ -158,64 +161,63 @@ typedef struct genoptStruct* genoptStructPtr;
  randomInteger returns an integer between 0 and upper EXclusive
  i.e. you will never get upper returned.
  */
-static int randomInteger (int upper){
-
-//static int randomInteger (Random *r, int upper){
-//	return r->Integer((unsigned) upper);
+static int randomInteger (struct mt19937p *myMT19937, int upper){
 	int val;
-	while (upper <= (val = random() / (RAND_MAX/upper)));
+	while (upper <= (val = genrand_int(myMT19937) / (0x7fffffff / upper)));
+//	while (upper <= (val = random() / (RAND_MAX/upper)));
 	return val;
 }
 
 /*
  randomDouble returns a double value between lower <= x <= upper OR [lower,upper]
  */
-static double randomDouble(double lower, double upper){
-	double val = lower + random()/(((double)RAND_MAX + 1)/(upper - lower));
-	return val;
+static double randomDouble(struct mt19937p *myMT19937, double lower, double upper){
+	return lower + (upper - lower) * genrand(myMT19937);
+	//double val = lower + random()/(((double)RAND_MAX + 1)/(upper - lower));
+	//return val;
 }
 
 
 //returns gaussian noise, which is from a distribution with sd = 2.
-double gnoise(double sd){
+double gnoise(struct mt19937p *myMT19937, double sd){
 	double en0, en1;
 	do{
-		en0 = randomDouble(0, 1);
+		en0 = randomDouble(myMT19937, 0, 1);
 	} while(en0==1);
 	do{
-		en1 = randomDouble(0, 1);
+		en1 = randomDouble(myMT19937, 0, 1);
 	} while(en1 == 1);
 	return sd * sqrt(-2 * log(en0))*cos(2 * PI * en1);
 }
 
-void SelectSamples(long popsize, long candidate, long *r1, long *r2, long *r3, long *r4, long *r5){
+void SelectSamples(struct mt19937p *myMT19937, long popsize, long candidate, long *r1, long *r2, long *r3, long *r4, long *r5){
 	if (r1){
 		do
-			*r1 = randomInteger(popsize);	
+			*r1 = randomInteger(myMT19937, popsize);	
 		while (*r1 == candidate);
 	}
 	
 	if (r2)	{
 		do
-			*r2 = randomInteger( popsize);
+			*r2 = randomInteger(myMT19937, popsize);
 		while ((*r2 == candidate) || (*r2 == *r1));
 	}
 	
 	if (r3){
 		do
-			*r3 = randomInteger( popsize);
+			*r3 = randomInteger(myMT19937, popsize);
 		while ((*r3 == candidate) || (*r3 == *r2) || (*r3 == *r1));
 	}
 	
 	if (r4){
 		do
-			*r4 = randomInteger( popsize);
+			*r4 = randomInteger(myMT19937, popsize);
 		while ((*r4 == candidate) || (*r4 == *r3) || (*r4 == *r2) || (*r4 == *r1));
 	}
 	
 	if (r5){
 		do
-			*r5 = randomInteger( popsize);
+			*r5 = randomInteger(myMT19937, popsize);
 		while ((*r5 == candidate) || (*r5 == *r4) || (*r5 == *r3)
 			   || (*r5 == *r2) || (*r5 == *r1));
 	}
@@ -228,13 +230,13 @@ void Best1Bin(genoptStruct *p, long candidate){
 	long r1, r2;
 	long n, i;
 	
-	SelectSamples(p->totalpopsize, candidate, &r1, &r2, NULL, NULL, NULL);
-	n = randomInteger( p->numvarparams);
+	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate, &r1, &r2, NULL, NULL, NULL);
+	n = randomInteger(&(p->myMT19937),  p->numvarparams);
 	
 	memcpy(p->gen_trial, *(p->gen_populationvector + candidate), p->numvarparams * sizeof(double));
 	
 	for (i=0; i < p->numvarparams; i++) {
-		if ((randomDouble(0, 1) < p->recomb) || (i == (p->numvarparams - 1)))
+		if ((randomDouble(&(p->myMT19937), 0, 1) < p->recomb) || (i == (p->numvarparams - 1)))
 			*(p->gen_trial + n) = p->gen_populationvector[0][n]
 			+ p->k_m * (p->gen_populationvector[r1][n] - p->gen_populationvector[r2][n]);
 		
@@ -247,12 +249,12 @@ void Best1Exp(genoptStruct *p, long candidate){
 	long r1, r2;
 	long n, i;
 	
-	SelectSamples( p->totalpopsize, candidate, &r1, &r2, NULL, NULL, NULL);
-	n = randomInteger(p->numvarparams);
+	SelectSamples(&(p->myMT19937),  p->totalpopsize, candidate, &r1, &r2, NULL, NULL, NULL);
+	n = randomInteger(&(p->myMT19937), p->numvarparams);
 	
 	memcpy(p->gen_trial, *(p->gen_populationvector + candidate), p->numvarparams * sizeof(double));
 	
-	for (i=0 ; (randomDouble( 0, 1) < p->recomb) && (i < p->numvarparams); i++){
+	for (i=0 ; (randomDouble(&(p->myMT19937),  0, 1) < p->recomb) && (i < p->numvarparams); i++){
 		*(p->gen_trial + n) = p->gen_populationvector[0][n]
 		+ p->k_m * (p->gen_populationvector[r1][n] - p->gen_populationvector[r2][n]);
 		
@@ -265,12 +267,12 @@ void Rand1Exp(genoptStruct *p, long candidate){
 	long r1, r2, r3;
 	long n, i;
 	
-	SelectSamples(p->totalpopsize, candidate,&r1,&r2,&r3, NULL, NULL);
-	n = randomInteger( p->numvarparams);
+	SelectSamples(&(p->myMT19937),  p->totalpopsize, candidate,&r1,&r2,&r3, NULL, NULL);
+	n = randomInteger(&(p->myMT19937),  p->numvarparams);
 	
 	memcpy(p->gen_trial, *(p->gen_populationvector + candidate), p->numvarparams * sizeof(double));
 	
-	for (i=0; (randomDouble(0, 1) < p->recomb) && (i < p->numvarparams); i++) {
+	for (i=0; (randomDouble(&(p->myMT19937), 0, 1) < p->recomb) && (i < p->numvarparams); i++) {
 		*(p->gen_trial + n) = p->gen_populationvector[r1][n]
 		+ p->k_m * (p->gen_populationvector[r2][n] - p->gen_populationvector[r3][n]);
 		
@@ -284,12 +286,12 @@ void RandToBest1Exp(genoptStruct *p, long candidate){
 	long r1, r2;
 	long n,  i;
 	
-	SelectSamples(p->totalpopsize, candidate,&r1,&r2, NULL, NULL, NULL);
-	n = randomInteger(p->numvarparams);
+	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2, NULL, NULL, NULL);
+	n = randomInteger(&(p->myMT19937), p->numvarparams);
 	
 	memcpy(p->gen_trial, *(p->gen_populationvector + candidate), p->numvarparams * sizeof(double));
 	
-	for (i=0; (randomDouble(0, 1) < p->recomb) && (i < p->numvarparams); i++) {
+	for (i=0; (randomDouble(&(p->myMT19937), 0, 1) < p->recomb) && (i < p->numvarparams); i++) {
 		*(p->gen_trial + n) += p->k_m * (p->gen_populationvector[0][n] - *(p->gen_trial + n))
 		+ p->k_m * (p->gen_populationvector[r1][n]
 					   - p->gen_populationvector[r2][n]);
@@ -303,12 +305,12 @@ void Best2Exp(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4;
 	long n, i;
 	
-	SelectSamples(p->totalpopsize, candidate,&r1,&r2,&r3,&r4, NULL);
-	n = randomInteger(p->numvarparams);
+	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,&r4, NULL);
+	n = randomInteger(&(p->myMT19937), p->numvarparams);
 	
 	memcpy(p->gen_trial, *(p->gen_populationvector + candidate), p->numvarparams * sizeof(double));
 	
-	for (i=0; (randomDouble(0, 1) < p->recomb) && (i < p->numvarparams); i++) {
+	for (i=0; (randomDouble(&(p->myMT19937), 0, 1) < p->recomb) && (i < p->numvarparams); i++) {
 		*(p->gen_trial + n) = p->gen_populationvector[0][n] +
 		p->k_m * (p->gen_populationvector[r1][n]
 					 + p->gen_populationvector[r2][n]
@@ -324,12 +326,12 @@ void Rand2Exp(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4, r5;
 	long n, i;
 	
-	SelectSamples(p->totalpopsize, candidate,&r1,&r2,&r3,&r4,&r5);
-	n = randomInteger(p->numvarparams);
+	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,&r4,&r5);
+	n = randomInteger(&(p->myMT19937), p->numvarparams);
 	
 	memcpy(p->gen_trial, *(p->gen_populationvector + candidate), p->numvarparams * sizeof(double));
 	
-	for (i=0; (randomDouble( 0, 1) < p->recomb) && (i < p->numvarparams); i++) {
+	for (i=0; (randomDouble(&(p->myMT19937), 0, 1) < p->recomb) && (i < p->numvarparams); i++) {
 		*(p->gen_trial + n) = p->gen_populationvector[r1][n]
 		+ p->k_m * (p->gen_populationvector[r2][n]
 					   + p->gen_populationvector[r3][n]
@@ -345,13 +347,13 @@ void RandToBest1Bin(genoptStruct *p, long candidate){
 	long r1, r2;
 	long n, i;
 	
-	SelectSamples(p->totalpopsize, candidate, &r1, &r2, NULL, NULL, NULL);
-	n = randomInteger(p->numvarparams);
+	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate, &r1, &r2, NULL, NULL, NULL);
+	n = randomInteger(&(p->myMT19937), p->numvarparams);
 	
 	memcpy(p->gen_trial, *(p->gen_populationvector + candidate), p->numvarparams * sizeof(double));
 	for (i=0; i < p->numvarparams; i++) 
 	{
-		if ((randomDouble(0, 1) < p->recomb) || (i  == (p->numvarparams - 1)))
+		if ((randomDouble(&(p->myMT19937), 0, 1) < p->recomb) || (i  == (p->numvarparams - 1)))
 			*(p->gen_trial + n) += p->k_m * (p->gen_populationvector[0][n] - *(p->gen_trial + n))
 			+ p->k_m * (p->gen_populationvector[r1][n]
 						   - p->gen_populationvector[r2][n]);
@@ -365,13 +367,13 @@ void Best2Bin(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4;
 	long n, i;
 	
-	SelectSamples(p->totalpopsize, candidate,&r1,&r2,&r3,&r4, NULL);
-	n = randomInteger(p->numvarparams);
+	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,&r4, NULL);
+	n = randomInteger(&(p->myMT19937), p->numvarparams);
 	
 	memcpy(p->gen_trial, *(p->gen_populationvector + candidate), p->numvarparams * sizeof(double));
 	for (i=0; i < p->numvarparams; i++) 
 	{
-		if ((randomDouble(0, 1) < p->recomb) || (i  == (p->numvarparams - 1)))
+		if ((randomDouble(&(p->myMT19937), 0, 1) < p->recomb) || (i  == (p->numvarparams - 1)))
 			*(p->gen_trial + n) = p->gen_populationvector[0][n]
 			+ p->k_m * (p->gen_populationvector[r1][n]
 						   + p->gen_populationvector[r2][n]
@@ -387,13 +389,13 @@ void Rand2Bin(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4, r5;
 	long n, i;
 	
-	SelectSamples(p->totalpopsize, candidate,&r1,&r2,&r3,&r4,&r5);
-	n = randomInteger(p->numvarparams);
+	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,&r4,&r5);
+	n = randomInteger(&(p->myMT19937), p->numvarparams);
 	
 	memcpy(p->gen_trial, *(p->gen_populationvector + candidate), p->numvarparams * sizeof(double));
 	for (i=0; i < p->numvarparams; i++) 
 	{
-		if ((randomDouble(0, 1) < p->recomb) || (i  == (p->numvarparams - 1)))
+		if ((randomDouble(&(p->myMT19937), 0, 1) < p->recomb) || (i  == (p->numvarparams - 1)))
 			*(p->gen_trial + n) = p->gen_populationvector[r1][n]
 			+ p->k_m * (p->gen_populationvector[r2][n]
 						   + p->gen_populationvector[r3][n]
@@ -409,13 +411,13 @@ void Rand1Bin(genoptStruct *p, long candidate){
 	long r1, r2, r3;
 	long n, i;
 	
-	SelectSamples(p->totalpopsize, candidate,&r1,&r2,&r3,NULL, NULL);
-	n = randomInteger(p->numvarparams);
+	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,NULL, NULL);
+	n = randomInteger(&(p->myMT19937), p->numvarparams);
 	
 	memcpy(p->gen_trial, *(p->gen_populationvector + candidate), p->numvarparams * sizeof(double));
 	
 	for (i=0; i < p->numvarparams; i++) {
-		if ((randomDouble(0, 1) < p->recomb) || (i  == (p->numvarparams - 1)))
+		if ((randomDouble(&(p->myMT19937), 0, 1) < p->recomb) || (i  == (p->numvarparams - 1)))
 			*(p->gen_trial + n) =  p->gen_populationvector[r1][n]
 			+ p->k_m * (p->gen_populationvector[r2][n]
 						   - p->gen_populationvector[r3][n]);
@@ -525,7 +527,7 @@ ensureConstraints(genoptStruct *p){
 	unsigned int ii;	
 	for(ii = 0 ; ii < p->numvarparams ; ii+=1)
 		if(*(p->gen_trial + ii) < p->limits[*(p->varparams + ii)][0] || *(p->gen_trial + ii) > (p->limits[*(p->varparams + ii)][1]))
-			*(p->gen_trial + ii) = randomDouble(p->limits[*(p->varparams + ii)][0], p->limits[*(p->varparams + ii)][1]);
+			*(p->gen_trial + ii) = randomDouble(&(p->myMT19937), p->limits[*(p->varparams + ii)][0], p->limits[*(p->varparams + ii)][1]);
 }
 
 /*
@@ -595,7 +597,7 @@ int initialiseFit(genoptStruct *p){
 		bot = p->limits[*(p->varparams + jj)][0];
 		top = p->limits[*(p->varparams + jj)][1];
 		for(ii = 0 ; ii < p->totalpopsize ; ii += 1)
-			p->gen_populationvector[ii][jj] = randomDouble(bot, top);
+			p->gen_populationvector[ii][jj] = randomDouble(&(p->myMT19937), bot, top);
 	}
 	
 	
@@ -684,7 +686,7 @@ int optimiseloop(genoptStruct *p){
 			chi2trial = (*(p->costfun))(p->userdata, p->temp_coefs, p->numcoefs, p->ydata, p->model, p->edata, p->datapoints);
 
 			acceptMoveGrudgingly = 0;
-			if(isfinite(p->MCtemp) && p->MCtemp > 0 && (exp(-chi2trial / chi2pvector / p->MCtemp) < randomDouble(0, 1)) ){
+			if(isfinite(p->MCtemp) && p->MCtemp > 0 && (exp(-chi2trial / chi2pvector / p->MCtemp) < randomDouble(&(p->myMT19937), 0, 1)) ){
 				acceptMoveGrudgingly = 1;				
 				if(p->updatefun && (2 & p->updatefrequency))
 					if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial))
@@ -759,7 +761,11 @@ int genetic_optimisation(fitfunction fitfun,
 	memset(&gos, 0, sizeof(gos));
 		
 	//initialise the random number generators
-	srandom(clock());
+//	srandom(clock());
+	if(gco == NULL || gco->seed < 1)
+		sgenrand(clock(), &(gos.myMT19937));
+	else
+		sgenrand(gco->seed, &gos.myMT19937);
 	
 	//setup the data.
 	gos.xdata = xdata;
