@@ -10,6 +10,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include "mt19937p.h"
 	
 #define NO_MEMORY -1
 #define INCORRECT_LIMITS -2
@@ -137,6 +139,7 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 									1 = everytime a monte carlo tempering move is accepted
 									2 = after the initialisation, but before the optimisation loop starts
 									3 = after each iteration finishes
+	seed					- seed the random number generator
 	 
 	 */																		  
 	struct gencurvefitOptions {
@@ -149,6 +152,7 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 		double temp;
 		updatefunction updatefun;
 		unsigned int updatefrequency;
+		int seed;
 	};
 	typedef struct gencurvefitOptions gencurvefitOptions;
 	
@@ -221,7 +225,7 @@ int genetic_optimisation(fitfunction fitfun,
 						 void* userdata
 						 );
 
-double gnoise(double sd);
+double gnoise(struct mt19937p *myMT19937, double sd);
 
 double chisquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
 double robust(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
