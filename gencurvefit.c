@@ -163,7 +163,7 @@ typedef struct genoptStruct* genoptStructPtr;
  */
 static int randomInteger (struct mt19937p *myMT19937, int upper){
 	int val;
-	while (upper <= (val = genrand_int(myMT19937) / (0x7fffffff / upper)));
+	while (upper <= (val = genrand_int(myMT19937) / (0xffffffff / upper)));
 //	while (upper <= (val = random() / (RAND_MAX/upper)));
 	return val;
 }
