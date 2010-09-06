@@ -185,7 +185,7 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 								 0 = vary
 								 1 = hold
 
-	limits[numcoefs][2]		- a 2D array which contains the lower and upper limits for each parameter. The lower limit must be lower than the upper limit,
+	limits[2][numcoefs]		- a 2D array which contains the lower and upper limits for each parameter. The lower limit must be lower than the upper limit,
 								but only for those parameters that are being varied.
  
 	datapoints				- the total number of data points in the fit.
