@@ -87,8 +87,9 @@ typedef double (*costfunction)(void *userdata, const double *params, unsigned in
 /*
  an (optional) user defined hook function to keep themselves of the fit progress.  If the user wishes to halt the fit early, then they should return a non
  zero value.  To keep the fit going return 0.  This will be called after each lowering of the best chi2 value.
+ updatetime						- corresponds to the bitwise settings of gencurvefitOptions.updatefrequency
  */
-typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int numcoefs, unsigned int iterations, double cost);
+typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int numcoefs, unsigned int iterations, double cost, unsigned int updatetime);
 
 
 	
@@ -138,6 +139,7 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 									1 = everytime a monte carlo tempering move is accepted
 									2 = after the initialisation, but before the optimisation loop starts
 									3 = after each iteration finishes
+									4 = after the fit has finished
 	seed					- seed the random number generator
 	 
 	 */																		  
