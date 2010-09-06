@@ -73,6 +73,9 @@ struct genoptStruct {
 	/*totalsize of the population = popsizeMultiplier * numvarparams*/
 	long totalpopsize;
 	
+	/*did you want to use the intial guesses to initialise the fit*/
+	int useinitialguesses;
+	
 	/*which parameters are varying*/
 	unsigned int *varparams;
 	
@@ -831,6 +834,7 @@ int genetic_optimisation(fitfunction fitfun,
 	}
 	gos.limits = limits;
 	
+	
 	//optional parameters
 	if(!gco){
 		gos.updatefun = NULL;
@@ -842,6 +846,7 @@ int genetic_optimisation(fitfunction fitfun,
 		gos.iterations = 100;
 		gos.tolerance = 0.001;
 		gos.updatefrequency = 1;
+		gos.useinitialguesses = 0;
 	} else {
 		gos.updatefun = gco->updatefun;
 		if(gco->temp <= 0)
@@ -855,18 +860,34 @@ int genetic_optimisation(fitfunction fitfun,
 		gos.iterations = gco->iterations;
 		gos.tolerance = gco->tolerance;
 		gos.updatefrequency = gco->updatefrequency;
+		gos.useinitialguesses = gco->useinitialguesses;
 	}
 	gos.totalpopsize = gos.numvarparams * popsizeMultiplier;
 
+	/*
+	 if you want to use the initial guesses to start the fit, then they need to be within the limits
+	 otherwise we don't care
+	 */
+	if(gos.useinitialguesses){
+		for(ii = 0 ; ii < gos.numcoefs ; ii++)
+			if(gos.coefs[ii] > gos.limits[ii][1] || gos.coefs[ii] < gos.limits[ii][0]){
+				err = COEFS_MUST_BE_WITHIN_LIMITS;
+				goto done;
+			}
+	}
 	
-	//now we can allocate memory for the rest of the structure members in gos.
-	//initialise population vector
+	/*
+	 now we can allocate memory for the rest of the structure members in gos.
+	initialise population vector
+	 */
 	gos.gen_populationvector = (double**)malloc2d(gos.totalpopsize, gos.numvarparams, sizeof(double));
 	if(gos.gen_populationvector == NULL){
 		err = NO_MEMORY;
 		goto done;
 	}
-	//initialise Chi2array
+	/*
+	 initialise Chi2array
+	 */
 	gos.chi2Array = (double*) malloc (gos.totalpopsize * sizeof(double));
 	if(gos.chi2Array == NULL){
 		err = NO_MEMORY;
@@ -874,14 +895,17 @@ int genetic_optimisation(fitfunction fitfun,
 	}
 	memset(gos.chi2Array, 0, gos.totalpopsize);
 	
-	//initialise the trial vector
+	/*
+	 initialise the trial vector
+	 */
 	gos.gen_trial = (double*)malloc(gos.numvarparams * sizeof(double));
 	if(gos.gen_trial == NULL){
 		err = NO_MEMORY;
 		goto done;
 	}
 
-	//initialise space for a full array copy of the coefficients
+	/* initialise space for a full array copy of the coefficients
+	 */
 	gos.temp_coefs = (double*)malloc(numcoefs * sizeof(double));
 	if(gos.temp_coefs == NULL){
 		err = NO_MEMORY;
@@ -889,21 +913,29 @@ int genetic_optimisation(fitfunction fitfun,
 	}
 	memcpy(gos.temp_coefs, coefs, numcoefs*sizeof(double));
 	
-	//initialise space for a full array copy of the coefficients
+	/*
+	 initialise space for a full array copy of the coefficients
+	 */
 	gos.model = (double*)malloc(datapoints* sizeof(double));
 	if(gos.model == NULL){
 		err = NO_MEMORY;
 		goto done;
 	}	
 	
-	//at this stage we can initialise the fit, before looping.
+	/*
+	 at this stage we can initialise the fit, before looping.
+	 */
 	if(err = initialiseFit(&gos))
 		goto done;
 	
-	//now iterate through, fitting the data.
+	/*
+	 now iterate through, fitting the data.
+	 */
 	err = optimiseloop(&gos);
 
-	//at this point we have the best fit.  Now return the results
+	/*
+	 at this point we have the best fit.  Now return the results
+	 */
 	*chi2 = *(gos.chi2Array);
 	
 	/*

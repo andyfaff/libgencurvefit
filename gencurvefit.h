@@ -17,6 +17,7 @@ extern "C" {
 #define HOLDVECTOR_COEFS_MISMATCH -3
 #define NO_VARYING_PARAMS -4
 #define WRONG_NUMBER_OF_PARAMS -5
+#define COEFS_MUST_BE_WITHIN_LIMITS -6
 
 #define PI 3.14159265358979323846
 
@@ -142,7 +143,10 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 									2 = after the initialisation, but before the optimisation loop starts
 									3 = after each iteration finishes
 									4 = after the fit has finished
-	seed					- seed the random number generator
+	seed					- seed the random number generator (must be an integer > 0)
+ 
+	useinitialguesses		- uses the initial guesses as a starting point for the fit.  If you specify this
+							 option then the starting coefficients must lie in between the limits
 	 
 	 */																		  
 	struct gencurvefitOptions {
@@ -156,6 +160,7 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 		updatefunction updatefun;
 		unsigned int updatefrequency;
 		int seed;
+		int useinitialguesses;
 	};
 	typedef struct gencurvefitOptions gencurvefitOptions;
 	
