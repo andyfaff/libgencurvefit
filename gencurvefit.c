@@ -627,7 +627,7 @@ int initialiseFit(genoptStruct *p){
 		goto done;
 	
 	if(p->updatefun && (4 & p->updatefrequency))
-		if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, 0, *(p->chi2Array)))
+		if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, 0, *(p->chi2Array), 4))
 			goto done;
 	
 	memcpy(p->coefs, p->temp_coefs, p->numcoefs * sizeof(double));
@@ -657,7 +657,7 @@ int optimiseloop(genoptStruct *p){
 			if(err = insertVaryingParams(p, *(p->gen_populationvector), p->numvarparams))
 				goto done;
 			
-			if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array)))
+			if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 8))
 				goto done;
 		}
 		
@@ -689,7 +689,7 @@ int optimiseloop(genoptStruct *p){
 			if(isfinite(p->MCtemp) && p->MCtemp > 0 && (exp(-chi2trial / chi2pvector / p->MCtemp) < randomDouble(&(p->myMT19937), 0, 1)) ){
 				acceptMoveGrudgingly = 1;				
 				if(p->updatefun && (2 & p->updatefrequency))
-					if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial))
+					if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 2))
 						goto done;
 			}
 			
@@ -713,7 +713,7 @@ int optimiseloop(genoptStruct *p){
 					  appraised of fit progress.
 					*/
 					if(p->updatefun && (1 & p->updatefrequency))
-						if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial))
+						if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 1))
 							goto done;
 	
 					/*
@@ -726,8 +726,15 @@ int optimiseloop(genoptStruct *p){
 					 */
 					*(p->chi2Array) = chi2trial;
 					
-					if( wavStats.V_stdev/wavStats.V_avg < p->tolerance)	/*if the fractional decrease is less and 0.5% stop.*/
+					/*
+					 if the SD of the population divided by it's average is less than tolerance stop.
+					 */
+					if( wavStats.V_stdev/wavStats.V_avg < p->tolerance){	
+						if(p->updatefun && (16 & p->updatefrequency))
+							if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 16))
+								goto done;
 						goto done;
+					}
 				}
 			}
 		}
