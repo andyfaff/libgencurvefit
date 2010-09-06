@@ -529,8 +529,8 @@ static void
 ensureConstraints(genoptStruct *p){
 	unsigned int ii;	
 	for(ii = 0 ; ii < p->numvarparams ; ii+=1)
-		if(*(p->gen_trial + ii) < p->limits[*(p->varparams + ii)][0] || *(p->gen_trial + ii) > (p->limits[*(p->varparams + ii)][1]))
-			*(p->gen_trial + ii) = randomDouble(&(p->myMT19937), p->limits[*(p->varparams + ii)][0], p->limits[*(p->varparams + ii)][1]);
+		if(*(p->gen_trial + ii) < p->limits[0][*(p->varparams + ii)] || *(p->gen_trial + ii) > (p->limits[1][*(p->varparams + ii)]))
+			*(p->gen_trial + ii) = randomDouble(&(p->myMT19937), p->limits[0][*(p->varparams + ii)], p->limits[1][*(p->varparams + ii)]);
 }
 
 /*
@@ -597,8 +597,8 @@ int initialiseFit(genoptStruct *p){
 	
 	//initialise population vector guesses, from between the limits
 	for(jj = 0 ; jj < p->numvarparams ; jj += 1){
-		bot = p->limits[*(p->varparams + jj)][0];
-		top = p->limits[*(p->varparams + jj)][1];
+		bot = p->limits[0][*(p->varparams + jj)];
+		top = p->limits[1][*(p->varparams + jj)];
 		for(ii = 0 ; ii < p->totalpopsize ; ii += 1)
 			p->gen_populationvector[ii][jj] = randomDouble(&(p->myMT19937), bot, top);
 	}
@@ -606,7 +606,7 @@ int initialiseFit(genoptStruct *p){
 	
 	//initialise Chi2array, will require a bit of calculation of the model function for each of the initial guesses.
 	for(ii = 0 ; ii < p->totalpopsize ; ii += 1){
-		if(err = insertVaryingParams(p, *(p->gen_populationvector+ ii), p->numvarparams))
+		if(err = insertVaryingParams(p, *(p->gen_populationvector + ii), p->numvarparams))
 			goto done;
 		
 		//calculate the model
@@ -827,7 +827,7 @@ int genetic_optimisation(fitfunction fitfun,
 	
 	//these are the upper and lower bounds for the limits, check them
 	for(ii = 0 ; ii < numcoefs ; ii += 1){
-		if(holdvector[ii] == 0 && limits[ii][0] > limits[ii][1]){
+		if(holdvector[ii] == 0 && limits[0][ii] > limits[1][ii]){
 			err = INCORRECT_LIMITS;
 			goto done;
 		}
@@ -870,7 +870,7 @@ int genetic_optimisation(fitfunction fitfun,
 	 */
 	if(gos.useinitialguesses){
 		for(ii = 0 ; ii < gos.numcoefs ; ii++)
-			if(gos.coefs[ii] > gos.limits[ii][1] || gos.coefs[ii] < gos.limits[ii][0]){
+			if(gos.coefs[ii] > gos.limits[1][ii] || gos.coefs[ii] < gos.limits[0][ii]){
 				err = COEFS_MUST_BE_WITHIN_LIMITS;
 				goto done;
 			}
