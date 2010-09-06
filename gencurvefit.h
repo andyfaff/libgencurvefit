@@ -88,8 +88,10 @@ typedef double (*costfunction)(void *userdata, const double *params, unsigned in
  an (optional) user defined hook function to keep themselves of the fit progress.  If the user wishes to halt the fit early, then they should return a non
  zero value.  To keep the fit going return 0.  This will be called after each lowering of the best chi2 value.
  updatetime						- corresponds to the bitwise settings of gencurvefitOptions.updatefrequency
+ convergenceNumber				- corresponds to how close the fit is to finishing (> 1 = finished)
  */
-typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int numcoefs, unsigned int iterations, double cost, unsigned int updatetime);
+	
+typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int numcoefs, unsigned int iterations, double cost, unsigned int updatetime, double convergenceNumber);
 
 
 	
