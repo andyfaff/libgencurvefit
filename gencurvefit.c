@@ -627,7 +627,7 @@ int initialiseFit(genoptStruct *p){
 		goto done;
 	
 	if(p->updatefun && (4 & p->updatefrequency))
-		if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, 0, *(p->chi2Array), 4))
+		if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, 0, *(p->chi2Array), 4, -1))
 			goto done;
 	
 	memcpy(p->coefs, p->temp_coefs, p->numcoefs * sizeof(double));
@@ -648,6 +648,7 @@ int optimiseloop(genoptStruct *p){
 	double chi2pvector,chi2trial;
 	int acceptMoveGrudgingly;
 	waveStats wavStats;
+	double convergenceNumber = -1;
 			
 	/* the user sets how many times through the entire population*/
 	for(kk = 1; kk <= p->iterations ; kk += 1){
@@ -657,7 +658,7 @@ int optimiseloop(genoptStruct *p){
 			if(err = insertVaryingParams(p, *(p->gen_populationvector), p->numvarparams))
 				goto done;
 			
-			if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 8))
+			if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 8, convergenceNumber))
 				goto done;
 		}
 		
@@ -689,7 +690,7 @@ int optimiseloop(genoptStruct *p){
 			if(isfinite(p->MCtemp) && p->MCtemp > 0 && (exp(-chi2trial / chi2pvector / p->MCtemp) < randomDouble(&(p->myMT19937), 0, 1)) ){
 				acceptMoveGrudgingly = 1;				
 				if(p->updatefun && (2 & p->updatefrequency))
-					if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 2))
+					if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 2, convergenceNumber))
 						goto done;
 			}
 			
@@ -713,7 +714,7 @@ int optimiseloop(genoptStruct *p){
 					  appraised of fit progress.
 					*/
 					if(p->updatefun && (1 & p->updatefrequency))
-						if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 1))
+						if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 1, convergenceNumber))
 							goto done;
 	
 					/*
@@ -729,9 +730,10 @@ int optimiseloop(genoptStruct *p){
 					/*
 					 if the SD of the population divided by it's average is less than tolerance stop.
 					 */
-					if( wavStats.V_stdev/wavStats.V_avg < p->tolerance){	
+					convergenceNumber = wavStats.V_stdev / wavStats.V_avg / p->tolerance;
+					if(convergenceNumber > 1){	
 						if(p->updatefun && (16 & p->updatefrequency))
-							if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 16))
+							if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 16, convergenceNumber))
 								goto done;
 						goto done;
 					}
