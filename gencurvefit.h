@@ -79,10 +79,10 @@ extern "C" {
 	
 	numDataDims				- the number of independent variables in the fit. For y = f(x) numDataDims = 1.  For y = f(n, m), numDataDims = 2, etc.
 */
-typedef int (*fitfunction)(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims);
+typedef int (*fitfunction)(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long datapoints, unsigned int numDataDims);
 	
 	
-typedef double (*costfunction)(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
+typedef double (*costfunction)(void *userdata, const double *params, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints);
 
 /*
  an (optional) user defined hook function to keep themselves of the fit progress.  If the user wishes to halt the fit early, then they should return a non
@@ -228,8 +228,8 @@ int genetic_optimisation(fitfunction fitfun,
 						 void* userdata
 						 );
 
-double chisquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
-double robust(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
+double chisquared(void *userdata, const double *params, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints);
+double robust(void *userdata, const double *params, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints);
 
 
 #ifdef __cplusplus

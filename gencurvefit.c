@@ -730,7 +730,7 @@ int optimiseloop(genoptStruct *p){
 					/*
 					 if the SD of the population divided by it's average is less than tolerance stop.
 					 */
-					convergenceNumber = wavStats.V_stdev / wavStats.V_avg / p->tolerance;
+					convergenceNumber = wavStats.V_avg * p->tolerance / wavStats.V_stdev;
 					if(convergenceNumber > 1){	
 						if(p->updatefun && (16 & p->updatefrequency))
 							if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 16, convergenceNumber))
@@ -931,11 +931,11 @@ done:
 	return err;
 }
 
-double chisquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts){
+double chisquared(void *userdata, const double *params, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints){
 	long ii;
 	double chi2 = 0;
 	double val=0;
-	for (ii=0; ii<numpnts; ii+=1){
+	for (ii = 0; ii < datapoints ; ii += 1){
 		double temp1, temp2, temp3;
 		temp1 = data[ii];
 		temp2 = model[ii];
@@ -948,11 +948,11 @@ double chisquared(void *userdata, const double *params, unsigned int numparams, 
 	return chi2;
 }
 
-double robust(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts){
+double robust(void *userdata, const double *params, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints){
  long ii;
  double chi = 0;
  double val=0;
- for (ii=0; ii<numpnts; ii+=1){
+ for (ii = 0; ii < datapoints ; ii += 1){
 	 val = fabs((data[ii] - model[ii])/errors[ii]);
 	 if(isfinite(val))
 		 chi += val;
