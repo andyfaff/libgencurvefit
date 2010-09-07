@@ -969,7 +969,6 @@ double chisquared(void *userdata, const double *params, unsigned int numcoefs, c
 	double chi2 = 0;
 	double val=0;
 	for (ii = 0; ii < datapoints ; ii += 1){
-		double temp1, temp2, temp3;
 		val = pow((fabs((data[ii] - model[ii])/errors[ii])),2);
 		if(isfinite(val))
 			chi2 += val;
