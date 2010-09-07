@@ -234,6 +234,54 @@ int genetic_optimisation(fitfunction fitfun,
 						 void* userdata
 						 );
 
+	/*
+	 in errorEstimation.c.  Calculates a hessian gradient matrix based covariance matrix.
+	 The covariance matrix is returned via the covarianceMatrix pointer and must be freed afterwards.
+	 
+	 covarianceMatrix	-	the covariance matrix is returned in this array.  It must be free'd afterwards.
+	 
+	 userdata			-	pass in user specific information to the fitfunction with this pointer.
+	 
+	 fitfun				-	your fitfunction
+	 
+	 cost				-	the value of the cost function for the parameters specified
+	 
+	 coefs[numcoefs]	-	an array containing the coefficients.  The covariance matrix is assessed for these values
+	 
+	 numcoefs			-	the number of coefficients
+	 
+	 holdvector[numcoefs]	-	an array specifying which parameters were held (=1) or varied (=0) during the fit
+	 
+	 ydata[datapoints]	-	an array of the data being fitting
+	 
+	 edata[datapoints]	-	an array for the error bars for the data being fitted.
+	 
+	 datapoints			-	the number of datapoints being fitted
+	 
+	 xdata[numDataDims][datapoints]	-	an array containing the independent variables for the fit
+	 
+	 numDataDims		-	how many independent variables do you have?
+	 
+	 unitSD				-	specify as 1 if the datapoints were unit weighted.
+	 
+	 */
+	int getCovarianceMatrix(double **covarianceMatrix,
+							void *userdata,
+							fitfunction fitfun,
+							double cost,
+							double *coefs,
+							int numcoefs,
+							unsigned int *holdvector,
+							double *ydata,
+							double *edata,
+							long datapoints,
+							double **xdata,
+							int numDataDims,
+							int unitSD);
+	
+	/*
+	 default cost functions
+	 */
 double chisquared(void *userdata, const double *params, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints);
 double robust(void *userdata, const double *params, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints);
 

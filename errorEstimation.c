@@ -32,6 +32,44 @@ double factorial(double num){
 	return result;
 }
 
+//Cholesky Decomposition
+static int choldc (double **a, int N, double *p){
+	int err = 0;	
+	int ii, jj, kk;
+	double sum = 0;
+	
+	
+	for(ii = 0; ii < N ; ii++){
+		for(jj = ii ; jj < N ; jj++){
+			for(sum = a[ii][jj] , kk = ii - 1 ; kk >= 0; kk--) sum -= a[ii][kk] * a[jj][kk];
+			if(ii == jj){
+				if(sum <= 0.0)
+					return PROBLEM_CALCULATING_COVARIANCE;
+				p[ii] = sqrt(sum);
+			} else a[jj][ii] = sum/p[ii];
+		}
+	}
+	
+	
+done:
+	return err;
+}
+
+
+//Cholesky back substitution
+static void cholsl(double **a, int N, const double *p, double *b, double *x){
+	int ii, kk;
+	double sum = 0;
+	for(ii = 0 ; ii < N ; ii++){
+		for(sum = b[ii], kk = ii-1 ; kk >=0 ; kk-- ) sum -=a[ii][kk] * x[kk];
+		x[ii] = sum/p[ii];
+	}
+	for(ii = N-1 ; ii >= 0 ; ii--){
+		for(sum = x[ii], kk = ii+1 ; kk < N ; kk++ ) sum -=a[kk][ii] * x[kk];
+		x[ii] = sum/p[ii];
+	}
+}
+
 
 static int matrixInversion(double **a, int N, double *detA){
 	int err=0;
@@ -104,113 +142,6 @@ done:
 		free(tempA);
 	return err;
 }
-
-
-//Cholesky Decomposition
-static int choldc (double **a, int N, double *p){
-	int err = 0;	
-	int ii, jj, kk;
-	double sum = 0;
-	
-	
-	for(ii = 0; ii < N ; ii++){
-		for(jj = ii ; jj < N ; jj++){
-			for(sum = a[ii][jj] , kk = ii - 1 ; kk >= 0; kk--) sum -= a[ii][kk] * a[jj][kk];
-			if(ii == jj){
-				if(sum <= 0.0)
-					return PROBLEM_CALCULATING_COVARIANCE;
-				p[ii] = sqrt(sum);
-			} else a[jj][ii] = sum/p[ii];
-		}
-	}
-	
-	
-done:
-	return err;
-}
-
-//Cholesky back substitution
-static void cholsl(double **a, int N, const double *p, double *b, double *x){
-	int ii, kk;
-	double sum = 0;
-	for(ii = 0 ; ii < N ; ii++){
-		for(sum = b[ii], kk = ii-1 ; kk >=0 ; kk-- ) sum -=a[ii][kk] * x[kk];
-		x[ii] = sum/p[ii];
-	}
-	for(ii = N-1 ; ii >= 0 ; ii--){
-		for(sum = x[ii], kk = ii+1 ; kk < N ; kk++ ) sum -=a[kk][ii] * x[kk];
-		x[ii] = sum/p[ii];
-	}
-}
-
-static int ludcmp(double **a, int n, int *indx, double *d){
-	int i, imax, j, k, err = 0;
-	double big, dum, sum, temp;
-	double *vv = NULL;
-	
-	vv = (double*)malloc(sizeof(double)*n);
-	if(vv == NULL){
-		err = 0;
-		goto done;
-	}
-	
-	*d = 1.0;
-	
-	for(i=0 ; i<n ; i++){
-		big = 0.0;
-		for(j=0 ; j<n ; j++)
-			if((temp = fabs(a[i][j])) > big) big = temp;
-		if(big == 0.0){
-			err = PROBLEM_CALCULATING_COVARIANCE;
-			goto done;
-		}
-		vv[i] = 1.0/big;	
-	} 
-	
-	for(j=0 ; j<n ; j++){
-		for(i=0 ; i<j ; i++){
-			sum = a[i][j];
-			for (k=0 ; k<i ; k++) sum -= a[i][k]*a[k][j];
-			a[i][j] = sum;
-		}
-		big = 0.0;
-		for(i=j ; i<n ; i++){
-			sum = a[i][j];
-			for(k=0; k<j ; k++) sum -= a[i][k]*a[k][j];
-			a[i][j] = sum;
-			if( (dum=vv[i]*fabs(sum)) >= big) {
-				big = dum;
-				imax = i;
-			}
-		}
-		if(j != imax){
-			for(k=0 ; k<n ; k++){
-				dum = a[imax][k];
-				a[imax][k] = a[j][k];
-				a[j][k] = dum;
-			}
-			*d = -(*d);
-			vv[imax] = vv[j];
-		}
-		indx[j] = imax;
-		if(a[j][j] == 0.0) a[j][j] = TINY;
-		
-		if(j != n-1){
-			dum = 1.0/(a[j][j]);
-			for(i=j+1; i<n ; i++) a[i][j] *=dum;
-		}
-	}
-	
-	
-done:
-	if(vv != NULL)
-		free(vv);
-	
-	return err;
-	
-}
-
-
 
 int partialDerivative(void *userdata, fitfunction fitfun, double** derivativeMatrix, int derivativeMatrixRow, int parameterIndex, double* coefs, int numcoefs, double **xdata, long datapoints, int numDataDims){
 	int err = 0;
@@ -305,11 +236,24 @@ int updateAlpha(double **alpha, double **derivativeMatrix,  unsigned int numvarp
 
 
 
-int getCovarianceMatrix(double **covarianceMatrix, void *userdata, fitfunction fitfun, double cost, double *coefs, int numcoefs, unsigned int *holdvector, double *ydata, double *edata, long datapoints, double **xdata, int numDataDims, int unitSD){
+int getCovarianceMatrix(double **covarianceMatrix,
+						void *userdata,
+						fitfunction fitfun,
+						double cost,
+						double *coefs,
+						int numcoefs,
+						unsigned int *holdvector,
+						double *ydata,
+						double *edata,
+						long datapoints,
+						double **xdata,
+						int numDataDims,
+						int unitSD){
 	int err;
 	double **derivativeMatrix = NULL;
 	double **reducedCovarianceMatrix = NULL;
 	double hessianDeterminant = 0;
+	double val = 0;
 	unsigned int *varparams = NULL;
 	int ii,jj, numvarparams;
 	err = 0;
@@ -322,7 +266,6 @@ int getCovarianceMatrix(double **covarianceMatrix, void *userdata, fitfunction f
 	if(!varparams){
 		err = NO_MEMORY;
 		goto done;
-		
 	}
 
 	jj = 0;
@@ -366,6 +309,13 @@ int getCovarianceMatrix(double **covarianceMatrix, void *userdata, fitfunction f
 	for(ii = 0 ; ii < numcoefs ; ii++)
 		for(jj = 0 ; jj < numcoefs ; jj++)
 			covarianceMatrix[ii][jj] = sqrt(-1);
+	
+	for (ii = 0; ii < numvarparams; ii++) {
+		for(jj = 0 ; jj < numvarparams ; jj++){
+			val = reducedCovarianceMatrix[ii][jj];
+			covarianceMatrix[varparams[ii]][varparams[jj]];
+		}
+	}
 		
 done:
 	if(varparams != NULL)
