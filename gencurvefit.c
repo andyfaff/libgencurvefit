@@ -447,6 +447,7 @@ void createTrialVector(genoptStruct *p, long currentpvector){
 			break;
 		case 2:
 			theStrategy = Rand1Exp;
+			break;
 		case 3:
 			theStrategy = RandToBest1Exp;
 			break;
@@ -969,9 +970,6 @@ double chisquared(void *userdata, const double *params, unsigned int numcoefs, c
 	double val=0;
 	for (ii = 0; ii < datapoints ; ii += 1){
 		double temp1, temp2, temp3;
-		temp1 = data[ii];
-		temp2 = model[ii];
-		temp3 = errors[ii];
 		val = pow((fabs((data[ii] - model[ii])/errors[ii])),2);
 		if(isfinite(val))
 			chi2 += val;
