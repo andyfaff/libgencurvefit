@@ -13,7 +13,6 @@
 #include "math.h"
 #include "stdlib.h"
 #include "string.h"
-#include "errorEstimation.h"
 
 #define TINY 1.0e-20
 
