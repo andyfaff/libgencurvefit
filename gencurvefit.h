@@ -7,11 +7,20 @@
  *
  */
 
+/*
+ we only ever want one version of the symbols in this file
+ */
+#ifndef GENCURVEFIT_H
+#define GENCURVEFIT_H
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 	
+/*
+ the error codes returned by this library.  They are all negative, allowing for user error codes >0 to be returned from genetic_optimisation
+ */
 #define NO_MEMORY -1
 #define INCORRECT_LIMITS -2
 #define HOLDVECTOR_COEFS_MISMATCH -3
@@ -132,7 +141,7 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 							 This has the effect of exploring wider parameter space, and is more likely to find a global minimum, but may take longer to converge. 
 							 One should use more iterations with temp. If one records the history of the fit using updatefun, then one can use the history for use in calculating
 							 a covariance matrix or use as the posterior probability distribution for Bayesian model selection.  
-							 IF YOU DON'T WANT THIS TEMPERING SET temp TO A NUMBER LESS THAN 0 (e.g. sqrt(-1)) .
+							 IF YOU DON'T WANT THIS TEMPERING SET temp TO A NUMBER LESS THAN 0 (e.g. -1) .
 	 
 	 updatefun				- an (optional) function that is called each time the costfunction improves.  Use this function to keep track of the fit.
 							 If you return a non-zero value from this function the fit will stop. This function will also be called if a move is accepted on a monte carlo basis (see temp). 
@@ -288,4 +297,6 @@ double robust(void *userdata, const double *params, unsigned int numcoefs, const
 
 #ifdef __cplusplus
 }
+#endif
+
 #endif
