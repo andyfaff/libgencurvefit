@@ -1,4 +1,0 @@
-g++ -O3 -funroll-loops -c -fopenmp gencurvefit.c
-ar -rvs libgencurvefit.a *.o 
-sudo cp libgencurvefit.a /usr/local/lib
-sudo cp gencurvefit.h /usr/local/include
