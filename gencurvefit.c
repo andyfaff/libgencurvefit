@@ -839,7 +839,7 @@ int genetic_optimisation(fitfunction fitfun,
 	//optional parameters
 	if(!gco){
 		gos.updatefun = NULL;
-		gos.MCtemp = NAN;
+		gos.MCtemp = -1;
 		popsizeMultiplier = 20;
 		gos.k_m = 0.7;
 		gos.recomb = 0.5;
@@ -851,7 +851,7 @@ int genetic_optimisation(fitfunction fitfun,
 	} else {
 		gos.updatefun = gco->updatefun;
 		if(gco->temp <= 0)
-			gos.MCtemp = NAN;
+			gos.MCtemp = -1;
 		else
 			gos.MCtemp = gco->temp;
 		popsizeMultiplier = gco->popsizeMultiplier;
