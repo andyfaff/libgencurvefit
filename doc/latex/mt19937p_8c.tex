@@ -1,0 +1,145 @@
+\hypertarget{mt19937p_8c}{
+\section{/Users/andrew/Documents/Andy/programming/libgencurvefit/src/mt19937p.c File Reference}
+\label{mt19937p_8c}\index{/Users/andrew/Documents/Andy/programming/libgencurvefit/src/mt19937p.c@{/Users/andrew/Documents/Andy/programming/libgencurvefit/src/mt19937p.c}}
+}
+{\ttfamily \#include $<$stdio.h$>$}\par
+{\ttfamily \#include \char`\"{}mt19937p.h\char`\"{}}\par
+\subsection*{Defines}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{mt19937p_8c_a0240ac851181b84ac374872dc5434ee4}{N}~624
+\item 
+\#define \hyperlink{mt19937p_8c_a52037c938e3c1b126c6277da5ca689d0}{M}~397
+\item 
+\#define \hyperlink{mt19937p_8c_a376c3581bae3c2367fc9ce694e5a8949}{MATRIX\_\-A}~0x9908b0df
+\item 
+\#define \hyperlink{mt19937p_8c_a39bc458849360f8f371b54c4365d397f}{UPPER\_\-MASK}~0x80000000
+\item 
+\#define \hyperlink{mt19937p_8c_a4ddd8cab3564b7a86a4b0e52ba08f70e}{LOWER\_\-MASK}~0x7fffffff
+\item 
+\#define \hyperlink{mt19937p_8c_ad823db99ec38ec810124406bd3dfeeae}{TEMPERING\_\-MASK\_\-B}~0x9d2c5680
+\item 
+\#define \hyperlink{mt19937p_8c_ae1c7a72f80707458249c99a6f37e7d3e}{TEMPERING\_\-MASK\_\-C}~0xefc60000
+\item 
+\#define \hyperlink{mt19937p_8c_a238852cd6380d77bd700e95d0a7d90c9}{TEMPERING\_\-SHIFT\_\-U}(y)~(y $>$$>$ 11)
+\item 
+\#define \hyperlink{mt19937p_8c_adce59eadb4013bb06a059dedf69c282d}{TEMPERING\_\-SHIFT\_\-S}(y)~(y $<$$<$ 7)
+\item 
+\#define \hyperlink{mt19937p_8c_a0a2b0d0fa7a7c8ce1bbc52a67f26f8c3}{TEMPERING\_\-SHIFT\_\-T}(y)~(y $<$$<$ 15)
+\item 
+\#define \hyperlink{mt19937p_8c_a15f821dd6f1a65b3ecf672718aa6273c}{TEMPERING\_\-SHIFT\_\-L}(y)~(y $>$$>$ 18)
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{mt19937p_8c_a7ffa18d510f0c5247071068e53ccadbf}{sgenrand} (unsigned long seed, struct \hyperlink{structmt19937p}{mt19937p} $\ast$config)
+\item 
+double \hyperlink{mt19937p_8c_ab709611bce528ff321d11f25ecdecdca}{genrand} (struct \hyperlink{structmt19937p}{mt19937p} $\ast$config)
+\item 
+unsigned long \hyperlink{mt19937p_8c_a8cc3eebacfa9894efe908013083fd28f}{genrand\_\-int} (struct \hyperlink{structmt19937p}{mt19937p} $\ast$config)
+\end{DoxyCompactItemize}
+
+
+\subsection{Define Documentation}
+\hypertarget{mt19937p_8c_a4ddd8cab3564b7a86a4b0e52ba08f70e}{
+\index{mt19937p.c@{mt19937p.c}!LOWER\_\-MASK@{LOWER\_\-MASK}}
+\index{LOWER\_\-MASK@{LOWER\_\-MASK}!mt19937p.c@{mt19937p.c}}
+\subsubsection[{LOWER\_\-MASK}]{\setlength{\rightskip}{0pt plus 5cm}\#define LOWER\_\-MASK~0x7fffffff}}
+\label{mt19937p_8c_a4ddd8cab3564b7a86a4b0e52ba08f70e}
+\hypertarget{mt19937p_8c_a52037c938e3c1b126c6277da5ca689d0}{
+\index{mt19937p.c@{mt19937p.c}!M@{M}}
+\index{M@{M}!mt19937p.c@{mt19937p.c}}
+\subsubsection[{M}]{\setlength{\rightskip}{0pt plus 5cm}\#define M~397}}
+\label{mt19937p_8c_a52037c938e3c1b126c6277da5ca689d0}
+\hypertarget{mt19937p_8c_a376c3581bae3c2367fc9ce694e5a8949}{
+\index{mt19937p.c@{mt19937p.c}!MATRIX\_\-A@{MATRIX\_\-A}}
+\index{MATRIX\_\-A@{MATRIX\_\-A}!mt19937p.c@{mt19937p.c}}
+\subsubsection[{MATRIX\_\-A}]{\setlength{\rightskip}{0pt plus 5cm}\#define MATRIX\_\-A~0x9908b0df}}
+\label{mt19937p_8c_a376c3581bae3c2367fc9ce694e5a8949}
+\hypertarget{mt19937p_8c_a0240ac851181b84ac374872dc5434ee4}{
+\index{mt19937p.c@{mt19937p.c}!N@{N}}
+\index{N@{N}!mt19937p.c@{mt19937p.c}}
+\subsubsection[{N}]{\setlength{\rightskip}{0pt plus 5cm}\#define N~624}}
+\label{mt19937p_8c_a0240ac851181b84ac374872dc5434ee4}
+\hypertarget{mt19937p_8c_ad823db99ec38ec810124406bd3dfeeae}{
+\index{mt19937p.c@{mt19937p.c}!TEMPERING\_\-MASK\_\-B@{TEMPERING\_\-MASK\_\-B}}
+\index{TEMPERING\_\-MASK\_\-B@{TEMPERING\_\-MASK\_\-B}!mt19937p.c@{mt19937p.c}}
+\subsubsection[{TEMPERING\_\-MASK\_\-B}]{\setlength{\rightskip}{0pt plus 5cm}\#define TEMPERING\_\-MASK\_\-B~0x9d2c5680}}
+\label{mt19937p_8c_ad823db99ec38ec810124406bd3dfeeae}
+\hypertarget{mt19937p_8c_ae1c7a72f80707458249c99a6f37e7d3e}{
+\index{mt19937p.c@{mt19937p.c}!TEMPERING\_\-MASK\_\-C@{TEMPERING\_\-MASK\_\-C}}
+\index{TEMPERING\_\-MASK\_\-C@{TEMPERING\_\-MASK\_\-C}!mt19937p.c@{mt19937p.c}}
+\subsubsection[{TEMPERING\_\-MASK\_\-C}]{\setlength{\rightskip}{0pt plus 5cm}\#define TEMPERING\_\-MASK\_\-C~0xefc60000}}
+\label{mt19937p_8c_ae1c7a72f80707458249c99a6f37e7d3e}
+\hypertarget{mt19937p_8c_a15f821dd6f1a65b3ecf672718aa6273c}{
+\index{mt19937p.c@{mt19937p.c}!TEMPERING\_\-SHIFT\_\-L@{TEMPERING\_\-SHIFT\_\-L}}
+\index{TEMPERING\_\-SHIFT\_\-L@{TEMPERING\_\-SHIFT\_\-L}!mt19937p.c@{mt19937p.c}}
+\subsubsection[{TEMPERING\_\-SHIFT\_\-L}]{\setlength{\rightskip}{0pt plus 5cm}\#define TEMPERING\_\-SHIFT\_\-L(
+\begin{DoxyParamCaption}
+\item[{}]{y}
+\end{DoxyParamCaption}
+)~(y $>$$>$ 18)}}
+\label{mt19937p_8c_a15f821dd6f1a65b3ecf672718aa6273c}
+\hypertarget{mt19937p_8c_adce59eadb4013bb06a059dedf69c282d}{
+\index{mt19937p.c@{mt19937p.c}!TEMPERING\_\-SHIFT\_\-S@{TEMPERING\_\-SHIFT\_\-S}}
+\index{TEMPERING\_\-SHIFT\_\-S@{TEMPERING\_\-SHIFT\_\-S}!mt19937p.c@{mt19937p.c}}
+\subsubsection[{TEMPERING\_\-SHIFT\_\-S}]{\setlength{\rightskip}{0pt plus 5cm}\#define TEMPERING\_\-SHIFT\_\-S(
+\begin{DoxyParamCaption}
+\item[{}]{y}
+\end{DoxyParamCaption}
+)~(y $<$$<$ 7)}}
+\label{mt19937p_8c_adce59eadb4013bb06a059dedf69c282d}
+\hypertarget{mt19937p_8c_a0a2b0d0fa7a7c8ce1bbc52a67f26f8c3}{
+\index{mt19937p.c@{mt19937p.c}!TEMPERING\_\-SHIFT\_\-T@{TEMPERING\_\-SHIFT\_\-T}}
+\index{TEMPERING\_\-SHIFT\_\-T@{TEMPERING\_\-SHIFT\_\-T}!mt19937p.c@{mt19937p.c}}
+\subsubsection[{TEMPERING\_\-SHIFT\_\-T}]{\setlength{\rightskip}{0pt plus 5cm}\#define TEMPERING\_\-SHIFT\_\-T(
+\begin{DoxyParamCaption}
+\item[{}]{y}
+\end{DoxyParamCaption}
+)~(y $<$$<$ 15)}}
+\label{mt19937p_8c_a0a2b0d0fa7a7c8ce1bbc52a67f26f8c3}
+\hypertarget{mt19937p_8c_a238852cd6380d77bd700e95d0a7d90c9}{
+\index{mt19937p.c@{mt19937p.c}!TEMPERING\_\-SHIFT\_\-U@{TEMPERING\_\-SHIFT\_\-U}}
+\index{TEMPERING\_\-SHIFT\_\-U@{TEMPERING\_\-SHIFT\_\-U}!mt19937p.c@{mt19937p.c}}
+\subsubsection[{TEMPERING\_\-SHIFT\_\-U}]{\setlength{\rightskip}{0pt plus 5cm}\#define TEMPERING\_\-SHIFT\_\-U(
+\begin{DoxyParamCaption}
+\item[{}]{y}
+\end{DoxyParamCaption}
+)~(y $>$$>$ 11)}}
+\label{mt19937p_8c_a238852cd6380d77bd700e95d0a7d90c9}
+\hypertarget{mt19937p_8c_a39bc458849360f8f371b54c4365d397f}{
+\index{mt19937p.c@{mt19937p.c}!UPPER\_\-MASK@{UPPER\_\-MASK}}
+\index{UPPER\_\-MASK@{UPPER\_\-MASK}!mt19937p.c@{mt19937p.c}}
+\subsubsection[{UPPER\_\-MASK}]{\setlength{\rightskip}{0pt plus 5cm}\#define UPPER\_\-MASK~0x80000000}}
+\label{mt19937p_8c_a39bc458849360f8f371b54c4365d397f}
+
+
+\subsection{Function Documentation}
+\hypertarget{mt19937p_8c_ab709611bce528ff321d11f25ecdecdca}{
+\index{mt19937p.c@{mt19937p.c}!genrand@{genrand}}
+\index{genrand@{genrand}!mt19937p.c@{mt19937p.c}}
+\subsubsection[{genrand}]{\setlength{\rightskip}{0pt plus 5cm}double genrand (
+\begin{DoxyParamCaption}
+\item[{struct {\bf mt19937p} $\ast$}]{ config}
+\end{DoxyParamCaption}
+)}}
+\label{mt19937p_8c_ab709611bce528ff321d11f25ecdecdca}
+\hypertarget{mt19937p_8c_a8cc3eebacfa9894efe908013083fd28f}{
+\index{mt19937p.c@{mt19937p.c}!genrand\_\-int@{genrand\_\-int}}
+\index{genrand\_\-int@{genrand\_\-int}!mt19937p.c@{mt19937p.c}}
+\subsubsection[{genrand\_\-int}]{\setlength{\rightskip}{0pt plus 5cm}unsigned long genrand\_\-int (
+\begin{DoxyParamCaption}
+\item[{struct {\bf mt19937p} $\ast$}]{ config}
+\end{DoxyParamCaption}
+)}}
+\label{mt19937p_8c_a8cc3eebacfa9894efe908013083fd28f}
+\hypertarget{mt19937p_8c_a7ffa18d510f0c5247071068e53ccadbf}{
+\index{mt19937p.c@{mt19937p.c}!sgenrand@{sgenrand}}
+\index{sgenrand@{sgenrand}!mt19937p.c@{mt19937p.c}}
+\subsubsection[{sgenrand}]{\setlength{\rightskip}{0pt plus 5cm}void sgenrand (
+\begin{DoxyParamCaption}
+\item[{unsigned long}]{ seed, }
+\item[{struct {\bf mt19937p} $\ast$}]{ config}
+\end{DoxyParamCaption}
+)}}
+\label{mt19937p_8c_a7ffa18d510f0c5247071068e53ccadbf}

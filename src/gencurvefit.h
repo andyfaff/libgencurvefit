@@ -18,9 +18,22 @@ extern "C" {
 #endif
 
 	
-/*
+/**\mainpage
+libgencurvefit is a lightweight library for data regression using differential evolution.  To use you will have to:
+ 1) include gencurvefit.h.
+ 2) write your own fitfunction().
+ 3) call genetic_optimisation().
+ 
+ Please note that you can create your own costfunction(), it doesn't have to be chisquared().
+ 
+ In addition, you can specify many more options, see gencurvefitOptions.
+ */
+	
+/**
  the error codes returned by this library.  They are all negative, allowing for user error codes >0 to be returned from genetic_optimisation
  */
+
+
 #define NO_MEMORY -1
 #define INCORRECT_LIMITS -2
 #define HOLDVECTOR_COEFS_MISMATCH -3
@@ -29,23 +42,26 @@ extern "C" {
 #define COEFS_MUST_BE_WITHIN_LIMITS -6
 #define PROBLEM_CALCULATING_COVARIANCE -7
 
+/**
+ The mathematical constant Pi
+ */
 #define PI 3.14159265358979323846
 
-	/*
+	/**
 	 Create a two-dimensional array in a single allocation
 	 *
 	 * The effect is the same as an array of "element p[ii][jj];
 	 * The equivalent declaration is "element** p;"
 	 * The array is created as an array of pointer to element, followed by an array of arrays of elements.
-	 * \param ii first array bound
-	 * \param jj second array bound
-	 * \param sz size in bytes of an element of the 2d array
-	 * \return NULL on error or pointer to array
+	 * @param ii first array bound
+	 * @param jj second array bound
+	 * @param sz size in bytes of an element of the 2d array
+	 * @return NULL on error or pointer to array
 	 *
 	 * assign return value to (element**)
-	 */
+	 
 	
-	/* to use this in practice one would write 
+	to use this in practice one would write 
 	 
 	 double **pp = NULL;
 	 pp = (double**)malloc2d(5, 11, sizeof(double));
@@ -62,20 +78,20 @@ extern "C" {
 	
 	void* malloc2d(int ii, int jj, int sz);
 	
-/*
+/**
  a function that calculates the dependent variable, given input parameters and independent variables. 
  If you return a non-zero value from this function the fit will stop, returning the same error code from genetic_optimisation.
 
-	userdata				- an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction.  Use this pointer to give extra
+	@param userdata				- an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction.  Use this pointer to give extra
 								information to your functions.
  
-	coefs[numcoefs]			- an array containing all the parameters for calculating the model data.
+	@param coefs[numcoefs]			- an array containing all the parameters for calculating the model data.
  
-	numcoefs				- total number of fit parameters.
+	@param numcoefs				- total number of fit parameters.
  
-	model[numpnts]			- the fitfunction should populate this array with the model data, calculated using the coefficients.
+	@param model[datapoints]			- the fitfunction should populate this array with the model data, calculated using the coefficients.
  
-	xdata[numDataDims][numpnts] - a 2D array containing the independent variables that correspond to each of the datapoints.
+	@param xdata[numDataDims][datapoints] - a 2D array containing the independent variables that correspond to each of the datapoints.
 									 One can fit multidimensional data, e.g. y = f(n, m).  In this case numDataDims = 2.
 									 You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)) (2 rows, m columns)
 									 If you want to pass in a 1D dataset simply pass a pointer to the array.
@@ -86,123 +102,165 @@ extern "C" {
 									BUT YOU HAVE TO REMEMBER TO DEREFERENCE THE POINTER IN THE FIT FUNCTION BEFORE YOU USE THE ARRAY.
 									model[ii] = (*xP)[ii]
  
- numpnts					- the number of datapoints to be calculated.
+	@param datapoints					- the number of datapoints to be calculated.
 	
-	numDataDims				- the number of independent variables in the fit. For y = f(x) numDataDims = 1.  For y = f(n, m), numDataDims = 2, etc.
+	@param numDataDims				- the number of independent variables in the fit. For y = f(x) numDataDims = 1.  For y = f(n, m), numDataDims = 2, etc.
 */
 typedef int (*fitfunction)(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long datapoints, unsigned int numDataDims);
 	
 	
-typedef double (*costfunction)(void *userdata, const double *params, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints);
+/**
+	 a function that calculates the cost function to be minimised (typically chi2). 
+	 @param userdata				- an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction.  Use this pointer to give extra
+										information to your functions.
+	 
+	 @param coefs[numcoefs]			- an array containing all the parameters for calculating the model data.
+	 
+	 @param numcoefs				- total number of fit parameters.
+	 
+	 @param data[datapoints]		- the dependent variable you are trying to fit
+ 
+	 @param model[datapoints]		- the fitfunction will have populated this array with the model data, calculated using the coefficients.
+ 
+	 @param edata[datapoints]		- the error bars (assumed to be standard deviation) on each of the datapoints you are trying to fit
+	 
+	 @param datapoints				- the number of datapoints you are trying to fit.
+	 */
+	
+typedef double (*costfunction)(void *userdata, const double *coefs, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints);
 
-/*
+/**
  an (optional) user defined hook function to keep themselves of the fit progress.  If the user wishes to halt the fit early, then they should return a non
  zero value.  To keep the fit going return 0.  This will be called after each lowering of the best chi2 value.
- updatetime						- corresponds to the bitwise settings of gencurvefitOptions.updatefrequency
- convergenceNumber				- corresponds to how close the fit is to finishing (> 1 = finished)
+
+ @param userdata				- an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction.  Use this pointer to give extra
+ information to your functions.
+ 
+ @param coefs[numcoefs]			- an array containing all the parameters for calculating the model data.
+ 
+ @param numcoefs				- total number of fit parameters.
+ 
+ @param iterations				- how many iterations have passed.
+ 
+ @param cost					- the value of the cost function (typically chi2)
+ 
+ @param updatetime				- corresponds to the bitwise settings of gencurvefitOptions.updatefrequency
+ 
+ @param convergenceNumber				- corresponds to how close the fit is to finishing (> 1 = finished)
  */
 	
 typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int numcoefs, unsigned int iterations, double cost, unsigned int updatetime, double convergenceNumber);
 
-
 	
-	
-/*contains options for the genetic optimisation
-	 iterations				- the maximum number of times the population is evolved during the fit (unless convergence is reached).
-	 
-	 popsizemultiplier		- the total size of the genetic population is popsizemultiplier multiplied by the number of varying parameters.
-	 
-	 k_m						- the mutation constant 0 < k_m < 2.  A typical value is 0.7.  Make larger to get more mutation.
-	 
-	 recomb					- the recombination constant, 0 < recomb < 1.  A typical value is 0.5.  Make smaller to get more exploration of parameter space.
-	 
-	 tolerance				- specifies the stopping tolerance for the fit, which is when the standard deviation of the chi2 values of the entire population
-							 divided by its mean is less than tolerance.
-	 
-	 strategy				- Choose the Differential Evolution strategy (see http://www.icsi.berkeley.edu/~storn/code.html#prac)
-	 0 = Best1Bin;
-	 1 = Best1Exp;
-	 2 = Rand1Exp;
-	 3 = RandToBest1Exp;
-	 4 = Best2Exp;
-	 5 = Rand2Exp;
-	 6 = RandToBest1Bin;
-	 7 = Best2Bin;
-	 8 = Rand2Bin;
-	 9 = Rand1Bin;
-	 Try Best1Bin to start with.
-	 
-	 temp					- Normally if the chi2 value of the trial vector is lower than vector i from the population then the trial vector replaces vector i. 
-							 However, if you specify temp  is specified then the probability of the trial vector being accepted is now done on a Monte Carlo basis. I.e.:
-							 accept if
-							 chi2(trial) < chi2(i)
-							 or accept if
-							 exp(-chi2(trial) / chi2(i) / temp) < enoise(1) 
-							 This has the effect of exploring wider parameter space, and is more likely to find a global minimum, but may take longer to converge. 
-							 One should use more iterations with temp. If one records the history of the fit using updatefun, then one can use the history for use in calculating
-							 a covariance matrix or use as the posterior probability distribution for Bayesian model selection.  
-							 IF YOU DON'T WANT THIS TEMPERING SET temp TO A NUMBER LESS THAN 0 (e.g. -1) .
-	 
-	 updatefun				- an (optional) function that is called each time the costfunction improves.  Use this function to keep track of the fit.
-							 If you return a non-zero value from this function the fit will stop. This function will also be called if a move is accepted on a monte carlo basis (see temp). 
- 
-	 updatefrequency		- Bitwise operator that specifies how often the update function is called.
-								Bit No:
-									0 = everytime the fitfunction improves (default)
-									1 = everytime a monte carlo tempering move is accepted
-									2 = after the initialisation, but before the optimisation loop starts
-									3 = after each iteration finishes
-									4 = after the fit has finished
-	seed					- seed the random number generator (must be an integer > 0)
- 
-	useinitialguesses		- uses the initial guesses as a starting point for the fit.  If you specify this
-							 option then the starting coefficients must lie in between the limits
-	 
-	 */																		  
+/**
+ gencurvefitOptions contains options for the genetic optimisation
+ */																		  
 	struct gencurvefitOptions {
+		/**
+		 iterations				- the maximum number of times the population is evolved during the fit (unless convergence is reached).
+		*/
 		unsigned int iterations;
+		/**
+		 popsizemultiplier		- the total size of the genetic population is popsizemultiplier multiplied by the number of varying parameters.
+		 */
 		unsigned int popsizeMultiplier;
+		/**
+		 k_m						- the mutation constant 0 < k_m < 2.  A typical value is 0.7.  Make larger to get more mutation.
+		 */
 		double k_m;
+		/**
+		 recomb					- the recombination constant, 0 < recomb < 1.  A typical value is 0.5.  Make smaller to get more exploration of parameter space.
+		 */
 		double recomb;
+		/**
+		 tolerance				- specifies the stopping tolerance for the fit, which is when the standard deviation of the chi2 values of the entire population
+		 divided by its mean is less than tolerance.
+		 */
 		double tolerance;
+		/**
+		 strategy				- Choose the Differential Evolution strategy (see http://www.icsi.berkeley.edu/~storn/code.html#prac)
+		 0 = Best1Bin;
+		 1 = Best1Exp;
+		 2 = Rand1Exp;
+		 3 = RandToBest1Exp;
+		 4 = Best2Exp;
+		 5 = Rand2Exp;
+		 6 = RandToBest1Bin;
+		 7 = Best2Bin;
+		 8 = Rand2Bin;
+		 9 = Rand1Bin;
+		 Try Best1Bin to start with.
+		 */
 		unsigned int strategy;
+		/**
+		 temp					- Normally if the chi2 value of the trial vector is lower than vector i from the population then the trial vector replaces vector i. 
+		 However, if you specify temp  is specified then the probability of the trial vector being accepted is now done on a Monte Carlo basis. I.e.:
+		 accept if
+		 chi2(trial) < chi2(i)
+		 or accept if
+		 exp(-chi2(trial) / chi2(i) / temp) < enoise(1) 
+		 This has the effect of exploring wider parameter space, and is more likely to find a global minimum, but may take longer to converge. 
+		 One should use more iterations with temp. If one records the history of the fit using updatefun, then one can use the history for use in calculating
+		 a covariance matrix or use as the posterior probability distribution for Bayesian model selection.  
+		 IF YOU DON'T WANT THIS TEMPERING SET temp TO A NUMBER LESS THAN 0 (e.g. -1) .
+		 */
 		double temp;
+		/**
+		 updatefun				- an (optional) function that is called each time the costfunction improves.  Use this function to keep track of the fit.
+		 If you return a non-zero value from this function the fit will stop. This function will also be called if a move is accepted on a monte carlo basis (see temp). 		 
+		 */		 
 		updatefunction updatefun;
+		/**
+		 updatefrequency		- Bitwise operator that specifies how often the update function is called.
+		 Bit No:
+		 0 = everytime the fitfunction improves (default).
+		 1 = everytime a monte carlo tempering move is accepted.
+		 2 = after the initialisation, but before the optimisation loop starts.
+		 3 = after each iteration finishes.
+		 4 = after the fit has finished.
+		*/		 
 		unsigned int updatefrequency;
+		/**
+		seed					- seed the random number generator (must be an integer > 0)
+		 */
 		int seed;
+		/**
+		useinitialguesses		- uses the initial guesses as a starting point for the fit.  If you specify this
+			option then the starting coefficients must lie in between the limits
+		 */
 		int useinitialguesses;
 	};
 	typedef struct gencurvefitOptions gencurvefitOptions;
 	
 	
-/*
+/**
  genetic_optimisation - perform curvefitting with differential evolution.  Fitting is not limited to 1 independent variable,
   you can have as many as you like.  The function is threadsafe as long as you supply unique copies of the inputs to each instance.
  
-	fitfun					- a function that calculates the dependent variable, given input parameters and independent variables. 
+	@param fitfun					- a function that calculates the dependent variable, given input parameters and independent variables. 
 								If you return a non-zero value from this function the fit will stop. 
  
-    costfun					- a function that calculates the costfunction to be minimised.  This is normally a chi2 type function.
+    @param costfun					- a function that calculates the costfunction to be minimised.  This is normally a chi2 type function.
 								i.e. sum (((model[i] - data[i]) / dataerrors[i])^2 )
 								If costfun == NULL then a default chi2 function is used.
  
-	numcoefs				- total number of fit parameters.
+	@param numcoefs				- total number of fit parameters.
  
-	coefs[numcoefs]			- an array containing all the parameters for the fit.  After genetic_optimisation this is populated by the parameters
+	@param coefs[numcoefs]			- an array containing all the parameters for the fit.  After genetic_optimisation this is populated by the parameters
 								that best fit the data.
  
-	holdvector[numcoefs]	- an array (with numcoefs elements) that specifies which parameters are going to be held during the fit. 
+	@param holdvector[numcoefs]	- an array (with numcoefs elements) that specifies which parameters are going to be held during the fit. 
 								 0 = vary
 								 1 = hold
 
-	limits[2][numcoefs]		- a 2D array which contains the lower and upper limits for each parameter. The lower limit must be lower than the upper limit,
+	@param limits[2][numcoefs]		- a 2D array which contains the lower and upper limits for each parameter. The lower limit must be lower than the upper limit,
 								but only for those parameters that are being varied.
  
-	datapoints				- the total number of data points in the fit.
+	@param datapoints				- the total number of data points in the fit.
  
-	ydata[datapoints]		- an array containing the dependent variable (i.e. the data one is trying to fit).
+	@param ydata[datapoints]		- an array containing the dependent variable (i.e. the data one is trying to fit).
 
-	xdata[numDataDims][datapoints]  - a 2D array containing the independent variables that correspond to each of the datapoints.
+	@param xdata[numDataDims][datapoints]  - a 2D array containing the independent variables that correspond to each of the datapoints.
 										One can fit multidimensional data, e.g. y = f(n, m).  In this case numDataDims = 2.
 										You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)).
 										If you want to pass in a 1D dataset simply pass a pointer to the array.
@@ -213,17 +271,17 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 										 BUT YOU HAVE TO REMEMBER TO DEREFERENCE THE POINTER IN THE FIT FUNCTION BEFORE YOU USE THE ARRAY.
 										 model[ii] = (*xP)[ii]
  
-	edata[datapoints]		- an array containing the experimental uncertainties for each of the datapoints.  If you use the default chi2 costfunction
+	@param edata[datapoints]		- an array containing the experimental uncertainties for each of the datapoints.  If you use the default chi2 costfunction
 								then it should contain standard deviations.  Set each element to 1 if you do not wish to weight the fit by the experimental
 								uncertainties.  
  
-	numDataDims				- the number of independent variables in the fit. For y = f(x) numDataDims = 1.  For y = f(n, m), numDataDims = 2, etc.
+	@param numDataDims				- the number of independent variables in the fit. For y = f(x) numDataDims = 1.  For y = f(n, m), numDataDims = 2, etc.
  
-	chi2					- the final value of the cost function.
+	@param chi2					- the final value of the cost function.
  
-	gco						- options for the genetic optimisation.  (see above).  If gco == NULL, then a default set of options are used.
+	@param gco						- options for the genetic optimisation.  (see above).  If gco == NULL, then a default set of options are used.
  
-	userdata				- an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction.  Use this pointer to give extra
+	@param userdata				- an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction.  Use this pointer to give extra
 								information to your functions.
  */
 	
@@ -240,38 +298,37 @@ int genetic_optimisation(fitfunction fitfun,
 						 unsigned int numDataDims,
 						 double *chi2,
 						 const gencurvefitOptions *gco,
-						 void* userdata
-						 );
+						 void* userdata);
 
-	/*
+	/**
 	 in errorEstimation.c.  Calculates a hessian gradient matrix based covariance matrix.
 	 The covariance matrix is returned via the covarianceMatrix pointer and must be freed afterwards.
 	 
-	 covarianceMatrix	-	the covariance matrix is returned in this array.  It must be free'd afterwards.
+	 @param covarianceMatrix	-	the covariance matrix is returned in this array.  It must be free'd afterwards.
 	 
-	 userdata			-	pass in user specific information to the fitfunction with this pointer.
+	 @param userdata			-	pass in user specific information to the fitfunction with this pointer.
 	 
-	 fitfun				-	your fitfunction
+	 @param fitfun				-	your fitfunction
 	 
-	 cost				-	the value of the cost function for the parameters specified
+	 @param cost				-	the value of the cost function for the parameters specified
 	 
-	 coefs[numcoefs]	-	an array containing the coefficients.  The covariance matrix is assessed for these values
+	 @param coefs[numcoefs]	-	an array containing the coefficients.  The covariance matrix is assessed for these values
 	 
-	 numcoefs			-	the number of coefficients
+	 @param numcoefs			-	the number of coefficients
 	 
-	 holdvector[numcoefs]	-	an array specifying which parameters were held (=1) or varied (=0) during the fit
+	 @param holdvector[numcoefs]	-	an array specifying which parameters were held (=1) or varied (=0) during the fit
 	 
-	 ydata[datapoints]	-	an array of the data being fitting
+	 @param ydata[datapoints]	-	an array of the data being fitting
 	 
-	 edata[datapoints]	-	an array for the error bars for the data being fitted.
+	 @param edata[datapoints]	-	an array for the error bars for the data being fitted.
 	 
-	 datapoints			-	the number of datapoints being fitted
+	 @param datapoints			-	the number of datapoints being fitted
 	 
-	 xdata[numDataDims][datapoints]	-	an array containing the independent variables for the fit
+	 @param xdata[numDataDims][datapoints]	-	an array containing the independent variables for the fit
 	 
-	 numDataDims		-	how many independent variables do you have?
+	 @param numDataDims		-	how many independent variables do you have?
 	 
-	 unitSD				-	specify as 1 if the datapoints were unit weighted.
+	 @param unitSD				-	specify as 1 if the datapoints were unit weighted.
 	 
 	 */
 	int getCovarianceMatrix(double **covarianceMatrix,
@@ -287,12 +344,48 @@ int genetic_optimisation(fitfunction fitfun,
 							double **xdata,
 							int numDataDims,
 							int unitSD);
-	
-	/*
-	 default cost functions
+		
+	/**
+	 a default chi2 cost function
+	 
+	 @param userdata	- an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction.  Use this pointer to give extra
+	 information to your functions.
+	 
+	 @param coefs[numcoefs]		- an array containing the coefficients for the fit.
+	 
+	 @param numcoefs			- the number of parameters being fitted.
+	 
+	 @param data[datapoints]	- the data points being fitted.
+	 
+	 @param model[datapoints]	- the model values calculated by the fitfunction.
+	 
+	 @param errors[datapoints]	- the error bars (standard deviation) corresponding to each of the datapoints.
+	 
+	 @param datapoints			- the number of datapoints being fitted.
+	 
 	 */
-double chisquared(void *userdata, const double *params, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints);
-double robust(void *userdata, const double *params, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints);
+double chisquared(void *userdata, const double *coefs, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints);
+
+	/**
+	 a default robust cost function
+	 
+	 @param userdata	- an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction.  Use this pointer to give extra
+	 information to your functions.
+	 
+	 @param coefs[numcoefs]		- an array containing the coefficients for the fit.
+	 
+	 @param numcoefs			- the number of parameters being fitted.
+	 
+	 @param data[datapoints]	- the data points being fitted.
+	 
+	 @param model[datapoints]	- the model values calculated by the fitfunction.
+	 
+	 @param errors[datapoints]	- the error bars (standard deviation) corresponding to each of the datapoints.
+	 
+	 @param datapoints			- the number of datapoints being fitted.
+	 
+	 */
+double robust(void *userdata, const double *coefs, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints);
 
 
 #ifdef __cplusplus

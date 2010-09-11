@@ -12,7 +12,7 @@
 #include "string.h"
 
 
-/*
+/**
  A structure to hold statistics of an array
  */
 struct waveStats {
@@ -134,8 +134,7 @@ typedef struct genoptStruct genoptStruct;
  In addition *(p+i) points to a whole row.
  */
 
- void* malloc2d(int ii, int jj, int sz)
-{
+ void* malloc2d(int ii, int jj, int sz){
 	void** p;
 	int sz_ptr_array;
 	int sz_elt_array;

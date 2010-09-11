@@ -1,0 +1,248 @@
+\begin{theindex}
+
+  \item {/Users/andrew/Documents/Andy/programming/libgencurvefit/src/errorEstimation.c}, 
+		\hyperpage{7}
+  \item {/Users/andrew/Documents/Andy/programming/libgencurvefit/src/gencurvefit.c}, 
+		\hyperpage{8}
+  \item {/Users/andrew/Documents/Andy/programming/libgencurvefit/src/gencurvefit.h}, 
+		\hyperpage{9}
+  \item {/Users/andrew/Documents/Andy/programming/libgencurvefit/src/mt19937p.c}, 
+		\hyperpage{12}
+  \item {/Users/andrew/Documents/Andy/programming/libgencurvefit/src/mt19937p.h}, 
+		\hyperpage{14}
+
+  \indexspace
+
+  \item {chisquared}
+    \subitem {gencurvefit.c}, \hyperpage{9}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+  \item {COEFS\_\discretionary {-}{}{}MUST\_\discretionary {-}{}{}BE\_\discretionary {-}{}{}WITHIN\_\discretionary {-}{}{}LIMITS}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+  \item {costfunction}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+
+  \indexspace
+
+  \item {errorEstimation.c}
+    \subitem {getCovarianceMatrix}, \hyperpage{8}
+    \subitem {TINY}, \hyperpage{8}
+
+  \indexspace
+
+  \item {fitfunction}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+
+  \indexspace
+
+  \item {gencurvefit.c}
+    \subitem {chisquared}, \hyperpage{9}
+    \subitem {genetic\_\discretionary {-}{}{}optimisation}, 
+		\hyperpage{9}
+    \subitem {genoptStruct}, \hyperpage{9}
+    \subitem {gnoise}, \hyperpage{9}
+    \subitem {malloc2d}, \hyperpage{9}
+    \subitem {robust}, \hyperpage{9}
+    \subitem {waveStats}, \hyperpage{9}
+  \item {gencurvefit.h}
+    \subitem {chisquared}, \hyperpage{12}
+    \subitem {COEFS\_\discretionary {-}{}{}MUST\_\discretionary {-}{}{}BE\_\discretionary {-}{}{}WITHIN\_\discretionary {-}{}{}LIMITS}, 
+		\hyperpage{12}
+    \subitem {costfunction}, \hyperpage{12}
+    \subitem {fitfunction}, \hyperpage{12}
+    \subitem {gencurvefitOptions}, \hyperpage{12}
+    \subitem {genetic\_\discretionary {-}{}{}optimisation}, 
+		\hyperpage{12}
+    \subitem {getCovarianceMatrix}, \hyperpage{12}
+    \subitem {HOLDVECTOR\_\discretionary {-}{}{}COEFS\_\discretionary {-}{}{}MISMATCH}, 
+		\hyperpage{12}
+    \subitem {INCORRECT\_\discretionary {-}{}{}LIMITS}, \hyperpage{12}
+    \subitem {malloc2d}, \hyperpage{12}
+    \subitem {NO\_\discretionary {-}{}{}MEMORY}, \hyperpage{12}
+    \subitem {NO\_\discretionary {-}{}{}VARYING\_\discretionary {-}{}{}PARAMS}, 
+		\hyperpage{12}
+    \subitem {PI}, \hyperpage{12}
+    \subitem {PROBLEM\_\discretionary {-}{}{}CALCULATING\_\discretionary {-}{}{}COVARIANCE}, 
+		\hyperpage{12}
+    \subitem {robust}, \hyperpage{12}
+    \subitem {updatefunction}, \hyperpage{12}
+    \subitem {WRONG\_\discretionary {-}{}{}NUMBER\_\discretionary {-}{}{}OF\_\discretionary {-}{}{}PARAMS}, 
+		\hyperpage{12}
+  \item {gencurvefitOptions}, \hyperpage{5}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+    \subitem {iterations}, \hyperpage{6}
+    \subitem {k\_\discretionary {-}{}{}m}, \hyperpage{6}
+    \subitem {popsizeMultiplier}, \hyperpage{6}
+    \subitem {recomb}, \hyperpage{6}
+    \subitem {seed}, \hyperpage{6}
+    \subitem {strategy}, \hyperpage{6}
+    \subitem {temp}, \hyperpage{6}
+    \subitem {tolerance}, \hyperpage{6}
+    \subitem {updatefrequency}, \hyperpage{6}
+    \subitem {updatefun}, \hyperpage{6}
+    \subitem {useinitialguesses}, \hyperpage{6}
+  \item {genetic\_\discretionary {-}{}{}optimisation}
+    \subitem {gencurvefit.c}, \hyperpage{9}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+  \item {genoptStruct}
+    \subitem {gencurvefit.c}, \hyperpage{9}
+  \item {genrand}
+    \subitem {mt19937p.c}, \hyperpage{14}
+    \subitem {mt19937p.h}, \hyperpage{15}
+  \item {genrand\_\discretionary {-}{}{}int}
+    \subitem {mt19937p.c}, \hyperpage{14}
+    \subitem {mt19937p.h}, \hyperpage{15}
+  \item {getCovarianceMatrix}
+    \subitem {errorEstimation.c}, \hyperpage{8}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+  \item {gnoise}
+    \subitem {gencurvefit.c}, \hyperpage{9}
+
+  \indexspace
+
+  \item {HOLDVECTOR\_\discretionary {-}{}{}COEFS\_\discretionary {-}{}{}MISMATCH}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+
+  \indexspace
+
+  \item {INCORRECT\_\discretionary {-}{}{}LIMITS}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+  \item {iterations}
+    \subitem {gencurvefitOptions}, \hyperpage{6}
+
+  \indexspace
+
+  \item {k\_\discretionary {-}{}{}m}
+    \subitem {gencurvefitOptions}, \hyperpage{6}
+
+  \indexspace
+
+  \item {LOWER\_\discretionary {-}{}{}MASK}
+    \subitem {mt19937p.c}, \hyperpage{14}
+
+  \indexspace
+
+  \item {M}
+    \subitem {mt19937p.c}, \hyperpage{14}
+  \item {mag01}
+    \subitem {mt19937p}, \hyperpage{6}
+  \item {malloc2d}
+    \subitem {gencurvefit.c}, \hyperpage{9}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+  \item {MATRIX\_\discretionary {-}{}{}A}
+    \subitem {mt19937p.c}, \hyperpage{14}
+    \subitem {mt19937p.h}, \hyperpage{15}
+  \item {mt}
+    \subitem {mt19937p}, \hyperpage{6}
+  \item {mt19937p}, \hyperpage{6}
+    \subitem {mag01}, \hyperpage{6}
+    \subitem {mt}, \hyperpage{6}
+    \subitem {mti}, \hyperpage{6}
+  \item {mt19937p.c}
+    \subitem {genrand}, \hyperpage{14}
+    \subitem {genrand\_\discretionary {-}{}{}int}, \hyperpage{14}
+    \subitem {LOWER\_\discretionary {-}{}{}MASK}, \hyperpage{14}
+    \subitem {M}, \hyperpage{14}
+    \subitem {MATRIX\_\discretionary {-}{}{}A}, \hyperpage{14}
+    \subitem {N}, \hyperpage{14}
+    \subitem {sgenrand}, \hyperpage{14}
+    \subitem {TEMPERING\_\discretionary {-}{}{}MASK\_\discretionary {-}{}{}B}, 
+		\hyperpage{14}
+    \subitem {TEMPERING\_\discretionary {-}{}{}MASK\_\discretionary {-}{}{}C}, 
+		\hyperpage{14}
+    \subitem {TEMPERING\_\discretionary {-}{}{}SHIFT\_\discretionary {-}{}{}L}, 
+		\hyperpage{14}
+    \subitem {TEMPERING\_\discretionary {-}{}{}SHIFT\_\discretionary {-}{}{}S}, 
+		\hyperpage{14}
+    \subitem {TEMPERING\_\discretionary {-}{}{}SHIFT\_\discretionary {-}{}{}T}, 
+		\hyperpage{14}
+    \subitem {TEMPERING\_\discretionary {-}{}{}SHIFT\_\discretionary {-}{}{}U}, 
+		\hyperpage{14}
+    \subitem {UPPER\_\discretionary {-}{}{}MASK}, \hyperpage{14}
+  \item {mt19937p.h}
+    \subitem {genrand}, \hyperpage{15}
+    \subitem {genrand\_\discretionary {-}{}{}int}, \hyperpage{15}
+    \subitem {MATRIX\_\discretionary {-}{}{}A}, \hyperpage{15}
+    \subitem {N}, \hyperpage{15}
+    \subitem {sgenrand}, \hyperpage{15}
+  \item {mti}
+    \subitem {mt19937p}, \hyperpage{6}
+
+  \indexspace
+
+  \item {N}
+    \subitem {mt19937p.c}, \hyperpage{14}
+    \subitem {mt19937p.h}, \hyperpage{15}
+  \item {NO\_\discretionary {-}{}{}MEMORY}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+  \item {NO\_\discretionary {-}{}{}VARYING\_\discretionary {-}{}{}PARAMS}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+
+  \indexspace
+
+  \item {PI}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+  \item {popsizeMultiplier}
+    \subitem {gencurvefitOptions}, \hyperpage{6}
+  \item {PROBLEM\_\discretionary {-}{}{}CALCULATING\_\discretionary {-}{}{}COVARIANCE}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+
+  \indexspace
+
+  \item {recomb}
+    \subitem {gencurvefitOptions}, \hyperpage{6}
+  \item {robust}
+    \subitem {gencurvefit.c}, \hyperpage{9}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+
+  \indexspace
+
+  \item {seed}
+    \subitem {gencurvefitOptions}, \hyperpage{6}
+  \item {sgenrand}
+    \subitem {mt19937p.c}, \hyperpage{14}
+    \subitem {mt19937p.h}, \hyperpage{15}
+  \item {strategy}
+    \subitem {gencurvefitOptions}, \hyperpage{6}
+
+  \indexspace
+
+  \item {temp}
+    \subitem {gencurvefitOptions}, \hyperpage{6}
+  \item {TEMPERING\_\discretionary {-}{}{}MASK\_\discretionary {-}{}{}B}
+    \subitem {mt19937p.c}, \hyperpage{14}
+  \item {TEMPERING\_\discretionary {-}{}{}MASK\_\discretionary {-}{}{}C}
+    \subitem {mt19937p.c}, \hyperpage{14}
+  \item {TEMPERING\_\discretionary {-}{}{}SHIFT\_\discretionary {-}{}{}L}
+    \subitem {mt19937p.c}, \hyperpage{14}
+  \item {TEMPERING\_\discretionary {-}{}{}SHIFT\_\discretionary {-}{}{}S}
+    \subitem {mt19937p.c}, \hyperpage{14}
+  \item {TEMPERING\_\discretionary {-}{}{}SHIFT\_\discretionary {-}{}{}T}
+    \subitem {mt19937p.c}, \hyperpage{14}
+  \item {TEMPERING\_\discretionary {-}{}{}SHIFT\_\discretionary {-}{}{}U}
+    \subitem {mt19937p.c}, \hyperpage{14}
+  \item {TINY}
+    \subitem {errorEstimation.c}, \hyperpage{8}
+  \item {tolerance}
+    \subitem {gencurvefitOptions}, \hyperpage{6}
+
+  \indexspace
+
+  \item {updatefrequency}
+    \subitem {gencurvefitOptions}, \hyperpage{6}
+  \item {updatefun}
+    \subitem {gencurvefitOptions}, \hyperpage{6}
+  \item {updatefunction}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+  \item {UPPER\_\discretionary {-}{}{}MASK}
+    \subitem {mt19937p.c}, \hyperpage{14}
+  \item {useinitialguesses}
+    \subitem {gencurvefitOptions}, \hyperpage{6}
+
+  \indexspace
+
+  \item {waveStats}
+    \subitem {gencurvefit.c}, \hyperpage{9}
+  \item {WRONG\_\discretionary {-}{}{}NUMBER\_\discretionary {-}{}{}OF\_\discretionary {-}{}{}PARAMS}
+    \subitem {gencurvefit.h}, \hyperpage{12}
+
+\end{theindex}
