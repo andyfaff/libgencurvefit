@@ -4,13 +4,9 @@ SHELL = /bin/sh
 OBJ =  gencurvefit.o mt19937p.o
 CFLAG = -O3 -funroll-loops -c -fopenmp
 CC = gcc
-INCLUDE =
-
 STATICLIB=libgencurvefit.a
 LIBS=$(STATICLIB)
-
 AR=ar rsc
-RANLIB=ranlib
 
 prefix = /usr/local
 exec_prefix = ${prefix}
@@ -18,7 +14,7 @@ libdir = ${exec_prefix}/lib
 sharedlibdir = ${libdir}
 includedir = ${prefix}/include
 
-OBJS = gencurvefit.o mt19937p.o
+OBJS = src/gencurvefit.o src/mt19937p.o
 
 all: libgencurvefit.a
 
