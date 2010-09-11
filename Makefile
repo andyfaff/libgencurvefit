@@ -23,7 +23,7 @@ libgencurvefit.a: $(OBJS)
 	-@ ($(RANLIB) $@ || true) >/dev/null 2>&1
 	
 clean:
-	rm *.o
+	rm src/*.o
 	rm *.a
 	
 install-libs: $(LIBS)
