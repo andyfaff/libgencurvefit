@@ -1,0 +1,290 @@
+.TH "/Users/andrew/Documents/Andy/programming/libgencurvefit/src/gencurvefit.h" 3 "Sat Sep 11 2010" "libgencurvefit" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/Users/andrew/Documents/Andy/programming/libgencurvefit/src/gencurvefit.h \- 
+.SH SYNOPSIS
+.br
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBgencurvefitOptions\fP"
+.br
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBNO_MEMORY\fP   -1"
+.br
+.ti -1c
+.RI "#define \fBINCORRECT_LIMITS\fP   -2"
+.br
+.ti -1c
+.RI "#define \fBHOLDVECTOR_COEFS_MISMATCH\fP   -3"
+.br
+.ti -1c
+.RI "#define \fBNO_VARYING_PARAMS\fP   -4"
+.br
+.ti -1c
+.RI "#define \fBWRONG_NUMBER_OF_PARAMS\fP   -5"
+.br
+.ti -1c
+.RI "#define \fBCOEFS_MUST_BE_WITHIN_LIMITS\fP   -6"
+.br
+.ti -1c
+.RI "#define \fBPROBLEM_CALCULATING_COVARIANCE\fP   -7"
+.br
+.ti -1c
+.RI "#define \fBPI\fP   3.14159265358979323846"
+.br
+.in -1c
+.SS "Typedefs"
+
+.in +1c
+.ti -1c
+.RI "typedef int(* \fBfitfunction\fP )(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long datapoints, unsigned int numDataDims)"
+.br
+.ti -1c
+.RI "typedef double(* \fBcostfunction\fP )(void *userdata, const double *coefs, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints)"
+.br
+.ti -1c
+.RI "typedef int(* \fBupdatefunction\fP )(void *userdata, const double *coefs, unsigned int numcoefs, unsigned int iterations, double cost, unsigned int updatetime, double convergenceNumber)"
+.br
+.ti -1c
+.RI "typedef struct \fBgencurvefitOptions\fP \fBgencurvefitOptions\fP"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void * \fBmalloc2d\fP (int ii, int jj, int sz)"
+.br
+.ti -1c
+.RI "int \fBgenetic_optimisation\fP (\fBfitfunction\fP fitfun, \fBcostfunction\fP costfun, unsigned int numcoefs, double *coefs, const unsigned int *holdvector, const double **limits, long datapoints, const double *ydata, const double **xdata, const double *edata, unsigned int numDataDims, double *chi2, const \fBgencurvefitOptions\fP *gco, void *userdata)"
+.br
+.ti -1c
+.RI "int \fBgetCovarianceMatrix\fP (double **covarianceMatrix, void *userdata, \fBfitfunction\fP fitfun, double cost, double *coefs, int numcoefs, unsigned int *holdvector, double *ydata, double *edata, long datapoints, double **xdata, int numDataDims, int unitSD)"
+.br
+.ti -1c
+.RI "double \fBchisquared\fP (void *userdata, const double *coefs, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints)"
+.br
+.ti -1c
+.RI "double \fBrobust\fP (void *userdata, const double *coefs, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints)"
+.br
+.in -1c
+.SH "Define Documentation"
+.PP 
+.SS "#define COEFS_MUST_BE_WITHIN_LIMITS   -6"
+.SS "#define HOLDVECTOR_COEFS_MISMATCH   -3"
+.SS "#define INCORRECT_LIMITS   -2"
+.SS "#define NO_MEMORY   -1"the error codes returned by this library. They are all negative, allowing for user error codes >0 to be returned from genetic_optimisation 
+.SS "#define NO_VARYING_PARAMS   -4"
+.SS "#define PI   3.14159265358979323846"The mathematical constant Pi 
+.SS "#define PROBLEM_CALCULATING_COVARIANCE   -7"
+.SS "#define WRONG_NUMBER_OF_PARAMS   -5"
+.SH "Typedef Documentation"
+.PP 
+.SS "typedef double(* \fBcostfunction\fP)(void *userdata, const double *coefs, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints)"a function that calculates the cost function to be minimised (typically chi2). 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIuserdata\fP - an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions.
+.br
+\fIcoefs[numcoefs]\fP - an array containing all the parameters for calculating the model data.
+.br
+\fInumcoefs\fP - total number of fit parameters.
+.br
+\fIdata[datapoints]\fP - the dependent variable you are trying to fit
+.br
+\fImodel[datapoints]\fP - the fitfunction will have populated this array with the model data, calculated using the coefficients.
+.br
+\fIedata[datapoints]\fP - the error bars (assumed to be standard deviation) on each of the datapoints you are trying to fit
+.br
+\fIdatapoints\fP - the number of datapoints you are trying to fit. 
+.RE
+.PP
+
+.SS "typedef int(* \fBfitfunction\fP)(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long datapoints, unsigned int numDataDims)"a function that calculates the dependent variable, given input parameters and independent variables. If you return a non-zero value from this function the fit will stop, returning the same error code from genetic_optimisation.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIuserdata\fP - an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions.
+.br
+\fIcoefs[numcoefs]\fP - an array containing all the parameters for calculating the model data.
+.br
+\fInumcoefs\fP - total number of fit parameters.
+.br
+\fImodel[datapoints]\fP - the fitfunction should populate this array with the model data, calculated using the coefficients.
+.br
+\fIxdata[numDataDims][datapoints]\fP - a 2D array containing the independent variables that correspond to each of the datapoints. One can fit multidimensional data, e.g. y = f(n, m). In this case numDataDims = 2. You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)) (2 rows, m columns) If you want to pass in a 1D dataset simply pass a pointer to the array. e.g. if your array is: double *xP; then pass in: &xP BUT YOU HAVE TO REMEMBER TO DEREFERENCE THE POINTER IN THE FIT FUNCTION BEFORE YOU USE THE ARRAY. model[ii] = (*xP)[ii]
+.br
+\fIdatapoints\fP - the number of datapoints to be calculated.
+.br
+\fInumDataDims\fP - the number of independent variables in the fit. For y = f(x) numDataDims = 1. For y = f(n, m), numDataDims = 2, etc. 
+.RE
+.PP
+
+.SS "typedef struct \fBgencurvefitOptions\fP \fBgencurvefitOptions\fP"
+.SS "typedef int(* \fBupdatefunction\fP)(void *userdata, const double *coefs, unsigned int numcoefs, unsigned int iterations, double cost, unsigned int updatetime, double convergenceNumber)"an (optional) user defined hook function to keep themselves of the fit progress. If the user wishes to halt the fit early, then they should return a non zero value. To keep the fit going return 0. This will be called after each lowering of the best chi2 value.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIuserdata\fP - an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions.
+.br
+\fIcoefs[numcoefs]\fP - an array containing all the parameters for calculating the model data.
+.br
+\fInumcoefs\fP - total number of fit parameters.
+.br
+\fIiterations\fP - how many iterations have passed.
+.br
+\fIcost\fP - the value of the cost function (typically chi2)
+.br
+\fIupdatetime\fP - corresponds to the bitwise settings of \fBgencurvefitOptions.updatefrequency\fP
+.br
+\fIconvergenceNumber\fP - corresponds to how close the fit is to finishing (> 1 = finished) 
+.RE
+.PP
+
+.SH "Function Documentation"
+.PP 
+.SS "double chisquared (void * userdata, const double * coefs, unsigned int numcoefs, const double * data, const double * model, const double * errors, long datapoints)"a default chi2 cost function
+.PP
+\fBParameters:\fP
+.RS 4
+\fIuserdata\fP - an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions.
+.br
+\fIcoefs[numcoefs]\fP - an array containing the coefficients for the fit.
+.br
+\fInumcoefs\fP - the number of parameters being fitted.
+.br
+\fIdata[datapoints]\fP - the data points being fitted.
+.br
+\fImodel[datapoints]\fP - the model values calculated by the fitfunction.
+.br
+\fIerrors[datapoints]\fP - the error bars (standard deviation) corresponding to each of the datapoints.
+.br
+\fIdatapoints\fP - the number of datapoints being fitted. 
+.RE
+.PP
+
+.SS "int genetic_optimisation (\fBfitfunction\fP fitfun, \fBcostfunction\fP costfun, unsigned int numcoefs, double * coefs, const unsigned int * holdvector, const double ** limits, long datapoints, const double * ydata, const double ** xdata, const double * edata, unsigned int numDataDims, double * chi2, const \fBgencurvefitOptions\fP * gco, void * userdata)"genetic_optimisation - perform curvefitting with differential evolution. Fitting is not limited to 1 independent variable, you can have as many as you like. The function is threadsafe as long as you supply unique copies of the inputs to each instance.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfitfun\fP - a function that calculates the dependent variable, given input parameters and independent variables. If you return a non-zero value from this function the fit will stop.
+.br
+\fIcostfun\fP - a function that calculates the costfunction to be minimised. This is normally a chi2 type function. i.e. sum (((model[i] - data[i]) / dataerrors[i])^2 ) If costfun == NULL then a default chi2 function is used.
+.br
+\fInumcoefs\fP - total number of fit parameters.
+.br
+\fIcoefs[numcoefs]\fP - an array containing all the parameters for the fit. After genetic_optimisation this is populated by the parameters that best fit the data.
+.br
+\fIholdvector[numcoefs]\fP - an array (with numcoefs elements) that specifies which parameters are going to be held during the fit. 0 = vary 1 = hold
+.br
+\fIlimits[2][numcoefs]\fP - a 2D array which contains the lower and upper limits for each parameter. The lower limit must be lower than the upper limit, but only for those parameters that are being varied.
+.br
+\fIdatapoints\fP - the total number of data points in the fit.
+.br
+\fIydata[datapoints]\fP - an array containing the dependent variable (i.e. the data one is trying to fit).
+.br
+\fIxdata[numDataDims][datapoints]\fP - a 2D array containing the independent variables that correspond to each of the datapoints. One can fit multidimensional data, e.g. y = f(n, m). In this case numDataDims = 2. You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)). If you want to pass in a 1D dataset simply pass a pointer to the array. e.g. if your array is: double *xP; then pass in: &xP BUT YOU HAVE TO REMEMBER TO DEREFERENCE THE POINTER IN THE FIT FUNCTION BEFORE YOU USE THE ARRAY. model[ii] = (*xP)[ii]
+.br
+\fIedata[datapoints]\fP - an array containing the experimental uncertainties for each of the datapoints. If you use the default chi2 costfunction then it should contain standard deviations. Set each element to 1 if you do not wish to weight the fit by the experimental uncertainties.
+.br
+\fInumDataDims\fP - the number of independent variables in the fit. For y = f(x) numDataDims = 1. For y = f(n, m), numDataDims = 2, etc.
+.br
+\fIchi2\fP - the final value of the cost function.
+.br
+\fIgco\fP - options for the genetic optimisation. (see above). If gco == NULL, then a default set of options are used.
+.br
+\fIuserdata\fP - an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions. 
+.RE
+.PP
+
+.SS "int getCovarianceMatrix (double ** covarianceMatrix, void * userdata, \fBfitfunction\fP fitfun, double cost, double * coefs, int numcoefs, unsigned int * holdvector, double * ydata, double * edata, long datapoints, double ** xdata, int numDataDims, int unitSD)"in \fBerrorEstimation.c\fP. Calculates a hessian gradient matrix based covariance matrix. The covariance matrix is returned via the covarianceMatrix pointer and must be freed afterwards.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIcovarianceMatrix\fP - the covariance matrix is returned in this array. It must be free'd afterwards.
+.br
+\fIuserdata\fP - pass in user specific information to the fitfunction with this pointer.
+.br
+\fIfitfun\fP - your fitfunction
+.br
+\fIcost\fP - the value of the cost function for the parameters specified
+.br
+\fIcoefs[numcoefs]\fP - an array containing the coefficients. The covariance matrix is assessed for these values
+.br
+\fInumcoefs\fP - the number of coefficients
+.br
+\fIholdvector[numcoefs]\fP - an array specifying which parameters were held (=1) or varied (=0) during the fit
+.br
+\fIydata[datapoints]\fP - an array of the data being fitting
+.br
+\fIedata[datapoints]\fP - an array for the error bars for the data being fitted.
+.br
+\fIdatapoints\fP - the number of datapoints being fitted
+.br
+\fIxdata[numDataDims][datapoints]\fP - an array containing the independent variables for the fit
+.br
+\fInumDataDims\fP - how many independent variables do you have?
+.br
+\fIunitSD\fP - specify as 1 if the datapoints were unit weighted. 
+.RE
+.PP
+
+.SS "void* malloc2d (int ii, int jj, int sz)"Create a two-dimensional array in a single allocation
+.PP
+The effect is the same as an array of 'element p[ii][jj];
+ The equivalent declaration is 'element** p;" The array is created as an array of pointer to element, followed by an array of arrays of elements. 
+.PP
+\fBParameters:\fP
+.RS 4
+\fIii\fP first array bound 
+.br
+\fIjj\fP second array bound 
+.br
+\fIsz\fP size in bytes of an element of the 2d array 
+.RE
+.PP
+\fBReturns:\fP
+.RS 4
+NULL on error or pointer to array
+.RE
+.PP
+assign return value to (element**)
+.PP
+to use this in practice one would write
+.PP
+double **pp = NULL; pp = (double**)malloc2d(5, 11, sizeof(double)); if(pp==NULL) return NOMEM;
+.PP
+<use pp='' as='' required>=''> free(pp);
+.PP
+Note you can access elements by (*(p+i)+j) is equivalent to p[i][j] In addition *(p+i) points to a whole row. 
+.SS "double robust (void * userdata, const double * coefs, unsigned int numcoefs, const double * data, const double * model, const double * errors, long datapoints)"a default robust cost function
+.PP
+\fBParameters:\fP
+.RS 4
+\fIuserdata\fP - an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions.
+.br
+\fIcoefs[numcoefs]\fP - an array containing the coefficients for the fit.
+.br
+\fInumcoefs\fP - the number of parameters being fitted.
+.br
+\fIdata[datapoints]\fP - the data points being fitted.
+.br
+\fImodel[datapoints]\fP - the model values calculated by the fitfunction.
+.br
+\fIerrors[datapoints]\fP - the error bars (standard deviation) corresponding to each of the datapoints.
+.br
+\fIdatapoints\fP - the number of datapoints being fitted. 
+.RE
+.PP
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libgencurvefit from the source code.

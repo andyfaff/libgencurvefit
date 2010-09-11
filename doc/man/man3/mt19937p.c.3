@@ -1,0 +1,84 @@
+.TH "/Users/andrew/Documents/Andy/programming/libgencurvefit/src/mt19937p.c" 3 "Sat Sep 11 2010" "libgencurvefit" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/Users/andrew/Documents/Andy/programming/libgencurvefit/src/mt19937p.c \- 
+.SH SYNOPSIS
+.br
+.PP
+\fC#include <stdio.h>\fP
+.br
+\fC#include 'mt19937p.h'\fP
+.br
+
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBN\fP   624"
+.br
+.ti -1c
+.RI "#define \fBM\fP   397"
+.br
+.ti -1c
+.RI "#define \fBMATRIX_A\fP   0x9908b0df"
+.br
+.ti -1c
+.RI "#define \fBUPPER_MASK\fP   0x80000000"
+.br
+.ti -1c
+.RI "#define \fBLOWER_MASK\fP   0x7fffffff"
+.br
+.ti -1c
+.RI "#define \fBTEMPERING_MASK_B\fP   0x9d2c5680"
+.br
+.ti -1c
+.RI "#define \fBTEMPERING_MASK_C\fP   0xefc60000"
+.br
+.ti -1c
+.RI "#define \fBTEMPERING_SHIFT_U\fP(y)   (y >> 11)"
+.br
+.ti -1c
+.RI "#define \fBTEMPERING_SHIFT_S\fP(y)   (y << 7)"
+.br
+.ti -1c
+.RI "#define \fBTEMPERING_SHIFT_T\fP(y)   (y << 15)"
+.br
+.ti -1c
+.RI "#define \fBTEMPERING_SHIFT_L\fP(y)   (y >> 18)"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBsgenrand\fP (unsigned long seed, struct \fBmt19937p\fP *config)"
+.br
+.ti -1c
+.RI "double \fBgenrand\fP (struct \fBmt19937p\fP *config)"
+.br
+.ti -1c
+.RI "unsigned long \fBgenrand_int\fP (struct \fBmt19937p\fP *config)"
+.br
+.in -1c
+.SH "Define Documentation"
+.PP 
+.SS "#define LOWER_MASK   0x7fffffff"
+.SS "#define M   397"
+.SS "#define MATRIX_A   0x9908b0df"
+.SS "#define N   624"
+.SS "#define TEMPERING_MASK_B   0x9d2c5680"
+.SS "#define TEMPERING_MASK_C   0xefc60000"
+.SS "#define TEMPERING_SHIFT_L(y)   (y >> 18)"
+.SS "#define TEMPERING_SHIFT_S(y)   (y << 7)"
+.SS "#define TEMPERING_SHIFT_T(y)   (y << 15)"
+.SS "#define TEMPERING_SHIFT_U(y)   (y >> 11)"
+.SS "#define UPPER_MASK   0x80000000"
+.SH "Function Documentation"
+.PP 
+.SS "double genrand (struct \fBmt19937p\fP * config)"
+.SS "unsigned long genrand_int (struct \fBmt19937p\fP * config)"
+.SS "void sgenrand (unsigned long seed, struct \fBmt19937p\fP * config)"
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libgencurvefit from the source code.

@@ -1,0 +1,50 @@
+.TH "/Users/andrew/Documents/Andy/programming/libgencurvefit/src/mt19937p.h" 3 "Sat Sep 11 2010" "libgencurvefit" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+/Users/andrew/Documents/Andy/programming/libgencurvefit/src/mt19937p.h \- 
+.SH SYNOPSIS
+.br
+.PP
+.SS "Data Structures"
+
+.in +1c
+.ti -1c
+.RI "struct \fBmt19937p\fP"
+.br
+.in -1c
+.SS "Defines"
+
+.in +1c
+.ti -1c
+.RI "#define \fBMATRIX_A\fP   0x9908b0df"
+.br
+.ti -1c
+.RI "#define \fBN\fP   624"
+.br
+.in -1c
+.SS "Functions"
+
+.in +1c
+.ti -1c
+.RI "void \fBsgenrand\fP (unsigned long seed, struct \fBmt19937p\fP *config)"
+.br
+.ti -1c
+.RI "double \fBgenrand\fP (struct \fBmt19937p\fP *config)"
+.br
+.ti -1c
+.RI "unsigned long \fBgenrand_int\fP (struct \fBmt19937p\fP *config)"
+.br
+.in -1c
+.SH "Define Documentation"
+.PP 
+.SS "#define MATRIX_A   0x9908b0df"
+.SS "#define N   624"
+.SH "Function Documentation"
+.PP 
+.SS "double genrand (struct \fBmt19937p\fP * config)"
+.SS "unsigned long genrand_int (struct \fBmt19937p\fP * config)"
+.SS "void sgenrand (unsigned long seed, struct \fBmt19937p\fP * config)"
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libgencurvefit from the source code.

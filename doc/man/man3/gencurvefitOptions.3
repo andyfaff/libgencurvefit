@@ -1,0 +1,67 @@
+.TH "gencurvefitOptions" 3 "Sat Sep 11 2010" "libgencurvefit" \" -*- nroff -*-
+.ad l
+.nh
+.SH NAME
+gencurvefitOptions \- 
+.SH SYNOPSIS
+.br
+.PP
+.PP
+\fC#include <gencurvefit.h>\fP
+.SS "Data Fields"
+
+.in +1c
+.ti -1c
+.RI "unsigned int \fBiterations\fP"
+.br
+.ti -1c
+.RI "unsigned int \fBpopsizeMultiplier\fP"
+.br
+.ti -1c
+.RI "double \fBk_m\fP"
+.br
+.ti -1c
+.RI "double \fBrecomb\fP"
+.br
+.ti -1c
+.RI "double \fBtolerance\fP"
+.br
+.ti -1c
+.RI "unsigned int \fBstrategy\fP"
+.br
+.ti -1c
+.RI "double \fBtemp\fP"
+.br
+.ti -1c
+.RI "\fBupdatefunction\fP \fBupdatefun\fP"
+.br
+.ti -1c
+.RI "unsigned int \fBupdatefrequency\fP"
+.br
+.ti -1c
+.RI "int \fBseed\fP"
+.br
+.ti -1c
+.RI "int \fBuseinitialguesses\fP"
+.br
+.in -1c
+.SH "Detailed Description"
+.PP 
+\fBgencurvefitOptions\fP contains options for the genetic optimisation 
+.SH "Field Documentation"
+.PP 
+.SS "unsigned int \fBiterations\fP"iterations - the maximum number of times the population is evolved during the fit (unless convergence is reached). 
+.SS "double \fBk_m\fP"k_m - the mutation constant 0 < k_m < 2. A typical value is 0.7. Make larger to get more mutation. 
+.SS "unsigned int \fBpopsizeMultiplier\fP"popsizemultiplier - the total size of the genetic population is popsizemultiplier multiplied by the number of varying parameters. 
+.SS "double \fBrecomb\fP"recomb - the recombination constant, 0 < recomb < 1. A typical value is 0.5. Make smaller to get more exploration of parameter space. 
+.SS "int \fBseed\fP"seed - seed the random number generator (must be an integer > 0) 
+.SS "unsigned int \fBstrategy\fP"strategy - Choose the Differential Evolution strategy (see http://www.icsi.berkeley.edu/~storn/code.html#prac) 0 = Best1Bin; 1 = Best1Exp; 2 = Rand1Exp; 3 = RandToBest1Exp; 4 = Best2Exp; 5 = Rand2Exp; 6 = RandToBest1Bin; 7 = Best2Bin; 8 = Rand2Bin; 9 = Rand1Bin; Try Best1Bin to start with. 
+.SS "double \fBtemp\fP"temp - Normally if the chi2 value of the trial vector is lower than vector i from the population then the trial vector replaces vector i. However, if you specify temp is specified then the probability of the trial vector being accepted is now done on a Monte Carlo basis. I.e.: accept if chi2(trial) < chi2(i) or accept if exp(-chi2(trial) / chi2(i) / temp) < enoise(1) This has the effect of exploring wider parameter space, and is more likely to find a global minimum, but may take longer to converge. One should use more iterations with temp. If one records the history of the fit using updatefun, then one can use the history for use in calculating a covariance matrix or use as the posterior probability distribution for Bayesian model selection. IF YOU DON'T WANT THIS TEMPERING SET temp TO A NUMBER LESS THAN 0 (e.g. -1) . 
+.SS "double \fBtolerance\fP"tolerance - specifies the stopping tolerance for the fit, which is when the standard deviation of the chi2 values of the entire population divided by its mean is less than tolerance. 
+.SS "unsigned int \fBupdatefrequency\fP"updatefrequency - Bitwise operator that specifies how often the update function is called. Bit No: 0 = everytime the fitfunction improves (default). 1 = everytime a monte carlo tempering move is accepted. 2 = after the initialisation, but before the optimisation loop starts. 3 = after each iteration finishes. 4 = after the fit has finished. 
+.SS "\fBupdatefunction\fP \fBupdatefun\fP"updatefun - an (optional) function that is called each time the costfunction improves. Use this function to keep track of the fit. If you return a non-zero value from this function the fit will stop. This function will also be called if a move is accepted on a monte carlo basis (see temp). 
+.SS "int \fBuseinitialguesses\fP"useinitialguesses - uses the initial guesses as a starting point for the fit. If you specify this option then the starting coefficients must lie in between the limits 
+
+.SH "Author"
+.PP 
+Generated automatically by Doxygen for libgencurvefit from the source code.

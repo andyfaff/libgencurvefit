@@ -1,0 +1,255 @@
+\hypertarget{gencurvefit_8h}{
+\section{/Users/andrew/Documents/Andy/programming/libgencurvefit/src/gencurvefit.h File Reference}
+\label{gencurvefit_8h}\index{/Users/andrew/Documents/Andy/programming/libgencurvefit/src/gencurvefit.h@{/Users/andrew/Documents/Andy/programming/libgencurvefit/src/gencurvefit.h}}
+}
+\subsection*{Data Structures}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structgencurvefit_options}{gencurvefitOptions}
+\end{DoxyCompactItemize}
+\subsection*{Defines}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{gencurvefit_8h_ab3d31997d98bf3d5b54e4aeec040d7fa}{NO\_\-MEMORY}~-\/1
+\item 
+\#define \hyperlink{gencurvefit_8h_a887b932ce2e083ed720e8777705623ea}{INCORRECT\_\-LIMITS}~-\/2
+\item 
+\#define \hyperlink{gencurvefit_8h_a3fbb755f6ad1074efcd42c3f2447a7c9}{HOLDVECTOR\_\-COEFS\_\-MISMATCH}~-\/3
+\item 
+\#define \hyperlink{gencurvefit_8h_a625a342ac31f96e2496e2d585f11d288}{NO\_\-VARYING\_\-PARAMS}~-\/4
+\item 
+\#define \hyperlink{gencurvefit_8h_add3ce6a3874bf324b3164cb3cadd752c}{WRONG\_\-NUMBER\_\-OF\_\-PARAMS}~-\/5
+\item 
+\#define \hyperlink{gencurvefit_8h_a39512545ed253142c66370ddd8677845}{COEFS\_\-MUST\_\-BE\_\-WITHIN\_\-LIMITS}~-\/6
+\item 
+\#define \hyperlink{gencurvefit_8h_a462b37801cd4d1b36ee0df9d0e670f48}{PROBLEM\_\-CALCULATING\_\-COVARIANCE}~-\/7
+\item 
+\#define \hyperlink{gencurvefit_8h_a598a3330b3c21701223ee0ca14316eca}{PI}~3.14159265358979323846
+\end{DoxyCompactItemize}
+\subsection*{Typedefs}
+\begin{DoxyCompactItemize}
+\item 
+typedef int($\ast$ \hyperlink{gencurvefit_8h_a7a7ea9c36bfca151fe1556d1f5e61c26}{fitfunction} )(void $\ast$userdata, const double $\ast$coefs, unsigned int numcoefs, double $\ast$model, const double $\ast$$\ast$xdata, long datapoints, unsigned int numDataDims)
+\item 
+typedef double($\ast$ \hyperlink{gencurvefit_8h_a655dc6f3bd77f814c6127a0556709cfe}{costfunction} )(void $\ast$userdata, const double $\ast$coefs, unsigned int numcoefs, const double $\ast$data, const double $\ast$model, const double $\ast$errors, long datapoints)
+\item 
+typedef int($\ast$ \hyperlink{gencurvefit_8h_a5e2662c4338bced26ad6aa5494fc1de2}{updatefunction} )(void $\ast$userdata, const double $\ast$coefs, unsigned int numcoefs, unsigned int iterations, double cost, unsigned int updatetime, double convergenceNumber)
+\item 
+typedef struct \hyperlink{structgencurvefit_options}{gencurvefitOptions} \hyperlink{gencurvefit_8h_ae03336b832d43fd256330c44324d933c}{gencurvefitOptions}
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void $\ast$ \hyperlink{gencurvefit_8h_a4cbd1f9b06be6e5d4f33e58b4d2cb134}{malloc2d} (int ii, int jj, int sz)
+\item 
+int \hyperlink{gencurvefit_8h_ae2b325ec90b9cad5ca726d96d7a277e5}{genetic\_\-optimisation} (\hyperlink{gencurvefit_8h_a7a7ea9c36bfca151fe1556d1f5e61c26}{fitfunction} fitfun, \hyperlink{gencurvefit_8h_a655dc6f3bd77f814c6127a0556709cfe}{costfunction} costfun, unsigned int numcoefs, double $\ast$coefs, const unsigned int $\ast$holdvector, const double $\ast$$\ast$limits, long datapoints, const double $\ast$ydata, const double $\ast$$\ast$xdata, const double $\ast$edata, unsigned int numDataDims, double $\ast$chi2, const \hyperlink{structgencurvefit_options}{gencurvefitOptions} $\ast$gco, void $\ast$userdata)
+\item 
+int \hyperlink{gencurvefit_8h_ae2d8c6ae67436bd60fb826b61efe4a7e}{getCovarianceMatrix} (double $\ast$$\ast$covarianceMatrix, void $\ast$userdata, \hyperlink{gencurvefit_8h_a7a7ea9c36bfca151fe1556d1f5e61c26}{fitfunction} fitfun, double cost, double $\ast$coefs, int numcoefs, unsigned int $\ast$holdvector, double $\ast$ydata, double $\ast$edata, long datapoints, double $\ast$$\ast$xdata, int numDataDims, int unitSD)
+\item 
+double \hyperlink{gencurvefit_8h_a5c6e9017f866d36eab96b12077ff0839}{chisquared} (void $\ast$userdata, const double $\ast$coefs, unsigned int numcoefs, const double $\ast$data, const double $\ast$model, const double $\ast$errors, long datapoints)
+\item 
+double \hyperlink{gencurvefit_8h_aa279ea4d5275c2a7d260e3b9dcd8a482}{robust} (void $\ast$userdata, const double $\ast$coefs, unsigned int numcoefs, const double $\ast$data, const double $\ast$model, const double $\ast$errors, long datapoints)
+\end{DoxyCompactItemize}
+
+
+\subsection{Define Documentation}
+\hypertarget{gencurvefit_8h_a39512545ed253142c66370ddd8677845}{
+\index{gencurvefit.h@{gencurvefit.h}!COEFS\_\-MUST\_\-BE\_\-WITHIN\_\-LIMITS@{COEFS\_\-MUST\_\-BE\_\-WITHIN\_\-LIMITS}}
+\index{COEFS\_\-MUST\_\-BE\_\-WITHIN\_\-LIMITS@{COEFS\_\-MUST\_\-BE\_\-WITHIN\_\-LIMITS}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{COEFS\_\-MUST\_\-BE\_\-WITHIN\_\-LIMITS}]{\setlength{\rightskip}{0pt plus 5cm}\#define COEFS\_\-MUST\_\-BE\_\-WITHIN\_\-LIMITS~-\/6}}
+\label{gencurvefit_8h_a39512545ed253142c66370ddd8677845}
+\hypertarget{gencurvefit_8h_a3fbb755f6ad1074efcd42c3f2447a7c9}{
+\index{gencurvefit.h@{gencurvefit.h}!HOLDVECTOR\_\-COEFS\_\-MISMATCH@{HOLDVECTOR\_\-COEFS\_\-MISMATCH}}
+\index{HOLDVECTOR\_\-COEFS\_\-MISMATCH@{HOLDVECTOR\_\-COEFS\_\-MISMATCH}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{HOLDVECTOR\_\-COEFS\_\-MISMATCH}]{\setlength{\rightskip}{0pt plus 5cm}\#define HOLDVECTOR\_\-COEFS\_\-MISMATCH~-\/3}}
+\label{gencurvefit_8h_a3fbb755f6ad1074efcd42c3f2447a7c9}
+\hypertarget{gencurvefit_8h_a887b932ce2e083ed720e8777705623ea}{
+\index{gencurvefit.h@{gencurvefit.h}!INCORRECT\_\-LIMITS@{INCORRECT\_\-LIMITS}}
+\index{INCORRECT\_\-LIMITS@{INCORRECT\_\-LIMITS}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{INCORRECT\_\-LIMITS}]{\setlength{\rightskip}{0pt plus 5cm}\#define INCORRECT\_\-LIMITS~-\/2}}
+\label{gencurvefit_8h_a887b932ce2e083ed720e8777705623ea}
+\hypertarget{gencurvefit_8h_ab3d31997d98bf3d5b54e4aeec040d7fa}{
+\index{gencurvefit.h@{gencurvefit.h}!NO\_\-MEMORY@{NO\_\-MEMORY}}
+\index{NO\_\-MEMORY@{NO\_\-MEMORY}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{NO\_\-MEMORY}]{\setlength{\rightskip}{0pt plus 5cm}\#define NO\_\-MEMORY~-\/1}}
+\label{gencurvefit_8h_ab3d31997d98bf3d5b54e4aeec040d7fa}
+the error codes returned by this library. They are all negative, allowing for user error codes $>$0 to be returned from genetic\_\-optimisation \hypertarget{gencurvefit_8h_a625a342ac31f96e2496e2d585f11d288}{
+\index{gencurvefit.h@{gencurvefit.h}!NO\_\-VARYING\_\-PARAMS@{NO\_\-VARYING\_\-PARAMS}}
+\index{NO\_\-VARYING\_\-PARAMS@{NO\_\-VARYING\_\-PARAMS}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{NO\_\-VARYING\_\-PARAMS}]{\setlength{\rightskip}{0pt plus 5cm}\#define NO\_\-VARYING\_\-PARAMS~-\/4}}
+\label{gencurvefit_8h_a625a342ac31f96e2496e2d585f11d288}
+\hypertarget{gencurvefit_8h_a598a3330b3c21701223ee0ca14316eca}{
+\index{gencurvefit.h@{gencurvefit.h}!PI@{PI}}
+\index{PI@{PI}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{PI}]{\setlength{\rightskip}{0pt plus 5cm}\#define PI~3.14159265358979323846}}
+\label{gencurvefit_8h_a598a3330b3c21701223ee0ca14316eca}
+The mathematical constant Pi \hypertarget{gencurvefit_8h_a462b37801cd4d1b36ee0df9d0e670f48}{
+\index{gencurvefit.h@{gencurvefit.h}!PROBLEM\_\-CALCULATING\_\-COVARIANCE@{PROBLEM\_\-CALCULATING\_\-COVARIANCE}}
+\index{PROBLEM\_\-CALCULATING\_\-COVARIANCE@{PROBLEM\_\-CALCULATING\_\-COVARIANCE}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{PROBLEM\_\-CALCULATING\_\-COVARIANCE}]{\setlength{\rightskip}{0pt plus 5cm}\#define PROBLEM\_\-CALCULATING\_\-COVARIANCE~-\/7}}
+\label{gencurvefit_8h_a462b37801cd4d1b36ee0df9d0e670f48}
+\hypertarget{gencurvefit_8h_add3ce6a3874bf324b3164cb3cadd752c}{
+\index{gencurvefit.h@{gencurvefit.h}!WRONG\_\-NUMBER\_\-OF\_\-PARAMS@{WRONG\_\-NUMBER\_\-OF\_\-PARAMS}}
+\index{WRONG\_\-NUMBER\_\-OF\_\-PARAMS@{WRONG\_\-NUMBER\_\-OF\_\-PARAMS}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{WRONG\_\-NUMBER\_\-OF\_\-PARAMS}]{\setlength{\rightskip}{0pt plus 5cm}\#define WRONG\_\-NUMBER\_\-OF\_\-PARAMS~-\/5}}
+\label{gencurvefit_8h_add3ce6a3874bf324b3164cb3cadd752c}
+
+
+\subsection{Typedef Documentation}
+\hypertarget{gencurvefit_8h_a655dc6f3bd77f814c6127a0556709cfe}{
+\index{gencurvefit.h@{gencurvefit.h}!costfunction@{costfunction}}
+\index{costfunction@{costfunction}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{costfunction}]{\setlength{\rightskip}{0pt plus 5cm}typedef double($\ast$ {\bf costfunction})(void $\ast$userdata, const double $\ast$coefs, unsigned int numcoefs, const double $\ast$data, const double $\ast$model, const double $\ast$errors, long datapoints)}}
+\label{gencurvefit_8h_a655dc6f3bd77f814c6127a0556709cfe}
+a function that calculates the cost function to be minimised (typically chi2). 
+\begin{DoxyParams}{Parameters}
+\item[{\em userdata}]-\/ an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions.\item[{\em coefs\mbox{[}numcoefs\mbox{]}}]-\/ an array containing all the parameters for calculating the model data.\item[{\em numcoefs}]-\/ total number of fit parameters.\item[{\em data\mbox{[}datapoints\mbox{]}}]-\/ the dependent variable you are trying to fit\item[{\em model\mbox{[}datapoints\mbox{]}}]-\/ the fitfunction will have populated this array with the model data, calculated using the coefficients.\item[{\em edata\mbox{[}datapoints\mbox{]}}]-\/ the error bars (assumed to be standard deviation) on each of the datapoints you are trying to fit\item[{\em datapoints}]-\/ the number of datapoints you are trying to fit. \end{DoxyParams}
+\hypertarget{gencurvefit_8h_a7a7ea9c36bfca151fe1556d1f5e61c26}{
+\index{gencurvefit.h@{gencurvefit.h}!fitfunction@{fitfunction}}
+\index{fitfunction@{fitfunction}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{fitfunction}]{\setlength{\rightskip}{0pt plus 5cm}typedef int($\ast$ {\bf fitfunction})(void $\ast$userdata, const double $\ast$coefs, unsigned int numcoefs, double $\ast$model, const double $\ast$$\ast$xdata, long datapoints, unsigned int numDataDims)}}
+\label{gencurvefit_8h_a7a7ea9c36bfca151fe1556d1f5e61c26}
+a function that calculates the dependent variable, given input parameters and independent variables. If you return a non-\/zero value from this function the fit will stop, returning the same error code from genetic\_\-optimisation.
+
+
+\begin{DoxyParams}{Parameters}
+\item[{\em userdata}]-\/ an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions.\item[{\em coefs\mbox{[}numcoefs\mbox{]}}]-\/ an array containing all the parameters for calculating the model data.\item[{\em numcoefs}]-\/ total number of fit parameters.\item[{\em model\mbox{[}datapoints\mbox{]}}]-\/ the fitfunction should populate this array with the model data, calculated using the coefficients.\item[{\em xdata\mbox{[}numDataDims\mbox{]}\mbox{[}datapoints\mbox{]}}]-\/ a 2D array containing the independent variables that correspond to each of the datapoints. One can fit multidimensional data, e.g. y = f(n, m). In this case numDataDims = 2. You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)) (2 rows, m columns) If you want to pass in a 1D dataset simply pass a pointer to the array. e.g. if your array is: double $\ast$xP; then pass in: \&xP BUT YOU HAVE TO REMEMBER TO DEREFERENCE THE POINTER IN THE FIT FUNCTION BEFORE YOU USE THE ARRAY. model\mbox{[}ii\mbox{]} = ($\ast$xP)\mbox{[}ii\mbox{]}\item[{\em datapoints}]-\/ the number of datapoints to be calculated.\item[{\em numDataDims}]-\/ the number of independent variables in the fit. For y = f(x) numDataDims = 1. For y = f(n, m), numDataDims = 2, etc. \end{DoxyParams}
+\hypertarget{gencurvefit_8h_ae03336b832d43fd256330c44324d933c}{
+\index{gencurvefit.h@{gencurvefit.h}!gencurvefitOptions@{gencurvefitOptions}}
+\index{gencurvefitOptions@{gencurvefitOptions}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{gencurvefitOptions}]{\setlength{\rightskip}{0pt plus 5cm}typedef struct {\bf gencurvefitOptions} {\bf gencurvefitOptions}}}
+\label{gencurvefit_8h_ae03336b832d43fd256330c44324d933c}
+\hypertarget{gencurvefit_8h_a5e2662c4338bced26ad6aa5494fc1de2}{
+\index{gencurvefit.h@{gencurvefit.h}!updatefunction@{updatefunction}}
+\index{updatefunction@{updatefunction}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{updatefunction}]{\setlength{\rightskip}{0pt plus 5cm}typedef int($\ast$ {\bf updatefunction})(void $\ast$userdata, const double $\ast$coefs, unsigned int numcoefs, unsigned int iterations, double cost, unsigned int updatetime, double convergenceNumber)}}
+\label{gencurvefit_8h_a5e2662c4338bced26ad6aa5494fc1de2}
+an (optional) user defined hook function to keep themselves of the fit progress. If the user wishes to halt the fit early, then they should return a non zero value. To keep the fit going return 0. This will be called after each lowering of the best chi2 value.
+
+
+\begin{DoxyParams}{Parameters}
+\item[{\em userdata}]-\/ an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions.\item[{\em coefs\mbox{[}numcoefs\mbox{]}}]-\/ an array containing all the parameters for calculating the model data.\item[{\em numcoefs}]-\/ total number of fit parameters.\item[{\em iterations}]-\/ how many iterations have passed.\item[{\em cost}]-\/ the value of the cost function (typically chi2)\item[{\em updatetime}]-\/ corresponds to the bitwise settings of \hyperlink{structgencurvefit_options_a44f1fec3d8e41bea598a75b06af1becb}{gencurvefitOptions.updatefrequency}\item[{\em convergenceNumber}]-\/ corresponds to how close the fit is to finishing ($>$ 1 = finished) \end{DoxyParams}
+
+
+\subsection{Function Documentation}
+\hypertarget{gencurvefit_8h_a5c6e9017f866d36eab96b12077ff0839}{
+\index{gencurvefit.h@{gencurvefit.h}!chisquared@{chisquared}}
+\index{chisquared@{chisquared}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{chisquared}]{\setlength{\rightskip}{0pt plus 5cm}double chisquared (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{ userdata, }
+\item[{const double $\ast$}]{ coefs, }
+\item[{unsigned int}]{ numcoefs, }
+\item[{const double $\ast$}]{ data, }
+\item[{const double $\ast$}]{ model, }
+\item[{const double $\ast$}]{ errors, }
+\item[{long}]{ datapoints}
+\end{DoxyParamCaption}
+)}}
+\label{gencurvefit_8h_a5c6e9017f866d36eab96b12077ff0839}
+a default chi2 cost function
+
+
+\begin{DoxyParams}{Parameters}
+\item[{\em userdata}]-\/ an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions.\item[{\em coefs\mbox{[}numcoefs\mbox{]}}]-\/ an array containing the coefficients for the fit.\item[{\em numcoefs}]-\/ the number of parameters being fitted.\item[{\em data\mbox{[}datapoints\mbox{]}}]-\/ the data points being fitted.\item[{\em model\mbox{[}datapoints\mbox{]}}]-\/ the model values calculated by the fitfunction.\item[{\em errors\mbox{[}datapoints\mbox{]}}]-\/ the error bars (standard deviation) corresponding to each of the datapoints.\item[{\em datapoints}]-\/ the number of datapoints being fitted. \end{DoxyParams}
+\hypertarget{gencurvefit_8h_ae2b325ec90b9cad5ca726d96d7a277e5}{
+\index{gencurvefit.h@{gencurvefit.h}!genetic\_\-optimisation@{genetic\_\-optimisation}}
+\index{genetic\_\-optimisation@{genetic\_\-optimisation}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{genetic\_\-optimisation}]{\setlength{\rightskip}{0pt plus 5cm}int genetic\_\-optimisation (
+\begin{DoxyParamCaption}
+\item[{{\bf fitfunction}}]{ fitfun, }
+\item[{{\bf costfunction}}]{ costfun, }
+\item[{unsigned int}]{ numcoefs, }
+\item[{double $\ast$}]{ coefs, }
+\item[{const unsigned int $\ast$}]{ holdvector, }
+\item[{const double $\ast$$\ast$}]{ limits, }
+\item[{long}]{ datapoints, }
+\item[{const double $\ast$}]{ ydata, }
+\item[{const double $\ast$$\ast$}]{ xdata, }
+\item[{const double $\ast$}]{ edata, }
+\item[{unsigned int}]{ numDataDims, }
+\item[{double $\ast$}]{ chi2, }
+\item[{const {\bf gencurvefitOptions} $\ast$}]{ gco, }
+\item[{void $\ast$}]{ userdata}
+\end{DoxyParamCaption}
+)}}
+\label{gencurvefit_8h_ae2b325ec90b9cad5ca726d96d7a277e5}
+genetic\_\-optimisation -\/ perform curvefitting with differential evolution. Fitting is not limited to 1 independent variable, you can have as many as you like. The function is threadsafe as long as you supply unique copies of the inputs to each instance.
+
+
+\begin{DoxyParams}{Parameters}
+\item[{\em fitfun}]-\/ a function that calculates the dependent variable, given input parameters and independent variables. If you return a non-\/zero value from this function the fit will stop.\item[{\em costfun}]-\/ a function that calculates the costfunction to be minimised. This is normally a chi2 type function. i.e. sum (((model\mbox{[}i\mbox{]} -\/ data\mbox{[}i\mbox{]}) / dataerrors\mbox{[}i\mbox{]})$^\wedge$2 ) If costfun == NULL then a default chi2 function is used.\item[{\em numcoefs}]-\/ total number of fit parameters.\item[{\em coefs\mbox{[}numcoefs\mbox{]}}]-\/ an array containing all the parameters for the fit. After genetic\_\-optimisation this is populated by the parameters that best fit the data.\item[{\em holdvector\mbox{[}numcoefs\mbox{]}}]-\/ an array (with numcoefs elements) that specifies which parameters are going to be held during the fit. 0 = vary 1 = hold\item[{\em limits\mbox{[}2\mbox{]}\mbox{[}numcoefs\mbox{]}}]-\/ a 2D array which contains the lower and upper limits for each parameter. The lower limit must be lower than the upper limit, but only for those parameters that are being varied.\item[{\em datapoints}]-\/ the total number of data points in the fit.\item[{\em ydata\mbox{[}datapoints\mbox{]}}]-\/ an array containing the dependent variable (i.e. the data one is trying to fit).\item[{\em xdata\mbox{[}numDataDims\mbox{]}\mbox{[}datapoints\mbox{]}}]-\/ a 2D array containing the independent variables that correspond to each of the datapoints. One can fit multidimensional data, e.g. y = f(n, m). In this case numDataDims = 2. You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)). If you want to pass in a 1D dataset simply pass a pointer to the array. e.g. if your array is: double $\ast$xP; then pass in: \&xP BUT YOU HAVE TO REMEMBER TO DEREFERENCE THE POINTER IN THE FIT FUNCTION BEFORE YOU USE THE ARRAY. model\mbox{[}ii\mbox{]} = ($\ast$xP)\mbox{[}ii\mbox{]}\item[{\em edata\mbox{[}datapoints\mbox{]}}]-\/ an array containing the experimental uncertainties for each of the datapoints. If you use the default chi2 costfunction then it should contain standard deviations. Set each element to 1 if you do not wish to weight the fit by the experimental uncertainties.\item[{\em numDataDims}]-\/ the number of independent variables in the fit. For y = f(x) numDataDims = 1. For y = f(n, m), numDataDims = 2, etc.\item[{\em chi2}]-\/ the final value of the cost function.\item[{\em gco}]-\/ options for the genetic optimisation. (see above). If gco == NULL, then a default set of options are used.\item[{\em userdata}]-\/ an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions. \end{DoxyParams}
+\hypertarget{gencurvefit_8h_ae2d8c6ae67436bd60fb826b61efe4a7e}{
+\index{gencurvefit.h@{gencurvefit.h}!getCovarianceMatrix@{getCovarianceMatrix}}
+\index{getCovarianceMatrix@{getCovarianceMatrix}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{getCovarianceMatrix}]{\setlength{\rightskip}{0pt plus 5cm}int getCovarianceMatrix (
+\begin{DoxyParamCaption}
+\item[{double $\ast$$\ast$}]{ covarianceMatrix, }
+\item[{void $\ast$}]{ userdata, }
+\item[{{\bf fitfunction}}]{ fitfun, }
+\item[{double}]{ cost, }
+\item[{double $\ast$}]{ coefs, }
+\item[{int}]{ numcoefs, }
+\item[{unsigned int $\ast$}]{ holdvector, }
+\item[{double $\ast$}]{ ydata, }
+\item[{double $\ast$}]{ edata, }
+\item[{long}]{ datapoints, }
+\item[{double $\ast$$\ast$}]{ xdata, }
+\item[{int}]{ numDataDims, }
+\item[{int}]{ unitSD}
+\end{DoxyParamCaption}
+)}}
+\label{gencurvefit_8h_ae2d8c6ae67436bd60fb826b61efe4a7e}
+in \hyperlink{error_estimation_8c}{errorEstimation.c}. Calculates a hessian gradient matrix based covariance matrix. The covariance matrix is returned via the covarianceMatrix pointer and must be freed afterwards.
+
+
+\begin{DoxyParams}{Parameters}
+\item[{\em covarianceMatrix}]-\/ the covariance matrix is returned in this array. It must be free'd afterwards.\item[{\em userdata}]-\/ pass in user specific information to the fitfunction with this pointer.\item[{\em fitfun}]-\/ your fitfunction\item[{\em cost}]-\/ the value of the cost function for the parameters specified\item[{\em coefs\mbox{[}numcoefs\mbox{]}}]-\/ an array containing the coefficients. The covariance matrix is assessed for these values\item[{\em numcoefs}]-\/ the number of coefficients\item[{\em holdvector\mbox{[}numcoefs\mbox{]}}]-\/ an array specifying which parameters were held (=1) or varied (=0) during the fit\item[{\em ydata\mbox{[}datapoints\mbox{]}}]-\/ an array of the data being fitting\item[{\em edata\mbox{[}datapoints\mbox{]}}]-\/ an array for the error bars for the data being fitted.\item[{\em datapoints}]-\/ the number of datapoints being fitted\item[{\em xdata\mbox{[}numDataDims\mbox{]}\mbox{[}datapoints\mbox{]}}]-\/ an array containing the independent variables for the fit\item[{\em numDataDims}]-\/ how many independent variables do you have?\item[{\em unitSD}]-\/ specify as 1 if the datapoints were unit weighted. \end{DoxyParams}
+\hypertarget{gencurvefit_8h_a4cbd1f9b06be6e5d4f33e58b4d2cb134}{
+\index{gencurvefit.h@{gencurvefit.h}!malloc2d@{malloc2d}}
+\index{malloc2d@{malloc2d}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{malloc2d}]{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ malloc2d (
+\begin{DoxyParamCaption}
+\item[{int}]{ ii, }
+\item[{int}]{ jj, }
+\item[{int}]{ sz}
+\end{DoxyParamCaption}
+)}}
+\label{gencurvefit_8h_a4cbd1f9b06be6e5d4f33e58b4d2cb134}
+Create a two-\/dimensional array in a single allocation
+
+The effect is the same as an array of \char`\"{}element p\mbox{[}ii\mbox{]}\mbox{[}jj\mbox{]};
+ The equivalent declaration is \char`\"{}element$\ast$$\ast$ p;" The array is created as an array of pointer to element, followed by an array of arrays of elements. 
+\begin{DoxyParams}{Parameters}
+\item[{\em ii}]first array bound \item[{\em jj}]second array bound \item[{\em sz}]size in bytes of an element of the 2d array \end{DoxyParams}
+\begin{DoxyReturn}{Returns}
+NULL on error or pointer to array
+\end{DoxyReturn}
+assign return value to (element$\ast$$\ast$)
+
+to use this in practice one would write
+
+double $\ast$$\ast$pp = NULL; pp = (double$\ast$$\ast$)malloc2d(5, 11, sizeof(double)); if(pp==NULL) return NOMEM;
+
+$<$use pp=\char`\"{}\char`\"{} as=\char`\"{}\char`\"{} required$>$=\char`\"{}\char`\"{}$>$ free(pp);
+
+Note you can access elements by ($\ast$(p+i)+j) is equivalent to p\mbox{[}i\mbox{]}\mbox{[}j\mbox{]} In addition $\ast$(p+i) points to a whole row. \hypertarget{gencurvefit_8h_aa279ea4d5275c2a7d260e3b9dcd8a482}{
+\index{gencurvefit.h@{gencurvefit.h}!robust@{robust}}
+\index{robust@{robust}!gencurvefit.h@{gencurvefit.h}}
+\subsubsection[{robust}]{\setlength{\rightskip}{0pt plus 5cm}double robust (
+\begin{DoxyParamCaption}
+\item[{void $\ast$}]{ userdata, }
+\item[{const double $\ast$}]{ coefs, }
+\item[{unsigned int}]{ numcoefs, }
+\item[{const double $\ast$}]{ data, }
+\item[{const double $\ast$}]{ model, }
+\item[{const double $\ast$}]{ errors, }
+\item[{long}]{ datapoints}
+\end{DoxyParamCaption}
+)}}
+\label{gencurvefit_8h_aa279ea4d5275c2a7d260e3b9dcd8a482}
+a default robust cost function
+
+
+\begin{DoxyParams}{Parameters}
+\item[{\em userdata}]-\/ an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions.\item[{\em coefs\mbox{[}numcoefs\mbox{]}}]-\/ an array containing the coefficients for the fit.\item[{\em numcoefs}]-\/ the number of parameters being fitted.\item[{\em data\mbox{[}datapoints\mbox{]}}]-\/ the data points being fitted.\item[{\em model\mbox{[}datapoints\mbox{]}}]-\/ the model values calculated by the fitfunction.\item[{\em errors\mbox{[}datapoints\mbox{]}}]-\/ the error bars (standard deviation) corresponding to each of the datapoints.\item[{\em datapoints}]-\/ the number of datapoints being fitted. \end{DoxyParams}
