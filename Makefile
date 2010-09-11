@@ -34,6 +34,6 @@ install-libs: $(LIBS)
 	
 install: install-libs
 	-@if [ ! -d $(DESTDIR)$(includedir)   ]; then mkdir -p $(DESTDIR)$(includedir); fi
-	cp gencurvefit.h $(DESTDIR)$(includedir)
+	cp src/gencurvefit.h $(DESTDIR)$(includedir)
 	chmod 644 $(DESTDIR)$(includedir)/gencurvefit.h
 	

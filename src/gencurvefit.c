@@ -22,7 +22,6 @@ struct waveStats {
 	long V_minloc;
 };
 typedef struct waveStats waveStats;
-typedef struct waveStats* waveStatsPtr;
 
 struct genoptStruct {
 	/*total number of datapoints*/
@@ -105,7 +104,6 @@ struct genoptStruct {
 	struct mt19937p myMT19937;
 };
 typedef struct genoptStruct genoptStruct;
-typedef struct genoptStruct* genoptStructPtr;
 
 /*
  * \brief Create a two-dimensional array in a single allocation
@@ -193,7 +191,7 @@ double gnoise(struct mt19937p *myMT19937, double sd){
 	return sd * sqrt(-2 * log(en0))*cos(2 * PI * en1);
 }
 
-void SelectSamples(struct mt19937p *myMT19937, long popsize, long candidate, long *r1, long *r2, long *r3, long *r4, long *r5){
+static void SelectSamples(struct mt19937p *myMT19937, long popsize, long candidate, long *r1, long *r2, long *r3, long *r4, long *r5){
 	if (r1){
 		do
 			*r1 = randomInteger(myMT19937, popsize);	
@@ -229,7 +227,7 @@ void SelectSamples(struct mt19937p *myMT19937, long popsize, long candidate, lon
 }
 
 
-void Best1Bin(genoptStruct *p, long candidate){
+static void Best1Bin(genoptStruct *p, long candidate){
 	long r1, r2;
 	long n, i;
 	
@@ -248,7 +246,7 @@ void Best1Bin(genoptStruct *p, long candidate){
 	return;
 }
 
-void Best1Exp(genoptStruct *p, long candidate){
+static void Best1Exp(genoptStruct *p, long candidate){
 	long r1, r2;
 	long n, i;
 	
@@ -266,7 +264,7 @@ void Best1Exp(genoptStruct *p, long candidate){
 	return;
 }
 
-void Rand1Exp(genoptStruct *p, long candidate){
+static void Rand1Exp(genoptStruct *p, long candidate){
 	long r1, r2, r3;
 	long n, i;
 	
@@ -285,7 +283,7 @@ void Rand1Exp(genoptStruct *p, long candidate){
 	return;
 }
 
-void RandToBest1Exp(genoptStruct *p, long candidate){
+static void RandToBest1Exp(genoptStruct *p, long candidate){
 	long r1, r2;
 	long n,  i;
 	
@@ -304,7 +302,7 @@ void RandToBest1Exp(genoptStruct *p, long candidate){
 	return;
 }
 
-void Best2Exp(genoptStruct *p, long candidate){
+static void Best2Exp(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4;
 	long n, i;
 	
@@ -325,7 +323,7 @@ void Best2Exp(genoptStruct *p, long candidate){
 	return;
 }
 
-void Rand2Exp(genoptStruct *p, long candidate){
+static void Rand2Exp(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4, r5;
 	long n, i;
 	
@@ -346,7 +344,7 @@ void Rand2Exp(genoptStruct *p, long candidate){
 	return;
 }
 
-void RandToBest1Bin(genoptStruct *p, long candidate){
+static void RandToBest1Bin(genoptStruct *p, long candidate){
 	long r1, r2;
 	long n, i;
 	
@@ -366,7 +364,7 @@ void RandToBest1Bin(genoptStruct *p, long candidate){
 	return;
 }
 
-void Best2Bin(genoptStruct *p, long candidate){
+static void Best2Bin(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4;
 	long n, i;
 	
@@ -388,7 +386,7 @@ void Best2Bin(genoptStruct *p, long candidate){
 	return;
 }
 
-void Rand2Bin(genoptStruct *p, long candidate){
+static void Rand2Bin(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4, r5;
 	long n, i;
 	
@@ -410,7 +408,7 @@ void Rand2Bin(genoptStruct *p, long candidate){
 	return;
 }
 
-void Rand1Bin(genoptStruct *p, long candidate){
+static void Rand1Bin(genoptStruct *p, long candidate){
 	long r1, r2, r3;
 	long n, i;
 	
@@ -435,7 +433,7 @@ void Rand1Bin(genoptStruct *p, long candidate){
  in modulo.
  bPrime is created from two random population vectors and the best fit vector.
  */
-void createTrialVector(genoptStruct *p, long currentpvector){
+static void createTrialVector(genoptStruct *p, long currentpvector){
 	void (*theStrategy)(genoptStruct*, long);
 	
 	switch(p->strategy){
@@ -589,7 +587,7 @@ swapPopVector(genoptStruct *p, long popsize, long i, long j){
 
 
 /*initialises the genetic optimisation for the optimiseloop, all memory allocation has occurred by now, just need to fill out the arrays*/
-int initialiseFit(genoptStruct *p){
+static int initialiseFit(genoptStruct *p){
 	int err = 0;
 	
 	long ii, jj;
@@ -646,7 +644,7 @@ done:
  returns 0 if no errors
  returns errorcode otherwise.
  */
-int optimiseloop(genoptStruct *p){
+static int optimiseloop(genoptStruct *p){
 	long ii, kk, currentpvector;
 	int err = 0;
 	double chi2pvector,chi2trial;
