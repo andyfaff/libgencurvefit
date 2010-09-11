@@ -16,7 +16,7 @@
 
 #define TINY 1.0e-20
 
-double factorial(double num){
+static double factorial(double num){
 	int ii;
 	double result = 0;
 	
@@ -142,7 +142,7 @@ done:
 	return err;
 }
 
-int partialDerivative(void *userdata, fitfunction fitfun, double** derivativeMatrix, int derivativeMatrixRow, int parameterIndex, double* coefs, int numcoefs, double **xdata, long datapoints, int numDataDims){
+static int partialDerivative(void *userdata, fitfunction fitfun, double** derivativeMatrix, int derivativeMatrixRow, int parameterIndex, double* coefs, int numcoefs, double **xdata, long datapoints, int numDataDims){
 	int err = 0;
 	double param, diff;
 	int jj;
@@ -179,7 +179,7 @@ done:
 }
 
 
-int updatePartialDerivative(void *userdata, fitfunction fitfun, double **derivativeMatrix, double *coefs, int numcoefs, unsigned int *varparams, int numvarparams, double **xdata, long datapoints, int numDataDims){
+static int updatePartialDerivative(void *userdata, fitfunction fitfun, double **derivativeMatrix, double *coefs, int numcoefs, unsigned int *varparams, int numvarparams, double **xdata, long datapoints, int numDataDims){
 	int err = 0;
 	int ii;
 	for(ii = 0 ; ii < numvarparams ; ii++){
@@ -190,7 +190,7 @@ int updatePartialDerivative(void *userdata, fitfunction fitfun, double **derivat
 }
 
 
-int calculateAlphaElement(int row, int col, double **alpha, double **derivativeMatrix, double *edata, long datapoints) {
+static int calculateAlphaElement(int row, int col, double **alpha, double **derivativeMatrix, double *edata, long datapoints) {
 	int err = 0;
 	int ii;
 	double result = 0;
@@ -209,7 +209,7 @@ int calculateAlphaElement(int row, int col, double **alpha, double **derivativeM
 
 
 /** packs the upper right elements of the alpha matrix, because the alpha matrix should be symmetrical*/
-int packAlphaSymmetric(double** alpha, unsigned int numvarparams){  
+static int packAlphaSymmetric(double** alpha, unsigned int numvarparams){  
 	int err = 0,ii,jj;
 	
 	for(ii = 0 ; ii < numvarparams ; ii++)
@@ -220,7 +220,7 @@ int packAlphaSymmetric(double** alpha, unsigned int numvarparams){
 }
 
 /** Calculates the lower left elements for <code>this.alpha</code>. */
-int updateAlpha(double **alpha, double **derivativeMatrix,  unsigned int numvarparams, double *edata, long datapoints) {
+static int updateAlpha(double **alpha, double **derivativeMatrix,  unsigned int numvarparams, double *edata, long datapoints) {
 	int err = 0, ii, jj;
 	for (ii = 0; ii < numvarparams; ii++) {
 		for (jj = 0; jj < ii+1 ; jj++) {
