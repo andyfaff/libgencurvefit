@@ -190,7 +190,7 @@ static int updatePartialDerivative(void *userdata, fitfunction fitfun, double **
 }
 
 
-static int calculateAlphaElement(int row, int col, double **alpha, double **derivativeMatrix, double *edata, long datapoints) {
+static int calculateAlphaElement(int row, int col, double **alpha, double **derivativeMatrix, const double *edata, long datapoints, double lambda) {
 	int err = 0;
 	int ii;
 	double result = 0;
@@ -202,6 +202,8 @@ static int calculateAlphaElement(int row, int col, double **alpha, double **deri
 		
 		result += num;
 	}
+	if(row == col)
+		result *= 1 + lambda;
 	
 	alpha[row][col] = result;
 	return err;
@@ -220,11 +222,11 @@ static int packAlphaSymmetric(double** alpha, unsigned int numvarparams){
 }
 
 /** Calculates the lower left elements for <code>this.alpha</code>. */
-static int updateAlpha(double **alpha, double **derivativeMatrix,  unsigned int numvarparams, double *edata, long datapoints) {
+static int updateAlpha(double **alpha, double **derivativeMatrix,  unsigned int numvarparams, const double *edata, long datapoints, double lambda) {
 	int err = 0, ii, jj;
 	for (ii = 0; ii < numvarparams; ii++) {
 		for (jj = 0; jj < ii+1 ; jj++) {
-			if(err = calculateAlphaElement(ii, jj, alpha, derivativeMatrix, edata, datapoints))
+			if(err = calculateAlphaElement(ii, jj, alpha, derivativeMatrix, edata, datapoints, lambda))
 				return err;
 		}
 	}
@@ -233,6 +235,27 @@ static int updateAlpha(double **alpha, double **derivativeMatrix,  unsigned int 
 	return err;
 }
 
+/** 
+ * @return An calculated element for the beta-matrix.
+ * NOTE: Does not change the value of beta-matrix.
+ */
+double calculateBetaElement(int row, const double *edata, long datapoints) {
+	int ii;
+	double result = 0;
+	for (ii = 0 ; ii < datapoints ; ii++) {
+		result +=  edata[ii]; //* 
+//		(dataPoints[1][i] - function.getY(dataPoints[0][i], parameters)) *
+//		function.getPartialDerivate(dataPoints[0][i], parameters, row);
+	}
+	return result;
+}
+
+/** Calculates all elements for <code>this.beta</code>. */
+void updateBeta(double *b, int numvarparams, const double *edata, long datapoints) {
+	int ii;
+	for (ii = 0; ii < numvarparams; ii++)
+		b[ii] = calculateBetaElement(ii, edata, datapoints);
+}
 
 
 int getCovarianceMatrix(double **covarianceMatrix,
@@ -289,7 +312,7 @@ int getCovarianceMatrix(double **covarianceMatrix,
 	if(err = updatePartialDerivative(userdata, fitfun, derivativeMatrix, coefs, numcoefs, varparams, numvarparams, xdata, datapoints, numDataDims))
 	   goto done;
 	   	
-	if(err = updateAlpha(reducedCovarianceMatrix, derivativeMatrix, numvarparams, edata, datapoints))
+	if(err = updateAlpha(reducedCovarianceMatrix, derivativeMatrix, numvarparams, edata, datapoints, 0))
 		goto done;
 
 	if(err = matrixInversion(reducedCovarianceMatrix, numvarparams, &hessianDeterminant)) goto done;
@@ -327,5 +350,187 @@ done:
 	return err;
 }
 
+/*
+ insertVaryingParams inserts the current pvector into an array copy of the coefficients,
+ then into a temporary wave
+ returns 0 if no error
+ returns errorcode otherwise
+ */
+static int
+insertVaryingParams(double *coefs, const unsigned int* varparams, unsigned int numvarparams, double *vector){
+	int err=0, ii;
+	
+	for(ii = 0 ; ii < numvarparams ; ii += 1)
+		*(coefs + *(varparams + ii)) =  *(vector + ii);
+	
+	return err;
+}
 
+int levenberg_marquardt(fitfunction fitfun,
+					 costfunction costfun,
+					 unsigned int numcoefs,
+					 double* coefs,
+					 const unsigned int *holdvector,
+					 long datapoints,
+					 const double* ydata,
+					 const double** xdata,
+					 const double *edata,
+					 unsigned int numDataDims,
+					 double *chi2,
+					 const gencurvefitOptions* gco,	 
+					 void* userdata){
+
+	int err = 0;
+	int ii, jj, numvarcoefs = 0, iterations;
+	unsigned int *varcoefs = NULL;
+	double cost = -1, incrementedCost = -1, lambda;
+	double **derivativeMatrix = NULL;
+	double **alpha = NULL;
+	double *reducedParameters = NULL;
+	double *da = NULL;
+	double *b = NULL;
+	double *model = NULL;
+	double *temp_coefs = NULL;
+	double *incrementedParameters = NULL;
+	gencurvefitOptions lgco;
+	costfunction mycostfun;
+	
+	
+	if(gco == NULL){
+		lgco.iterations = 100;
+		lgco.tolerance = 0.001;
+	} else {
+		lgco.iterations = gco->iterations;
+		lgco.tolerance = gco->iterations;
+	}
+	
+	if(costfun == NULL)
+		mycostfun = &chisquared;
+	else
+		mycostfun = costfun;
+
+		
+	for(ii = 0; ii < numcoefs ; ii++)
+		if(holdvector[ii] == 0) numvarcoefs ++;
+
+	varcoefs = (unsigned int*) malloc(sizeof(unsigned int) * numvarcoefs);
+	if(!varcoefs){
+		err = NO_MEMORY;
+		goto done;
+	}
+	
+	derivativeMatrix = (double**) malloc2d(numvarcoefs, numvarcoefs, sizeof(double));
+	if(!derivativeMatrix){
+		err = NO_MEMORY;
+		goto done;
+	}
+	
+	alpha = (double**) malloc2d(numvarcoefs, numvarcoefs, sizeof(double));
+	if(!alpha){
+		err = NO_MEMORY;
+		goto done;
+	}
+	
+	reducedParameters = (double*) malloc(sizeof(double) * numvarcoefs);
+	if(!reducedParameters){
+		err = NO_MEMORY;
+		goto done;
+	}
+	
+	da = (double*) malloc(sizeof(double) * numvarcoefs);
+	if(!da){
+		err = NO_MEMORY;
+		goto done;
+	}
+	
+	b = (double*) malloc(sizeof(double) * numvarcoefs);
+	if(!b){
+		err = NO_MEMORY;
+		goto done;
+	}
+	
+	incrementedParameters = (double*) malloc(sizeof(double) * numvarcoefs);
+	if(!incrementedParameters){
+		err = NO_MEMORY;
+		goto done;
+	}
+	
+	temp_coefs = (double*) malloc(sizeof(double) * numcoefs);
+	if(!temp_coefs){
+		err = NO_MEMORY;
+		goto done;
+	}
+	memcpy(temp_coefs, coefs, sizeof(double) * numcoefs);
+	
+	jj = 0;
+	for(ii = 0 ; ii < numvarcoefs ; ii++){
+		if(holdvector[ii] == 0){
+			varcoefs[jj] = ii;
+			reducedParameters[jj] = (double) coefs[ii];
+			jj++;
+		}
+	}
+	
+	model = (double*) malloc(sizeof(double) * datapoints);
+	if(!model){
+		err = NO_MEMORY;
+		goto done;
+	}
+	
+	iterations = 0;
+	do {
+		insertVaryingParams(temp_coefs, varcoefs, numvarcoefs, reducedParameters);
+		
+		if(err = fitfun(userdata, temp_coefs, numcoefs, model, xdata, datapoints, numDataDims))
+			goto done;
+		
+		cost = mycostfun(userdata, temp_coefs, numcoefs, model, ydata, edata, datapoints);
+		
+		if(err = updateAlpha(alpha, derivativeMatrix, numvarcoefs, edata, datapoints, 0))
+		   goto done;
+		   
+		updateBeta(b, numvarcoefs, edata, datapoints);
+		
+//		solveIncrements();
+		
+		insertVaryingParams(temp_coefs, varcoefs, numvarcoefs, incrementedParameters);
+		incrementedCost = mycostfun(userdata, temp_coefs, numcoefs, model, ydata, edata, datapoints);
+		
+		// The guess results to worse chi2 - make the step smaller
+		if (incrementedCost >= cost) {
+			lambda *= 10;
+		}
+		// The guess results to better chi2 - move and make the step larger
+		else {
+			lambda /= 10;
+			memcpy(reducedParameters, incrementedParameters, sizeof(double) * numvarcoefs);
+			insertVaryingParams(coefs, varcoefs, numvarcoefs, reducedParameters);
+		}
+		iterations++;
+	} while ( iterations < lgco.iterations || lgco.tolerance > fabs(cost - incrementedCost));
+	
+	
+done:
+	if(temp_coefs)
+		free(temp_coefs);
+	if(alpha)
+		free(alpha);
+	if(model)
+		free(model);
+	if(derivativeMatrix)
+		free(derivativeMatrix);
+	if(da)
+		free(da);
+	if(b)
+		free(b);
+	if(reducedParameters)
+		free(reducedParameters);
+	if(incrementedParameters)
+		free(incrementedParameters);
+	
+	if(varcoefs)
+		free(varcoefs);
+	
+	return 0;
+}
 

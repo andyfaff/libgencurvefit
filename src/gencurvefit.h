@@ -236,6 +236,8 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 /**
  genetic_optimisation - perform curvefitting with differential evolution.  Fitting is not limited to 1 independent variable,
   you can have as many as you like.  The function is threadsafe as long as you supply unique copies of the inputs to each instance.
+ The function returns a non-zero error code (<0) if something goes wrong.  However, if you return a non-zero value from your fit
+ function then the optimisation will stop and that value will be returned.
  
 	@param fitfun					- a function that calculates the dependent variable, given input parameters and independent variables. 
 								If you return a non-zero value from this function the fit will stop. 
@@ -301,7 +303,72 @@ int genetic_optimisation(fitfunction fitfun,
 						 void* userdata);
 
 	/**
-	 in errorEstimation.c.  Calculates a hessian gradient matrix based covariance matrix.
+	 does a levenberg marquardt fit to the data, instead of differential evolution.  It returns a
+	 non-zero error code if something goes wrong.  However, it will also stop if your fitfunction 
+	 returns a non-zero value.  As with genetic optimisation you can supply your own cost function.
+	 
+	 @param fitfun					- a function that calculates the dependent variable, given input parameters and independent variables. 
+	 If you return a non-zero value from this function the fit will stop. 
+	 
+	 @param costfun					- a function that calculates the costfunction to be minimised.  This is normally a chi2 type function.
+	 i.e. sum (((model[i] - data[i]) / dataerrors[i])^2 )
+	 If costfun == NULL then a default chi2 function is used.
+	 
+	 @param numcoefs				- total number of fit parameters.
+	 
+	 @param coefs[numcoefs]			- an array containing all the parameters for the fit.  After genetic_optimisation this is populated by the parameters
+	 that best fit the data.
+	 
+	 @param holdvector[numcoefs]	- an array (with numcoefs elements) that specifies which parameters are going to be held during the fit. 
+	 0 = vary
+	 1 = hold
+	 
+	 @param datapoints				- the total number of data points in the fit.
+	 
+	 @param ydata[datapoints]		- an array containing the dependent variable (i.e. the data one is trying to fit).
+	 
+	 @param xdata[numDataDims][datapoints]  - a 2D array containing the independent variables that correspond to each of the datapoints.
+	 One can fit multidimensional data, e.g. y = f(n, m).  In this case numDataDims = 2.
+	 You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)).
+	 If you want to pass in a 1D dataset simply pass a pointer to the array.
+	 e.g. if your array is:
+	 double *xP;
+	 then pass in:
+	 &xP
+	 BUT YOU HAVE TO REMEMBER TO DEREFERENCE THE POINTER IN THE FIT FUNCTION BEFORE YOU USE THE ARRAY.
+	 model[ii] = (*xP)[ii]
+	 
+	 @param edata[datapoints]		- an array containing the experimental uncertainties for each of the datapoints.  If you use the default chi2 costfunction
+	 then it should contain standard deviations.  Set each element to 1 if you do not wish to weight the fit by the experimental
+	 uncertainties.  
+	 
+	 @param numDataDims				- the number of independent variables in the fit. For y = f(x) numDataDims = 1.  For y = f(n, m), numDataDims = 2, etc.
+	 
+	 @param chi2					- the final value of the cost function.
+	 
+	 @param gco						- options for the genetic optimisation.  (see above).  If gco == NULL, then a default set of options are used.
+	 
+	 @param userdata				- an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction.  Use this pointer to give extra
+	 information to your functions.
+	 */
+	
+	int levenberg_marquardt(fitfunction fitfun,
+							costfunction costfun,
+							unsigned int numcoefs,
+							double* coefs,
+							const unsigned int *holdvector,
+							long datapoints,
+							const double* ydata,
+							const double** xdata,
+							const double *edata,
+							unsigned int numDataDims,
+							double *chi2,
+							const gencurvefitOptions* gco,	 
+							void* userdata
+							);
+	
+	/**
+	 in levenbergMarquardt.c.  Calculates a hessian gradient matrix based covariance matrix.
 	 The covariance matrix is returned via the covarianceMatrix pointer and must be freed afterwards.
 	 
 	 @param covarianceMatrix	-	the covariance matrix is returned in this array.  It must be free'd afterwards.
