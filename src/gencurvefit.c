@@ -765,6 +765,10 @@ int genetic_optimisation(fitfunction fitfun,
 	
 	unsigned int ii,jj;
 	
+	//fit function must exist
+	if(!fitfun)
+		return NO_FIT_FUNCTION_SPECIFIED;
+	
 	/*the overall structure to contain the entire fit*/
 	genoptStruct gos;
 	memset(&gos, 0, sizeof(gos));

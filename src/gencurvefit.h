@@ -41,6 +41,7 @@ libgencurvefit is a lightweight library for data regression using differential e
 #define WRONG_NUMBER_OF_PARAMS -5
 #define COEFS_MUST_BE_WITHIN_LIMITS -6
 #define PROBLEM_CALCULATING_COVARIANCE -7
+#define NO_FIT_FUNCTION_SPECIFIED -8
 
 /**
  The mathematical constant Pi
@@ -405,10 +406,10 @@ int genetic_optimisation(fitfunction fitfun,
 							double *coefs,
 							int numcoefs,
 							unsigned int *holdvector,
-							double *ydata,
-							double *edata,
+							const double *ydata,
+							const double *edata,
+							const double **xdata,
 							long datapoints,
-							double **xdata,
 							int numDataDims,
 							int unitSD);
 		

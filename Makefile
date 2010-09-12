@@ -14,7 +14,7 @@ libdir = ${exec_prefix}/lib
 sharedlibdir = ${libdir}
 includedir = ${prefix}/include
 
-OBJS = src/gencurvefit.o src/mt19937p.o src/errorEstimation.o
+OBJS = src/gencurvefit.o src/mt19937p.o src/levenbergMarquardt.o
 
 all: libgencurvefit.a
 
