@@ -265,7 +265,7 @@ Functions</h2></td></tr>
       </table>
 </div>
 <div class="memdoc">
-<p>genetic_optimisation - perform curvefitting with differential evolution. Fitting is not limited to 1 independent variable, you can have as many as you like. The function is threadsafe as long as you supply unique copies of the inputs to each instance.</p>
+<p>genetic_optimisation - perform curvefitting with differential evolution. Fitting is not limited to 1 independent variable, you can have as many as you like. The function is threadsafe as long as you supply unique copies of the inputs to each instance. The function returns a non-zero error code (&lt;0) if something goes wrong. However, if you return a non-zero value from your fit function then the optimisation will stop and that value will be returned.</p>
 <dl><dt><b>Parameters:</b></dt><dd>
   <table border="0" cellspacing="2" cellpadding="0">
     <tr><td valign="top"></td><td valign="top"><em>fitfun</em>&nbsp;</td><td>- a function that calculates the dependent variable, given input parameters and independent variables. If you return a non-zero value from this function the fit will stop.</td></tr>
@@ -450,7 +450,7 @@ Functions</h2></td></tr>
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Sat Sep 11 2010 15:06:59 for libgencurvefit by&nbsp;
+<hr class="footer"/><address class="footer"><small>Generated on Sun Sep 12 2010 22:48:54 for libgencurvefit by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.1 </small></address>
 </body>
