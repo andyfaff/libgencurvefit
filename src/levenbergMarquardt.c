@@ -69,7 +69,6 @@ static void cholsl(double **a, int N, const double *p, double *b, double *x){
 	}
 }
 
-
 static int matrixInversion(double **a, int N, double *detA){
 	int err=0;
 	int i,j;
@@ -127,7 +126,7 @@ static int matrixInversion(double **a, int N, double *detA){
 	
 	
 	//the determinant of the original matrix is the square of the products of the elements in the cholesky diagonal
-	for(i = 0 ; i < N ; i+=1)
+	for(i = 0 ; i < N && detA ; i+=1)
 		*detA *= tempA[i][i] * tempA[i][i];
 	
 done:
@@ -142,7 +141,7 @@ done:
 	return err;
 }
 
-static int partialDerivative(void *userdata, fitfunction fitfun, double** derivativeMatrix, int derivativeMatrixRow, int parameterIndex, double* coefs, int numcoefs, double **xdata, long datapoints, int numDataDims){
+static int partialDerivative(void *userdata, fitfunction fitfun, double** derivativeMatrix, int derivativeMatrixRow, int parameterIndex, double* coefs, int numcoefs, const double **xdata, long datapoints, int numDataDims){
 	int err = 0;
 	double param, diff;
 	int jj;
@@ -179,7 +178,7 @@ done:
 }
 
 
-static int updatePartialDerivative(void *userdata, fitfunction fitfun, double **derivativeMatrix, double *coefs, int numcoefs, unsigned int *varparams, int numvarparams, double **xdata, long datapoints, int numDataDims){
+static int updatePartialDerivative(void *userdata, fitfunction fitfun, double **derivativeMatrix, double *coefs, int numcoefs, unsigned int *varparams, int numvarparams, const double **xdata, long datapoints, int numDataDims){
 	int err = 0;
 	int ii;
 	for(ii = 0 ; ii < numvarparams ; ii++){
@@ -190,8 +189,7 @@ static int updatePartialDerivative(void *userdata, fitfunction fitfun, double **
 }
 
 
-static int calculateAlphaElement(int row, int col, double **alpha, double **derivativeMatrix, const double *edata, long datapoints, double lambda) {
-	int err = 0;
+void calculateAlphaElement(int row, int col, double **alpha, double **derivativeMatrix, const double *edata, long datapoints, double lambda) {
 	int ii;
 	double result = 0;
 	double num = 0;
@@ -206,55 +204,46 @@ static int calculateAlphaElement(int row, int col, double **alpha, double **deri
 		result *= 1 + lambda;
 	
 	alpha[row][col] = result;
-	return err;
 }
 
 
 /** packs the upper right elements of the alpha matrix, because the alpha matrix should be symmetrical*/
-static int packAlphaSymmetric(double** alpha, unsigned int numvarparams){  
-	int err = 0,ii,jj;
+void packAlphaSymmetric(double** alpha, unsigned int numvarparams){  
+	int ii,jj;
 	
 	for(ii = 0 ; ii < numvarparams ; ii++)
 		for(jj = numvarparams - 1 ; jj > ii ; jj--)
-			alpha[ii][jj] = alpha[jj][ii];
-	
-	return err;
+			alpha[ii][jj] = alpha[jj][ii];	
 }
 
 /** Calculates the lower left elements for <code>this.alpha</code>. */
-static int updateAlpha(double **alpha, double **derivativeMatrix,  unsigned int numvarparams, const double *edata, long datapoints, double lambda) {
-	int err = 0, ii, jj;
+void updateAlpha(double **alpha, double **derivativeMatrix,  unsigned int numvarparams, const double *edata, long datapoints, double lambda) {
+	int ii, jj;
 	for (ii = 0; ii < numvarparams; ii++) {
-		for (jj = 0; jj < ii+1 ; jj++) {
-			if(err = calculateAlphaElement(ii, jj, alpha, derivativeMatrix, edata, datapoints, lambda))
-				return err;
-		}
+		for (jj = 0; jj < ii+1 ; jj++)
+			calculateAlphaElement(ii, jj, alpha, derivativeMatrix, edata, datapoints, lambda);
 	}
-	if(err = packAlphaSymmetric(alpha, numvarparams))
-		return err;
-	return err;
+	packAlphaSymmetric(alpha, numvarparams);
 }
 
 /** 
  * @return An calculated element for the beta-matrix.
  * NOTE: Does not change the value of beta-matrix.
  */
-double calculateBetaElement(int row, const double *edata, long datapoints) {
+double calculateBetaElement(double **derivativeMatrix, int row, const double *ydata, const double *model, const double *edata, long datapoints) {
 	int ii;
 	double result = 0;
-	for (ii = 0 ; ii < datapoints ; ii++) {
-		result +=  edata[ii]; //* 
-//		(dataPoints[1][i] - function.getY(dataPoints[0][i], parameters)) *
-//		function.getPartialDerivate(dataPoints[0][i], parameters, row);
-	}
+	for (ii = 0 ; ii < datapoints ; ii++)
+		result +=  edata[ii] * edata[ii] * (ydata[ii] - model[ii]) * derivativeMatrix[row][ii];
+
 	return result;
 }
 
 /** Calculates all elements for <code>this.beta</code>. */
-void updateBeta(double *b, int numvarparams, const double *edata, long datapoints) {
+void updateBeta(double *b, double **derivativeMatrix, int numvarparams, const double *ydata, const double *model, const double *edata, long datapoints) {
 	int ii;
 	for (ii = 0; ii < numvarparams; ii++)
-		b[ii] = calculateBetaElement(ii, edata, datapoints);
+		b[ii] = calculateBetaElement(derivativeMatrix, ii, ydata, model, edata, datapoints);
 }
 
 
@@ -265,10 +254,10 @@ int getCovarianceMatrix(double **covarianceMatrix,
 						double *coefs,
 						int numcoefs,
 						unsigned int *holdvector,
-						double *ydata,
-						double *edata,
+						const double *ydata,
+						const double *edata,
+						const double **xdata,
 						long datapoints,
-						double **xdata,
 						int numDataDims,
 						int unitSD){
 	int err;
@@ -279,6 +268,11 @@ int getCovarianceMatrix(double **covarianceMatrix,
 	unsigned int *varparams = NULL;
 	int ii,jj, numvarparams;
 	err = 0;
+	
+	//fit function must exist
+	if(!fitfun)
+		return NO_FIT_FUNCTION_SPECIFIED;
+	
 	
 	for(ii = 0 ; ii < numcoefs ; ii++)
 		if(holdvector[ii] == 0)
@@ -312,8 +306,7 @@ int getCovarianceMatrix(double **covarianceMatrix,
 	if(err = updatePartialDerivative(userdata, fitfun, derivativeMatrix, coefs, numcoefs, varparams, numvarparams, xdata, datapoints, numDataDims))
 	   goto done;
 	   	
-	if(err = updateAlpha(reducedCovarianceMatrix, derivativeMatrix, numvarparams, edata, datapoints, 0))
-		goto done;
+	updateAlpha(reducedCovarianceMatrix, derivativeMatrix, numvarparams, edata, datapoints, 0);
 
 	if(err = matrixInversion(reducedCovarianceMatrix, numvarparams, &hessianDeterminant)) goto done;
 		
@@ -383,18 +376,20 @@ int levenberg_marquardt(fitfunction fitfun,
 	int err = 0;
 	int ii, jj, numvarcoefs = 0, iterations;
 	unsigned int *varcoefs = NULL;
-	double cost = -1, incrementedCost = -1, lambda;
+	double cost = -1, incrementedCost = -1, lambda = 0.001;
 	double **derivativeMatrix = NULL;
 	double **alpha = NULL;
 	double *reducedParameters = NULL;
-	double *da = NULL;
-	double *b = NULL;
+	double *beta = NULL;
 	double *model = NULL;
 	double *temp_coefs = NULL;
 	double *incrementedParameters = NULL;
 	gencurvefitOptions lgco;
 	costfunction mycostfun;
 	
+	//fit function must exist
+	if(!fitfun)
+		return NO_FIT_FUNCTION_SPECIFIED;
 	
 	if(gco == NULL){
 		lgco.iterations = 100;
@@ -419,7 +414,7 @@ int levenberg_marquardt(fitfunction fitfun,
 		goto done;
 	}
 	
-	derivativeMatrix = (double**) malloc2d(numvarcoefs, numvarcoefs, sizeof(double));
+	derivativeMatrix = (double**) malloc2d(numvarcoefs, datapoints, sizeof(double));
 	if(!derivativeMatrix){
 		err = NO_MEMORY;
 		goto done;
@@ -437,14 +432,8 @@ int levenberg_marquardt(fitfunction fitfun,
 		goto done;
 	}
 	
-	da = (double*) malloc(sizeof(double) * numvarcoefs);
-	if(!da){
-		err = NO_MEMORY;
-		goto done;
-	}
-	
-	b = (double*) malloc(sizeof(double) * numvarcoefs);
-	if(!b){
+	beta = (double*) malloc(sizeof(double) * numvarcoefs);
+	if(!beta){
 		err = NO_MEMORY;
 		goto done;
 	}
@@ -486,14 +475,29 @@ int levenberg_marquardt(fitfunction fitfun,
 		
 		cost = mycostfun(userdata, temp_coefs, numcoefs, model, ydata, edata, datapoints);
 		
-		if(err = updateAlpha(alpha, derivativeMatrix, numvarcoefs, edata, datapoints, 0))
-		   goto done;
-		   
-		updateBeta(b, numvarcoefs, edata, datapoints);
+		if(err = updatePartialDerivative(userdata, fitfun, derivativeMatrix, temp_coefs, numcoefs, varcoefs, numvarcoefs, xdata, datapoints, numDataDims))
+			goto done;
 		
-//		solveIncrements();
+		updateAlpha(alpha, derivativeMatrix, numvarcoefs, edata, datapoints, lambda);
+		   
+		updateBeta(beta, derivativeMatrix, numvarcoefs, ydata, model, edata, datapoints);
+		
+		if(err = matrixInversion(alpha, numvarcoefs, NULL))
+			goto done;
+		
+		for (ii = 0; ii < numvarcoefs ; ii++){
+			double val = 0;
+			for(jj = 0 ; jj < numvarcoefs ; jj++)
+				val += alpha[ii][jj] + beta[jj];
+			
+			incrementedParameters[ii] = reducedParameters[ii] + val;
+		}
 		
 		insertVaryingParams(temp_coefs, varcoefs, numvarcoefs, incrementedParameters);
+
+		if(err = fitfun(userdata, temp_coefs, numcoefs, model, xdata, datapoints, numDataDims))
+			goto done;
+		
 		incrementedCost = mycostfun(userdata, temp_coefs, numcoefs, model, ydata, edata, datapoints);
 		
 		// The guess results to worse chi2 - make the step smaller
@@ -519,10 +523,8 @@ done:
 		free(model);
 	if(derivativeMatrix)
 		free(derivativeMatrix);
-	if(da)
-		free(da);
-	if(b)
-		free(b);
+	if(beta)
+		free(beta);
 	if(reducedParameters)
 		free(reducedParameters);
 	if(incrementedParameters)
