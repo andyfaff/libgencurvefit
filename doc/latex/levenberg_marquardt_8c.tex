@@ -1,0 +1,165 @@
+\hypertarget{levenberg_marquardt_8c}{
+\section{/Users/andrew/Documents/Andy/programming/libgencurvefit/src/levenbergMarquardt.c File Reference}
+\label{levenberg_marquardt_8c}\index{/Users/andrew/Documents/Andy/programming/libgencurvefit/src/levenbergMarquardt.c@{/Users/andrew/Documents/Andy/programming/libgencurvefit/src/levenbergMarquardt.c}}
+}
+{\ttfamily \#include \char`\"{}gencurvefit.h\char`\"{}}\par
+{\ttfamily \#include \char`\"{}math.h\char`\"{}}\par
+{\ttfamily \#include \char`\"{}stdlib.h\char`\"{}}\par
+{\ttfamily \#include \char`\"{}string.h\char`\"{}}\par
+\subsection*{Defines}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{levenberg_marquardt_8c_acf1c38f71f39386356edb151a131ad11}{TINY}~1.0e-\/20
+\end{DoxyCompactItemize}
+\subsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{levenberg_marquardt_8c_a1c2881460f75436c3f3099ffe7ab8727}{calculateAlphaElement} (int row, int col, double $\ast$$\ast$alpha, double $\ast$$\ast$derivativeMatrix, const double $\ast$edata, long datapoints, double lambda)
+\item 
+void \hyperlink{levenberg_marquardt_8c_a387dc3b3f3748402c0a68eb0c528e446}{packAlphaSymmetric} (double $\ast$$\ast$alpha, unsigned int numvarparams)
+\item 
+void \hyperlink{levenberg_marquardt_8c_a62c16b92e037ac2258a8ee86b51a6188}{updateAlpha} (double $\ast$$\ast$alpha, double $\ast$$\ast$derivativeMatrix, unsigned int numvarparams, const double $\ast$edata, long datapoints, double lambda)
+\item 
+double \hyperlink{levenberg_marquardt_8c_a7ac73b3541aa4508fde6ec027ac655e2}{calculateBetaElement} (double $\ast$$\ast$derivativeMatrix, int row, const double $\ast$ydata, const double $\ast$model, const double $\ast$edata, long datapoints)
+\item 
+void \hyperlink{levenberg_marquardt_8c_a5d3486edfdd69a707f92425d7c042db7}{updateBeta} (double $\ast$b, double $\ast$$\ast$derivativeMatrix, int numvarparams, const double $\ast$ydata, const double $\ast$model, const double $\ast$edata, long datapoints)
+\item 
+int \hyperlink{levenberg_marquardt_8c_a7cccba78664919d776c72861adcbaea6}{getCovarianceMatrix} (double $\ast$$\ast$covarianceMatrix, void $\ast$userdata, \hyperlink{gencurvefit_8h_a7a7ea9c36bfca151fe1556d1f5e61c26}{fitfunction} fitfun, double cost, double $\ast$coefs, int numcoefs, unsigned int $\ast$holdvector, const double $\ast$ydata, const double $\ast$edata, const double $\ast$$\ast$xdata, long datapoints, int numDataDims, int unitSD)
+\item 
+int \hyperlink{levenberg_marquardt_8c_a43bf2800e229ffef697a68b673c01ede}{levenberg\_\-marquardt} (\hyperlink{gencurvefit_8h_a7a7ea9c36bfca151fe1556d1f5e61c26}{fitfunction} fitfun, \hyperlink{gencurvefit_8h_a655dc6f3bd77f814c6127a0556709cfe}{costfunction} costfun, unsigned int numcoefs, double $\ast$coefs, const unsigned int $\ast$holdvector, long datapoints, const double $\ast$ydata, const double $\ast$$\ast$xdata, const double $\ast$edata, unsigned int numDataDims, double $\ast$chi2, const \hyperlink{structgencurvefit_options}{gencurvefitOptions} $\ast$gco, void $\ast$userdata)
+\end{DoxyCompactItemize}
+
+
+\subsection{Define Documentation}
+\hypertarget{levenberg_marquardt_8c_acf1c38f71f39386356edb151a131ad11}{
+\index{levenbergMarquardt.c@{levenbergMarquardt.c}!TINY@{TINY}}
+\index{TINY@{TINY}!levenbergMarquardt.c@{levenbergMarquardt.c}}
+\subsubsection[{TINY}]{\setlength{\rightskip}{0pt plus 5cm}\#define TINY~1.0e-\/20}}
+\label{levenberg_marquardt_8c_acf1c38f71f39386356edb151a131ad11}
+
+
+\subsection{Function Documentation}
+\hypertarget{levenberg_marquardt_8c_a1c2881460f75436c3f3099ffe7ab8727}{
+\index{levenbergMarquardt.c@{levenbergMarquardt.c}!calculateAlphaElement@{calculateAlphaElement}}
+\index{calculateAlphaElement@{calculateAlphaElement}!levenbergMarquardt.c@{levenbergMarquardt.c}}
+\subsubsection[{calculateAlphaElement}]{\setlength{\rightskip}{0pt plus 5cm}void calculateAlphaElement (
+\begin{DoxyParamCaption}
+\item[{int}]{ row, }
+\item[{int}]{ col, }
+\item[{double $\ast$$\ast$}]{ alpha, }
+\item[{double $\ast$$\ast$}]{ derivativeMatrix, }
+\item[{const double $\ast$}]{ edata, }
+\item[{long}]{ datapoints, }
+\item[{double}]{ lambda}
+\end{DoxyParamCaption}
+)}}
+\label{levenberg_marquardt_8c_a1c2881460f75436c3f3099ffe7ab8727}
+\hypertarget{levenberg_marquardt_8c_a7ac73b3541aa4508fde6ec027ac655e2}{
+\index{levenbergMarquardt.c@{levenbergMarquardt.c}!calculateBetaElement@{calculateBetaElement}}
+\index{calculateBetaElement@{calculateBetaElement}!levenbergMarquardt.c@{levenbergMarquardt.c}}
+\subsubsection[{calculateBetaElement}]{\setlength{\rightskip}{0pt plus 5cm}double calculateBetaElement (
+\begin{DoxyParamCaption}
+\item[{double $\ast$$\ast$}]{ derivativeMatrix, }
+\item[{int}]{ row, }
+\item[{const double $\ast$}]{ ydata, }
+\item[{const double $\ast$}]{ model, }
+\item[{const double $\ast$}]{ edata, }
+\item[{long}]{ datapoints}
+\end{DoxyParamCaption}
+)}}
+\label{levenberg_marquardt_8c_a7ac73b3541aa4508fde6ec027ac655e2}
+\begin{DoxyReturn}{Returns}
+An calculated element for the beta-\/matrix. NOTE: Does not change the value of beta-\/matrix. 
+\end{DoxyReturn}
+\hypertarget{levenberg_marquardt_8c_a7cccba78664919d776c72861adcbaea6}{
+\index{levenbergMarquardt.c@{levenbergMarquardt.c}!getCovarianceMatrix@{getCovarianceMatrix}}
+\index{getCovarianceMatrix@{getCovarianceMatrix}!levenbergMarquardt.c@{levenbergMarquardt.c}}
+\subsubsection[{getCovarianceMatrix}]{\setlength{\rightskip}{0pt plus 5cm}int getCovarianceMatrix (
+\begin{DoxyParamCaption}
+\item[{double $\ast$$\ast$}]{ covarianceMatrix, }
+\item[{void $\ast$}]{ userdata, }
+\item[{{\bf fitfunction}}]{ fitfun, }
+\item[{double}]{ cost, }
+\item[{double $\ast$}]{ coefs, }
+\item[{int}]{ numcoefs, }
+\item[{unsigned int $\ast$}]{ holdvector, }
+\item[{const double $\ast$}]{ ydata, }
+\item[{const double $\ast$}]{ edata, }
+\item[{const double $\ast$$\ast$}]{ xdata, }
+\item[{long}]{ datapoints, }
+\item[{int}]{ numDataDims, }
+\item[{int}]{ unitSD}
+\end{DoxyParamCaption}
+)}}
+\label{levenberg_marquardt_8c_a7cccba78664919d776c72861adcbaea6}
+in \hyperlink{levenberg_marquardt_8c}{levenbergMarquardt.c}. Calculates a hessian gradient matrix based covariance matrix. The covariance matrix is returned via the covarianceMatrix pointer and must be freed afterwards.
+
+
+\begin{DoxyParams}{Parameters}
+\item[{\em covarianceMatrix}]-\/ the covariance matrix is returned in this array. It must be free'd afterwards.\item[{\em userdata}]-\/ pass in user specific information to the fitfunction with this pointer.\item[{\em fitfun}]-\/ your fitfunction\item[{\em cost}]-\/ the value of the cost function for the parameters specified\item[{\em coefs\mbox{[}numcoefs\mbox{]}}]-\/ an array containing the coefficients. The covariance matrix is assessed for these values\item[{\em numcoefs}]-\/ the number of coefficients\item[{\em holdvector\mbox{[}numcoefs\mbox{]}}]-\/ an array specifying which parameters were held (=1) or varied (=0) during the fit\item[{\em ydata\mbox{[}datapoints\mbox{]}}]-\/ an array of the data being fitting\item[{\em edata\mbox{[}datapoints\mbox{]}}]-\/ an array for the error bars for the data being fitted.\item[{\em datapoints}]-\/ the number of datapoints being fitted\item[{\em xdata\mbox{[}numDataDims\mbox{]}\mbox{[}datapoints\mbox{]}}]-\/ an array containing the independent variables for the fit\item[{\em numDataDims}]-\/ how many independent variables do you have?\item[{\em unitSD}]-\/ specify as 1 if the datapoints were unit weighted. \end{DoxyParams}
+\hypertarget{levenberg_marquardt_8c_a43bf2800e229ffef697a68b673c01ede}{
+\index{levenbergMarquardt.c@{levenbergMarquardt.c}!levenberg\_\-marquardt@{levenberg\_\-marquardt}}
+\index{levenberg\_\-marquardt@{levenberg\_\-marquardt}!levenbergMarquardt.c@{levenbergMarquardt.c}}
+\subsubsection[{levenberg\_\-marquardt}]{\setlength{\rightskip}{0pt plus 5cm}int levenberg\_\-marquardt (
+\begin{DoxyParamCaption}
+\item[{{\bf fitfunction}}]{ fitfun, }
+\item[{{\bf costfunction}}]{ costfun, }
+\item[{unsigned int}]{ numcoefs, }
+\item[{double $\ast$}]{ coefs, }
+\item[{const unsigned int $\ast$}]{ holdvector, }
+\item[{long}]{ datapoints, }
+\item[{const double $\ast$}]{ ydata, }
+\item[{const double $\ast$$\ast$}]{ xdata, }
+\item[{const double $\ast$}]{ edata, }
+\item[{unsigned int}]{ numDataDims, }
+\item[{double $\ast$}]{ chi2, }
+\item[{const {\bf gencurvefitOptions} $\ast$}]{ gco, }
+\item[{void $\ast$}]{ userdata}
+\end{DoxyParamCaption}
+)}}
+\label{levenberg_marquardt_8c_a43bf2800e229ffef697a68b673c01ede}
+does a levenberg marquardt fit to the data, instead of differential evolution. It returns a non-\/zero error code if something goes wrong. However, it will also stop if your fitfunction returns a non-\/zero value. As with genetic optimisation you can supply your own cost function.
+
+
+\begin{DoxyParams}{Parameters}
+\item[{\em fitfun}]-\/ a function that calculates the dependent variable, given input parameters and independent variables. If you return a non-\/zero value from this function the fit will stop.\item[{\em costfun}]-\/ a function that calculates the costfunction to be minimised. This is normally a chi2 type function. i.e. sum (((model\mbox{[}i\mbox{]} -\/ data\mbox{[}i\mbox{]}) / dataerrors\mbox{[}i\mbox{]})$^\wedge$2 ) If costfun == NULL then a default chi2 function is used.\item[{\em numcoefs}]-\/ total number of fit parameters.\item[{\em coefs\mbox{[}numcoefs\mbox{]}}]-\/ an array containing all the parameters for the fit. After genetic\_\-optimisation this is populated by the parameters that best fit the data.\item[{\em holdvector\mbox{[}numcoefs\mbox{]}}]-\/ an array (with numcoefs elements) that specifies which parameters are going to be held during the fit. 0 = vary 1 = hold\item[{\em datapoints}]-\/ the total number of data points in the fit.\item[{\em ydata\mbox{[}datapoints\mbox{]}}]-\/ an array containing the dependent variable (i.e. the data one is trying to fit).\item[{\em xdata\mbox{[}numDataDims\mbox{]}\mbox{[}datapoints\mbox{]}}]-\/ a 2D array containing the independent variables that correspond to each of the datapoints. One can fit multidimensional data, e.g. y = f(n, m). In this case numDataDims = 2. You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)). If you want to pass in a 1D dataset simply pass a pointer to the array. e.g. if your array is: double $\ast$xP; then pass in: \&xP BUT YOU HAVE TO REMEMBER TO DEREFERENCE THE POINTER IN THE FIT FUNCTION BEFORE YOU USE THE ARRAY. model\mbox{[}ii\mbox{]} = ($\ast$xP)\mbox{[}ii\mbox{]}\item[{\em edata\mbox{[}datapoints\mbox{]}}]-\/ an array containing the experimental uncertainties for each of the datapoints. If you use the default chi2 costfunction then it should contain standard deviations. Set each element to 1 if you do not wish to weight the fit by the experimental uncertainties.\item[{\em numDataDims}]-\/ the number of independent variables in the fit. For y = f(x) numDataDims = 1. For y = f(n, m), numDataDims = 2, etc.\item[{\em chi2}]-\/ the final value of the cost function.\item[{\em gco}]-\/ options for the genetic optimisation. (see above). If gco == NULL, then a default set of options are used.\item[{\em userdata}]-\/ an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions. \end{DoxyParams}
+\hypertarget{levenberg_marquardt_8c_a387dc3b3f3748402c0a68eb0c528e446}{
+\index{levenbergMarquardt.c@{levenbergMarquardt.c}!packAlphaSymmetric@{packAlphaSymmetric}}
+\index{packAlphaSymmetric@{packAlphaSymmetric}!levenbergMarquardt.c@{levenbergMarquardt.c}}
+\subsubsection[{packAlphaSymmetric}]{\setlength{\rightskip}{0pt plus 5cm}void packAlphaSymmetric (
+\begin{DoxyParamCaption}
+\item[{double $\ast$$\ast$}]{ alpha, }
+\item[{unsigned int}]{ numvarparams}
+\end{DoxyParamCaption}
+)}}
+\label{levenberg_marquardt_8c_a387dc3b3f3748402c0a68eb0c528e446}
+packs the upper right elements of the alpha matrix, because the alpha matrix should be symmetrical \hypertarget{levenberg_marquardt_8c_a62c16b92e037ac2258a8ee86b51a6188}{
+\index{levenbergMarquardt.c@{levenbergMarquardt.c}!updateAlpha@{updateAlpha}}
+\index{updateAlpha@{updateAlpha}!levenbergMarquardt.c@{levenbergMarquardt.c}}
+\subsubsection[{updateAlpha}]{\setlength{\rightskip}{0pt plus 5cm}void updateAlpha (
+\begin{DoxyParamCaption}
+\item[{double $\ast$$\ast$}]{ alpha, }
+\item[{double $\ast$$\ast$}]{ derivativeMatrix, }
+\item[{unsigned int}]{ numvarparams, }
+\item[{const double $\ast$}]{ edata, }
+\item[{long}]{ datapoints, }
+\item[{double}]{ lambda}
+\end{DoxyParamCaption}
+)}}
+\label{levenberg_marquardt_8c_a62c16b92e037ac2258a8ee86b51a6188}
+Calculates the lower left elements for {\ttfamily this.alpha}. \hypertarget{levenberg_marquardt_8c_a5d3486edfdd69a707f92425d7c042db7}{
+\index{levenbergMarquardt.c@{levenbergMarquardt.c}!updateBeta@{updateBeta}}
+\index{updateBeta@{updateBeta}!levenbergMarquardt.c@{levenbergMarquardt.c}}
+\subsubsection[{updateBeta}]{\setlength{\rightskip}{0pt plus 5cm}void updateBeta (
+\begin{DoxyParamCaption}
+\item[{double $\ast$}]{ b, }
+\item[{double $\ast$$\ast$}]{ derivativeMatrix, }
+\item[{int}]{ numvarparams, }
+\item[{const double $\ast$}]{ ydata, }
+\item[{const double $\ast$}]{ model, }
+\item[{const double $\ast$}]{ edata, }
+\item[{long}]{ datapoints}
+\end{DoxyParamCaption}
+)}}
+\label{levenberg_marquardt_8c_a5d3486edfdd69a707f92425d7c042db7}
+Calculates all elements for {\ttfamily this.beta}. 

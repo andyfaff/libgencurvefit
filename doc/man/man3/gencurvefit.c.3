@@ -1,4 +1,4 @@
-.TH "/Users/andrew/Documents/Andy/programming/libgencurvefit/src/gencurvefit.c" 3 "Sat Sep 11 2010" "libgencurvefit" \" -*- nroff -*-
+.TH "/Users/andrew/Documents/Andy/programming/libgencurvefit/src/gencurvefit.c" 3 "Sun Sep 12 2010" "libgencurvefit" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -74,7 +74,7 @@
 .RE
 .PP
 
-.SS "int genetic_optimisation (\fBfitfunction\fP fitfun, \fBcostfunction\fP costfun, unsigned int numcoefs, double * coefs, const unsigned int * holdvector, const double ** limits, long datapoints, const double * ydata, const double ** xdata, const double * edata, unsigned int numDataDims, double * chi2, const \fBgencurvefitOptions\fP * gco, void * userdata)"genetic_optimisation - perform curvefitting with differential evolution. Fitting is not limited to 1 independent variable, you can have as many as you like. The function is threadsafe as long as you supply unique copies of the inputs to each instance.
+.SS "int genetic_optimisation (\fBfitfunction\fP fitfun, \fBcostfunction\fP costfun, unsigned int numcoefs, double * coefs, const unsigned int * holdvector, const double ** limits, long datapoints, const double * ydata, const double ** xdata, const double * edata, unsigned int numDataDims, double * chi2, const \fBgencurvefitOptions\fP * gco, void * userdata)"genetic_optimisation - perform curvefitting with differential evolution. Fitting is not limited to 1 independent variable, you can have as many as you like. The function is threadsafe as long as you supply unique copies of the inputs to each instance. The function returns a non-zero error code (<0) if something goes wrong. However, if you return a non-zero value from your fit function then the optimisation will stop and that value will be returned.
 .PP
 \fBParameters:\fP
 .RS 4

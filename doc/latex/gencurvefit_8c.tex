@@ -86,7 +86,7 @@ a default chi2 cost function
 \end{DoxyParamCaption}
 )}}
 \label{gencurvefit_8c_ae2b325ec90b9cad5ca726d96d7a277e5}
-genetic\_\-optimisation -\/ perform curvefitting with differential evolution. Fitting is not limited to 1 independent variable, you can have as many as you like. The function is threadsafe as long as you supply unique copies of the inputs to each instance.
+genetic\_\-optimisation -\/ perform curvefitting with differential evolution. Fitting is not limited to 1 independent variable, you can have as many as you like. The function is threadsafe as long as you supply unique copies of the inputs to each instance. The function returns a non-\/zero error code ($<$0) if something goes wrong. However, if you return a non-\/zero value from your fit function then the optimisation will stop and that value will be returned.
 
 
 \begin{DoxyParams}{Parameters}

@@ -75,74 +75,90 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <a name="l00041"></a><a class="code" href="gencurvefit_8h.html#add3ce6a3874bf324b3164cb3cadd752c">00041</a> <span class="preprocessor"></span><span class="preprocessor">#define WRONG_NUMBER_OF_PARAMS -5</span>
 <a name="l00042"></a><a class="code" href="gencurvefit_8h.html#a39512545ed253142c66370ddd8677845">00042</a> <span class="preprocessor"></span><span class="preprocessor">#define COEFS_MUST_BE_WITHIN_LIMITS -6</span>
 <a name="l00043"></a><a class="code" href="gencurvefit_8h.html#a462b37801cd4d1b36ee0df9d0e670f48">00043</a> <span class="preprocessor"></span><span class="preprocessor">#define PROBLEM_CALCULATING_COVARIANCE -7</span>
-<a name="l00044"></a>00044 <span class="preprocessor"></span>
-<a name="l00048"></a><a class="code" href="gencurvefit_8h.html#a598a3330b3c21701223ee0ca14316eca">00048</a> <span class="preprocessor">#define PI 3.14159265358979323846</span>
-<a name="l00049"></a>00049 <span class="preprocessor"></span>
-<a name="l00079"></a>00079         <span class="keywordtype">void</span>* <a class="code" href="gencurvefit_8c.html#a4cbd1f9b06be6e5d4f33e58b4d2cb134">malloc2d</a>(<span class="keywordtype">int</span> ii, <span class="keywordtype">int</span> jj, <span class="keywordtype">int</span> sz);
-<a name="l00080"></a>00080         
-<a name="l00109"></a><a class="code" href="gencurvefit_8h.html#a7a7ea9c36bfca151fe1556d1f5e61c26">00109</a> <span class="keyword">typedef</span> int (*<a class="code" href="gencurvefit_8h.html#a7a7ea9c36bfca151fe1556d1f5e61c26">fitfunction</a>)(<span class="keywordtype">void</span> *userdata, <span class="keyword">const</span> <span class="keywordtype">double</span> *coefs, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numcoefs, <span class="keywordtype">double</span> *model, <span class="keyword">const</span> <span class="keywordtype">double</span> **xdata, <span class="keywordtype">long</span> datapoints, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numDataDims);
-<a name="l00110"></a>00110         
+<a name="l00044"></a><a class="code" href="gencurvefit_8h.html#accdaec40e34d7c4d0c192d13b2f751c5">00044</a> <span class="preprocessor"></span><span class="preprocessor">#define NO_FIT_FUNCTION_SPECIFIED -8</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span>
+<a name="l00049"></a><a class="code" href="gencurvefit_8h.html#a598a3330b3c21701223ee0ca14316eca">00049</a> <span class="preprocessor">#define PI 3.14159265358979323846</span>
+<a name="l00050"></a>00050 <span class="preprocessor"></span>
+<a name="l00080"></a>00080         <span class="keywordtype">void</span>* <a class="code" href="gencurvefit_8c.html#a4cbd1f9b06be6e5d4f33e58b4d2cb134">malloc2d</a>(<span class="keywordtype">int</span> ii, <span class="keywordtype">int</span> jj, <span class="keywordtype">int</span> sz);
+<a name="l00081"></a>00081         
+<a name="l00110"></a><a class="code" href="gencurvefit_8h.html#a7a7ea9c36bfca151fe1556d1f5e61c26">00110</a> <span class="keyword">typedef</span> int (*<a class="code" href="gencurvefit_8h.html#a7a7ea9c36bfca151fe1556d1f5e61c26">fitfunction</a>)(<span class="keywordtype">void</span> *userdata, <span class="keyword">const</span> <span class="keywordtype">double</span> *coefs, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numcoefs, <span class="keywordtype">double</span> *model, <span class="keyword">const</span> <span class="keywordtype">double</span> **xdata, <span class="keywordtype">long</span> datapoints, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numDataDims);
 <a name="l00111"></a>00111         
-<a name="l00130"></a><a class="code" href="gencurvefit_8h.html#a655dc6f3bd77f814c6127a0556709cfe">00130</a> <span class="keyword">typedef</span> double (*<a class="code" href="gencurvefit_8h.html#a655dc6f3bd77f814c6127a0556709cfe">costfunction</a>)(<span class="keywordtype">void</span> *userdata, <span class="keyword">const</span> <span class="keywordtype">double</span> *coefs, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numcoefs, <span class="keyword">const</span> <span class="keywordtype">double</span> *data, <span class="keyword">const</span> <span class="keywordtype">double</span> *model, <span class="keyword">const</span> <span class="keywordtype">double</span> *errors, <span class="keywordtype">long</span> datapoints);
-<a name="l00131"></a>00131 
-<a name="l00152"></a><a class="code" href="gencurvefit_8h.html#a5e2662c4338bced26ad6aa5494fc1de2">00152</a> <span class="keyword">typedef</span> int (*<a class="code" href="gencurvefit_8h.html#a5e2662c4338bced26ad6aa5494fc1de2">updatefunction</a>)(<span class="keywordtype">void</span> *userdata, <span class="keyword">const</span> <span class="keywordtype">double</span> *coefs, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numcoefs, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> iterations, <span class="keywordtype">double</span> cost, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> updatetime, <span class="keywordtype">double</span> convergenceNumber);
-<a name="l00153"></a>00153 
-<a name="l00154"></a>00154         
-<a name="l00158"></a><a class="code" href="structgencurvefit_options.html">00158</a>         <span class="keyword">struct </span><a class="code" href="structgencurvefit_options.html">gencurvefitOptions</a> {
-<a name="l00162"></a><a class="code" href="structgencurvefit_options.html#a49884a390fe5592f17ab6795b728d63c">00162</a>                 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> iterations;
-<a name="l00166"></a><a class="code" href="structgencurvefit_options.html#a7a71f8a56b1deaa38ea4f08c253a154f">00166</a>                 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structgencurvefit_options.html#a7a71f8a56b1deaa38ea4f08c253a154f">popsizeMultiplier</a>;
-<a name="l00170"></a><a class="code" href="structgencurvefit_options.html#a59bef0ce7a5cd9e1caa5cfa556bde37f">00170</a>                 <span class="keywordtype">double</span> <a class="code" href="structgencurvefit_options.html#a59bef0ce7a5cd9e1caa5cfa556bde37f">k_m</a>;
-<a name="l00174"></a><a class="code" href="structgencurvefit_options.html#ac0204c26d2cd7eb82bc13c199d03461e">00174</a>                 <span class="keywordtype">double</span> <a class="code" href="structgencurvefit_options.html#ac0204c26d2cd7eb82bc13c199d03461e">recomb</a>;
-<a name="l00179"></a><a class="code" href="structgencurvefit_options.html#a97eab6d709b80585fe9e8a54b1e3da27">00179</a>                 <span class="keywordtype">double</span> <a class="code" href="structgencurvefit_options.html#a97eab6d709b80585fe9e8a54b1e3da27">tolerance</a>;
-<a name="l00194"></a><a class="code" href="structgencurvefit_options.html#a09885471db33b126d97901a29aea53c4">00194</a>                 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structgencurvefit_options.html#a09885471db33b126d97901a29aea53c4">strategy</a>;
-<a name="l00207"></a><a class="code" href="structgencurvefit_options.html#a9fb78358ae4b0a049a0d1b37dc4cffec">00207</a>                 <span class="keywordtype">double</span> <a class="code" href="structgencurvefit_options.html#a9fb78358ae4b0a049a0d1b37dc4cffec">temp</a>;
-<a name="l00212"></a><a class="code" href="structgencurvefit_options.html#ae8dada41d1098787c320af40b0320412">00212</a>                 <a class="code" href="gencurvefit_8h.html#a5e2662c4338bced26ad6aa5494fc1de2">updatefunction</a> <a class="code" href="structgencurvefit_options.html#ae8dada41d1098787c320af40b0320412">updatefun</a>;
-<a name="l00222"></a><a class="code" href="structgencurvefit_options.html#a44f1fec3d8e41bea598a75b06af1becb">00222</a>                 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structgencurvefit_options.html#a44f1fec3d8e41bea598a75b06af1becb">updatefrequency</a>;
-<a name="l00226"></a><a class="code" href="structgencurvefit_options.html#a1447ad288a0a73454510f5777bdc3ed1">00226</a>                 <span class="keywordtype">int</span> <a class="code" href="structgencurvefit_options.html#a1447ad288a0a73454510f5777bdc3ed1">seed</a>;
-<a name="l00231"></a><a class="code" href="structgencurvefit_options.html#af99f3583d5d6789c1aa1e9bf02f4c61c">00231</a>                 <span class="keywordtype">int</span> <a class="code" href="structgencurvefit_options.html#af99f3583d5d6789c1aa1e9bf02f4c61c">useinitialguesses</a>;
-<a name="l00232"></a>00232         };
-<a name="l00233"></a><a class="code" href="gencurvefit_8h.html#ae03336b832d43fd256330c44324d933c">00233</a>         <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structgencurvefit_options.html">gencurvefitOptions</a> <a class="code" href="structgencurvefit_options.html">gencurvefitOptions</a>;
-<a name="l00234"></a>00234         
+<a name="l00112"></a>00112         
+<a name="l00131"></a><a class="code" href="gencurvefit_8h.html#a655dc6f3bd77f814c6127a0556709cfe">00131</a> <span class="keyword">typedef</span> double (*<a class="code" href="gencurvefit_8h.html#a655dc6f3bd77f814c6127a0556709cfe">costfunction</a>)(<span class="keywordtype">void</span> *userdata, <span class="keyword">const</span> <span class="keywordtype">double</span> *coefs, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numcoefs, <span class="keyword">const</span> <span class="keywordtype">double</span> *data, <span class="keyword">const</span> <span class="keywordtype">double</span> *model, <span class="keyword">const</span> <span class="keywordtype">double</span> *errors, <span class="keywordtype">long</span> datapoints);
+<a name="l00132"></a>00132 
+<a name="l00153"></a><a class="code" href="gencurvefit_8h.html#a5e2662c4338bced26ad6aa5494fc1de2">00153</a> <span class="keyword">typedef</span> int (*<a class="code" href="gencurvefit_8h.html#a5e2662c4338bced26ad6aa5494fc1de2">updatefunction</a>)(<span class="keywordtype">void</span> *userdata, <span class="keyword">const</span> <span class="keywordtype">double</span> *coefs, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numcoefs, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> iterations, <span class="keywordtype">double</span> cost, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> updatetime, <span class="keywordtype">double</span> convergenceNumber);
+<a name="l00154"></a>00154 
+<a name="l00155"></a>00155         
+<a name="l00159"></a><a class="code" href="structgencurvefit_options.html">00159</a>         <span class="keyword">struct </span><a class="code" href="structgencurvefit_options.html">gencurvefitOptions</a> {
+<a name="l00163"></a><a class="code" href="structgencurvefit_options.html#a49884a390fe5592f17ab6795b728d63c">00163</a>                 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> iterations;
+<a name="l00167"></a><a class="code" href="structgencurvefit_options.html#a7a71f8a56b1deaa38ea4f08c253a154f">00167</a>                 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structgencurvefit_options.html#a7a71f8a56b1deaa38ea4f08c253a154f">popsizeMultiplier</a>;
+<a name="l00171"></a><a class="code" href="structgencurvefit_options.html#a59bef0ce7a5cd9e1caa5cfa556bde37f">00171</a>                 <span class="keywordtype">double</span> <a class="code" href="structgencurvefit_options.html#a59bef0ce7a5cd9e1caa5cfa556bde37f">k_m</a>;
+<a name="l00175"></a><a class="code" href="structgencurvefit_options.html#ac0204c26d2cd7eb82bc13c199d03461e">00175</a>                 <span class="keywordtype">double</span> <a class="code" href="structgencurvefit_options.html#ac0204c26d2cd7eb82bc13c199d03461e">recomb</a>;
+<a name="l00180"></a><a class="code" href="structgencurvefit_options.html#a97eab6d709b80585fe9e8a54b1e3da27">00180</a>                 <span class="keywordtype">double</span> <a class="code" href="structgencurvefit_options.html#a97eab6d709b80585fe9e8a54b1e3da27">tolerance</a>;
+<a name="l00195"></a><a class="code" href="structgencurvefit_options.html#a09885471db33b126d97901a29aea53c4">00195</a>                 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structgencurvefit_options.html#a09885471db33b126d97901a29aea53c4">strategy</a>;
+<a name="l00208"></a><a class="code" href="structgencurvefit_options.html#a9fb78358ae4b0a049a0d1b37dc4cffec">00208</a>                 <span class="keywordtype">double</span> <a class="code" href="structgencurvefit_options.html#a9fb78358ae4b0a049a0d1b37dc4cffec">temp</a>;
+<a name="l00213"></a><a class="code" href="structgencurvefit_options.html#ae8dada41d1098787c320af40b0320412">00213</a>                 <a class="code" href="gencurvefit_8h.html#a5e2662c4338bced26ad6aa5494fc1de2">updatefunction</a> <a class="code" href="structgencurvefit_options.html#ae8dada41d1098787c320af40b0320412">updatefun</a>;
+<a name="l00223"></a><a class="code" href="structgencurvefit_options.html#a44f1fec3d8e41bea598a75b06af1becb">00223</a>                 <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structgencurvefit_options.html#a44f1fec3d8e41bea598a75b06af1becb">updatefrequency</a>;
+<a name="l00227"></a><a class="code" href="structgencurvefit_options.html#a1447ad288a0a73454510f5777bdc3ed1">00227</a>                 <span class="keywordtype">int</span> <a class="code" href="structgencurvefit_options.html#a1447ad288a0a73454510f5777bdc3ed1">seed</a>;
+<a name="l00232"></a><a class="code" href="structgencurvefit_options.html#af99f3583d5d6789c1aa1e9bf02f4c61c">00232</a>                 <span class="keywordtype">int</span> <a class="code" href="structgencurvefit_options.html#af99f3583d5d6789c1aa1e9bf02f4c61c">useinitialguesses</a>;
+<a name="l00233"></a>00233         };
+<a name="l00234"></a><a class="code" href="gencurvefit_8h.html#ae03336b832d43fd256330c44324d933c">00234</a>         <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structgencurvefit_options.html">gencurvefitOptions</a> <a class="code" href="structgencurvefit_options.html">gencurvefitOptions</a>;
 <a name="l00235"></a>00235         
-<a name="l00288"></a>00288 <span class="keywordtype">int</span> <a class="code" href="gencurvefit_8c.html#ae2b325ec90b9cad5ca726d96d7a277e5">genetic_optimisation</a>(<a class="code" href="gencurvefit_8h.html#a7a7ea9c36bfca151fe1556d1f5e61c26">fitfunction</a> fitfun,
-<a name="l00289"></a>00289                                                  <a class="code" href="gencurvefit_8h.html#a655dc6f3bd77f814c6127a0556709cfe">costfunction</a> costfun,
-<a name="l00290"></a>00290                                                  <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numcoefs,
-<a name="l00291"></a>00291                                                  <span class="keywordtype">double</span>* coefs,
-<a name="l00292"></a>00292                                                  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *holdvector,
-<a name="l00293"></a>00293                                                  <span class="keyword">const</span> <span class="keywordtype">double</span>** limits,
-<a name="l00294"></a>00294                                                  <span class="keywordtype">long</span> datapoints,
-<a name="l00295"></a>00295                                                  <span class="keyword">const</span> <span class="keywordtype">double</span>* ydata,
-<a name="l00296"></a>00296                                                  <span class="keyword">const</span> <span class="keywordtype">double</span>** xdata,
-<a name="l00297"></a>00297                                                  <span class="keyword">const</span> <span class="keywordtype">double</span> *edata,
-<a name="l00298"></a>00298                                                  <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numDataDims,
-<a name="l00299"></a>00299                                                  <span class="keywordtype">double</span> *chi2,
-<a name="l00300"></a>00300                                                  <span class="keyword">const</span> <a class="code" href="structgencurvefit_options.html">gencurvefitOptions</a> *gco,
-<a name="l00301"></a>00301                                                  <span class="keywordtype">void</span>* userdata);
-<a name="l00302"></a>00302 
-<a name="l00334"></a>00334         <span class="keywordtype">int</span> <a class="code" href="error_estimation_8c.html#ae2d8c6ae67436bd60fb826b61efe4a7e">getCovarianceMatrix</a>(<span class="keywordtype">double</span> **covarianceMatrix,
-<a name="l00335"></a>00335                                                         <span class="keywordtype">void</span> *userdata,
-<a name="l00336"></a>00336                                                         <a class="code" href="gencurvefit_8h.html#a7a7ea9c36bfca151fe1556d1f5e61c26">fitfunction</a> fitfun,
-<a name="l00337"></a>00337                                                         <span class="keywordtype">double</span> cost,
-<a name="l00338"></a>00338                                                         <span class="keywordtype">double</span> *coefs,
-<a name="l00339"></a>00339                                                         <span class="keywordtype">int</span> numcoefs,
-<a name="l00340"></a>00340                                                         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *holdvector,
-<a name="l00341"></a>00341                                                         <span class="keywordtype">double</span> *ydata,
-<a name="l00342"></a>00342                                                         <span class="keywordtype">double</span> *edata,
-<a name="l00343"></a>00343                                                         <span class="keywordtype">long</span> datapoints,
-<a name="l00344"></a>00344                                                         <span class="keywordtype">double</span> **xdata,
-<a name="l00345"></a>00345                                                         <span class="keywordtype">int</span> numDataDims,
-<a name="l00346"></a>00346                                                         <span class="keywordtype">int</span> unitSD);
-<a name="l00347"></a>00347                 
-<a name="l00367"></a>00367 <span class="keywordtype">double</span> <a class="code" href="gencurvefit_8c.html#a4b14e8f032e637096d2f1e3327f8e4a8">chisquared</a>(<span class="keywordtype">void</span> *userdata, <span class="keyword">const</span> <span class="keywordtype">double</span> *coefs, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numcoefs, <span class="keyword">const</span> <span class="keywordtype">double</span> *data, <span class="keyword">const</span> <span class="keywordtype">double</span> *model, <span class="keyword">const</span> <span class="keywordtype">double</span> *errors, <span class="keywordtype">long</span> datapoints);
-<a name="l00368"></a>00368 
-<a name="l00388"></a>00388 <span class="keywordtype">double</span> <a class="code" href="gencurvefit_8c.html#a12c9b16ff375eafa5ceff3ad8f783548">robust</a>(<span class="keywordtype">void</span> *userdata, <span class="keyword">const</span> <span class="keywordtype">double</span> *coefs, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numcoefs, <span class="keyword">const</span> <span class="keywordtype">double</span> *data, <span class="keyword">const</span> <span class="keywordtype">double</span> *model, <span class="keyword">const</span> <span class="keywordtype">double</span> *errors, <span class="keywordtype">long</span> datapoints);
-<a name="l00389"></a>00389 
-<a name="l00390"></a>00390 
-<a name="l00391"></a>00391 <span class="preprocessor">#ifdef __cplusplus</span>
-<a name="l00392"></a>00392 <span class="preprocessor"></span>}
-<a name="l00393"></a>00393 <span class="preprocessor">#endif</span>
-<a name="l00394"></a>00394 <span class="preprocessor"></span>
-<a name="l00395"></a>00395 <span class="preprocessor">#endif</span>
+<a name="l00236"></a>00236         
+<a name="l00291"></a>00291 <span class="keywordtype">int</span> <a class="code" href="gencurvefit_8c.html#ae2b325ec90b9cad5ca726d96d7a277e5">genetic_optimisation</a>(<a class="code" href="gencurvefit_8h.html#a7a7ea9c36bfca151fe1556d1f5e61c26">fitfunction</a> fitfun,
+<a name="l00292"></a>00292                                                  <a class="code" href="gencurvefit_8h.html#a655dc6f3bd77f814c6127a0556709cfe">costfunction</a> costfun,
+<a name="l00293"></a>00293                                                  <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numcoefs,
+<a name="l00294"></a>00294                                                  <span class="keywordtype">double</span>* coefs,
+<a name="l00295"></a>00295                                                  <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *holdvector,
+<a name="l00296"></a>00296                                                  <span class="keyword">const</span> <span class="keywordtype">double</span>** limits,
+<a name="l00297"></a>00297                                                  <span class="keywordtype">long</span> datapoints,
+<a name="l00298"></a>00298                                                  <span class="keyword">const</span> <span class="keywordtype">double</span>* ydata,
+<a name="l00299"></a>00299                                                  <span class="keyword">const</span> <span class="keywordtype">double</span>** xdata,
+<a name="l00300"></a>00300                                                  <span class="keyword">const</span> <span class="keywordtype">double</span> *edata,
+<a name="l00301"></a>00301                                                  <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numDataDims,
+<a name="l00302"></a>00302                                                  <span class="keywordtype">double</span> *chi2,
+<a name="l00303"></a>00303                                                  <span class="keyword">const</span> <a class="code" href="structgencurvefit_options.html">gencurvefitOptions</a> *gco,
+<a name="l00304"></a>00304                                                  <span class="keywordtype">void</span>* userdata);
+<a name="l00305"></a>00305 
+<a name="l00356"></a>00356         <span class="keywordtype">int</span> <a class="code" href="gencurvefit_8h.html#a43bf2800e229ffef697a68b673c01ede">levenberg_marquardt</a>(<a class="code" href="gencurvefit_8h.html#a7a7ea9c36bfca151fe1556d1f5e61c26">fitfunction</a> fitfun,
+<a name="l00357"></a>00357                                                         <a class="code" href="gencurvefit_8h.html#a655dc6f3bd77f814c6127a0556709cfe">costfunction</a> costfun,
+<a name="l00358"></a>00358                                                         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numcoefs,
+<a name="l00359"></a>00359                                                         <span class="keywordtype">double</span>* coefs,
+<a name="l00360"></a>00360                                                         <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *holdvector,
+<a name="l00361"></a>00361                                                         <span class="keywordtype">long</span> datapoints,
+<a name="l00362"></a>00362                                                         <span class="keyword">const</span> <span class="keywordtype">double</span>* ydata,
+<a name="l00363"></a>00363                                                         <span class="keyword">const</span> <span class="keywordtype">double</span>** xdata,
+<a name="l00364"></a>00364                                                         <span class="keyword">const</span> <span class="keywordtype">double</span> *edata,
+<a name="l00365"></a>00365                                                         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numDataDims,
+<a name="l00366"></a>00366                                                         <span class="keywordtype">double</span> *chi2,
+<a name="l00367"></a>00367                                                         <span class="keyword">const</span> <a class="code" href="structgencurvefit_options.html">gencurvefitOptions</a>* gco,   
+<a name="l00368"></a>00368                                                         <span class="keywordtype">void</span>* userdata
+<a name="l00369"></a>00369                                                         );
+<a name="l00370"></a>00370         
+<a name="l00402"></a>00402         <span class="keywordtype">int</span> <a class="code" href="gencurvefit_8h.html#a7cccba78664919d776c72861adcbaea6">getCovarianceMatrix</a>(<span class="keywordtype">double</span> **covarianceMatrix,
+<a name="l00403"></a>00403                                                         <span class="keywordtype">void</span> *userdata,
+<a name="l00404"></a>00404                                                         <a class="code" href="gencurvefit_8h.html#a7a7ea9c36bfca151fe1556d1f5e61c26">fitfunction</a> fitfun,
+<a name="l00405"></a>00405                                                         <span class="keywordtype">double</span> cost,
+<a name="l00406"></a>00406                                                         <span class="keywordtype">double</span> *coefs,
+<a name="l00407"></a>00407                                                         <span class="keywordtype">int</span> numcoefs,
+<a name="l00408"></a>00408                                                         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> *holdvector,
+<a name="l00409"></a>00409                                                         <span class="keyword">const</span> <span class="keywordtype">double</span> *ydata,
+<a name="l00410"></a>00410                                                         <span class="keyword">const</span> <span class="keywordtype">double</span> *edata,
+<a name="l00411"></a>00411                                                         <span class="keyword">const</span> <span class="keywordtype">double</span> **xdata,
+<a name="l00412"></a>00412                                                         <span class="keywordtype">long</span> datapoints,
+<a name="l00413"></a>00413                                                         <span class="keywordtype">int</span> numDataDims,
+<a name="l00414"></a>00414                                                         <span class="keywordtype">int</span> unitSD);
+<a name="l00415"></a>00415                 
+<a name="l00435"></a>00435 <span class="keywordtype">double</span> <a class="code" href="gencurvefit_8c.html#a4b14e8f032e637096d2f1e3327f8e4a8">chisquared</a>(<span class="keywordtype">void</span> *userdata, <span class="keyword">const</span> <span class="keywordtype">double</span> *coefs, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numcoefs, <span class="keyword">const</span> <span class="keywordtype">double</span> *data, <span class="keyword">const</span> <span class="keywordtype">double</span> *model, <span class="keyword">const</span> <span class="keywordtype">double</span> *errors, <span class="keywordtype">long</span> datapoints);
+<a name="l00436"></a>00436 
+<a name="l00456"></a>00456 <span class="keywordtype">double</span> <a class="code" href="gencurvefit_8c.html#a12c9b16ff375eafa5ceff3ad8f783548">robust</a>(<span class="keywordtype">void</span> *userdata, <span class="keyword">const</span> <span class="keywordtype">double</span> *coefs, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> numcoefs, <span class="keyword">const</span> <span class="keywordtype">double</span> *data, <span class="keyword">const</span> <span class="keywordtype">double</span> *model, <span class="keyword">const</span> <span class="keywordtype">double</span> *errors, <span class="keywordtype">long</span> datapoints);
+<a name="l00457"></a>00457 
+<a name="l00458"></a>00458 
+<a name="l00459"></a>00459 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00460"></a>00460 <span class="preprocessor"></span>}
+<a name="l00461"></a>00461 <span class="preprocessor">#endif</span>
+<a name="l00462"></a>00462 <span class="preprocessor"></span>
+<a name="l00463"></a>00463 <span class="preprocessor">#endif</span>
 </pre></div></div>
 </div>
 <!--- window showing the filter options -->
@@ -159,7 +175,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Sat Sep 11 2010 15:06:59 for libgencurvefit by&nbsp;
+<hr class="footer"/><address class="footer"><small>Generated on Sun Sep 12 2010 22:48:54 for libgencurvefit by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.1 </small></address>
 </body>

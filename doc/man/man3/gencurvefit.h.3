@@ -1,4 +1,4 @@
-.TH "/Users/andrew/Documents/Andy/programming/libgencurvefit/src/gencurvefit.h" 3 "Sat Sep 11 2010" "libgencurvefit" \" -*- nroff -*-
+.TH "/Users/andrew/Documents/Andy/programming/libgencurvefit/src/gencurvefit.h" 3 "Sun Sep 12 2010" "libgencurvefit" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -38,6 +38,9 @@
 .RI "#define \fBPROBLEM_CALCULATING_COVARIANCE\fP   -7"
 .br
 .ti -1c
+.RI "#define \fBNO_FIT_FUNCTION_SPECIFIED\fP   -8"
+.br
+.ti -1c
 .RI "#define \fBPI\fP   3.14159265358979323846"
 .br
 .in -1c
@@ -67,7 +70,10 @@
 .RI "int \fBgenetic_optimisation\fP (\fBfitfunction\fP fitfun, \fBcostfunction\fP costfun, unsigned int numcoefs, double *coefs, const unsigned int *holdvector, const double **limits, long datapoints, const double *ydata, const double **xdata, const double *edata, unsigned int numDataDims, double *chi2, const \fBgencurvefitOptions\fP *gco, void *userdata)"
 .br
 .ti -1c
-.RI "int \fBgetCovarianceMatrix\fP (double **covarianceMatrix, void *userdata, \fBfitfunction\fP fitfun, double cost, double *coefs, int numcoefs, unsigned int *holdvector, double *ydata, double *edata, long datapoints, double **xdata, int numDataDims, int unitSD)"
+.RI "int \fBlevenberg_marquardt\fP (\fBfitfunction\fP fitfun, \fBcostfunction\fP costfun, unsigned int numcoefs, double *coefs, const unsigned int *holdvector, long datapoints, const double *ydata, const double **xdata, const double *edata, unsigned int numDataDims, double *chi2, const \fBgencurvefitOptions\fP *gco, void *userdata)"
+.br
+.ti -1c
+.RI "int \fBgetCovarianceMatrix\fP (double **covarianceMatrix, void *userdata, \fBfitfunction\fP fitfun, double cost, double *coefs, int numcoefs, unsigned int *holdvector, const double *ydata, const double *edata, const double **xdata, long datapoints, int numDataDims, int unitSD)"
 .br
 .ti -1c
 .RI "double \fBchisquared\fP (void *userdata, const double *coefs, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints)"
@@ -81,6 +87,7 @@
 .SS "#define COEFS_MUST_BE_WITHIN_LIMITS   -6"
 .SS "#define HOLDVECTOR_COEFS_MISMATCH   -3"
 .SS "#define INCORRECT_LIMITS   -2"
+.SS "#define NO_FIT_FUNCTION_SPECIFIED   -8"
 .SS "#define NO_MEMORY   -1"the error codes returned by this library. They are all negative, allowing for user error codes >0 to be returned from genetic_optimisation 
 .SS "#define NO_VARYING_PARAMS   -4"
 .SS "#define PI   3.14159265358979323846"The mathematical constant Pi 
@@ -171,7 +178,7 @@
 .RE
 .PP
 
-.SS "int genetic_optimisation (\fBfitfunction\fP fitfun, \fBcostfunction\fP costfun, unsigned int numcoefs, double * coefs, const unsigned int * holdvector, const double ** limits, long datapoints, const double * ydata, const double ** xdata, const double * edata, unsigned int numDataDims, double * chi2, const \fBgencurvefitOptions\fP * gco, void * userdata)"genetic_optimisation - perform curvefitting with differential evolution. Fitting is not limited to 1 independent variable, you can have as many as you like. The function is threadsafe as long as you supply unique copies of the inputs to each instance.
+.SS "int genetic_optimisation (\fBfitfunction\fP fitfun, \fBcostfunction\fP costfun, unsigned int numcoefs, double * coefs, const unsigned int * holdvector, const double ** limits, long datapoints, const double * ydata, const double ** xdata, const double * edata, unsigned int numDataDims, double * chi2, const \fBgencurvefitOptions\fP * gco, void * userdata)"genetic_optimisation - perform curvefitting with differential evolution. Fitting is not limited to 1 independent variable, you can have as many as you like. The function is threadsafe as long as you supply unique copies of the inputs to each instance. The function returns a non-zero error code (<0) if something goes wrong. However, if you return a non-zero value from your fit function then the optimisation will stop and that value will be returned.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -205,7 +212,7 @@
 .RE
 .PP
 
-.SS "int getCovarianceMatrix (double ** covarianceMatrix, void * userdata, \fBfitfunction\fP fitfun, double cost, double * coefs, int numcoefs, unsigned int * holdvector, double * ydata, double * edata, long datapoints, double ** xdata, int numDataDims, int unitSD)"in \fBerrorEstimation.c\fP. Calculates a hessian gradient matrix based covariance matrix. The covariance matrix is returned via the covarianceMatrix pointer and must be freed afterwards.
+.SS "int getCovarianceMatrix (double ** covarianceMatrix, void * userdata, \fBfitfunction\fP fitfun, double cost, double * coefs, int numcoefs, unsigned int * holdvector, const double * ydata, const double * edata, const double ** xdata, long datapoints, int numDataDims, int unitSD)"in \fBlevenbergMarquardt.c\fP. Calculates a hessian gradient matrix based covariance matrix. The covariance matrix is returned via the covarianceMatrix pointer and must be freed afterwards.
 .PP
 \fBParameters:\fP
 .RS 4
@@ -234,6 +241,38 @@
 \fInumDataDims\fP - how many independent variables do you have?
 .br
 \fIunitSD\fP - specify as 1 if the datapoints were unit weighted. 
+.RE
+.PP
+
+.SS "int levenberg_marquardt (\fBfitfunction\fP fitfun, \fBcostfunction\fP costfun, unsigned int numcoefs, double * coefs, const unsigned int * holdvector, long datapoints, const double * ydata, const double ** xdata, const double * edata, unsigned int numDataDims, double * chi2, const \fBgencurvefitOptions\fP * gco, void * userdata)"does a levenberg marquardt fit to the data, instead of differential evolution. It returns a non-zero error code if something goes wrong. However, it will also stop if your fitfunction returns a non-zero value. As with genetic optimisation you can supply your own cost function.
+.PP
+\fBParameters:\fP
+.RS 4
+\fIfitfun\fP - a function that calculates the dependent variable, given input parameters and independent variables. If you return a non-zero value from this function the fit will stop.
+.br
+\fIcostfun\fP - a function that calculates the costfunction to be minimised. This is normally a chi2 type function. i.e. sum (((model[i] - data[i]) / dataerrors[i])^2 ) If costfun == NULL then a default chi2 function is used.
+.br
+\fInumcoefs\fP - total number of fit parameters.
+.br
+\fIcoefs[numcoefs]\fP - an array containing all the parameters for the fit. After genetic_optimisation this is populated by the parameters that best fit the data.
+.br
+\fIholdvector[numcoefs]\fP - an array (with numcoefs elements) that specifies which parameters are going to be held during the fit. 0 = vary 1 = hold
+.br
+\fIdatapoints\fP - the total number of data points in the fit.
+.br
+\fIydata[datapoints]\fP - an array containing the dependent variable (i.e. the data one is trying to fit).
+.br
+\fIxdata[numDataDims][datapoints]\fP - a 2D array containing the independent variables that correspond to each of the datapoints. One can fit multidimensional data, e.g. y = f(n, m). In this case numDataDims = 2. You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)). If you want to pass in a 1D dataset simply pass a pointer to the array. e.g. if your array is: double *xP; then pass in: &xP BUT YOU HAVE TO REMEMBER TO DEREFERENCE THE POINTER IN THE FIT FUNCTION BEFORE YOU USE THE ARRAY. model[ii] = (*xP)[ii]
+.br
+\fIedata[datapoints]\fP - an array containing the experimental uncertainties for each of the datapoints. If you use the default chi2 costfunction then it should contain standard deviations. Set each element to 1 if you do not wish to weight the fit by the experimental uncertainties.
+.br
+\fInumDataDims\fP - the number of independent variables in the fit. For y = f(x) numDataDims = 1. For y = f(n, m), numDataDims = 2, etc.
+.br
+\fIchi2\fP - the final value of the cost function.
+.br
+\fIgco\fP - options for the genetic optimisation. (see above). If gco == NULL, then a default set of options are used.
+.br
+\fIuserdata\fP - an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions. 
 .RE
 .PP
 
