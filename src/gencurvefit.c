@@ -769,12 +769,27 @@ int genetic_optimisation(fitfunction fitfun,
 	if(!fitfun)
 		return NO_FIT_FUNCTION_SPECIFIED;
 	
+	//y, x, e arrays must exist
+	if(!ydata)
+		return NO_Y_ARRAY;
+	
+	if(!xdata)
+		return NO_X_ARRAY;
+	
+	if(!edata)
+		return NO_E_ARRAY;
+	
+	if(!coefs)
+		return NO_COEFS_ARRAY;
+	
+	if(!limits)
+		return NO_LIMITS_ARRAY;
+	
 	/*the overall structure to contain the entire fit*/
 	genoptStruct gos;
 	memset(&gos, 0, sizeof(gos));
 		
 	//initialise the random number generators
-//	srandom(clock());
 	if(gco == NULL || gco->seed < 1)
 		sgenrand(clock(), &(gos.myMT19937));
 	else
@@ -937,7 +952,8 @@ int genetic_optimisation(fitfunction fitfun,
 	/*
 	 at this point we have the best fit.  Now return the results
 	 */
-	*chi2 = *(gos.chi2Array);
+	if(chi2)
+		*chi2 = *(gos.chi2Array);
 	
 	/*
 	 put the best fit into the coeffcient array that will be returned to the user

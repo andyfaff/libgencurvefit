@@ -374,8 +374,8 @@ int levenberg_marquardt(fitfunction fitfun,
 					 void* userdata){
 
 	int err = 0;
-	int ii, jj, numvarcoefs = 0, iterations;
-	unsigned int *varcoefs = NULL;
+	int ii, jj, numvarparams = 0, iterations;
+	unsigned int *varparams = NULL;
 	double cost = -1, incrementedCost = -1, lambda = 0.001;
 	double **derivativeMatrix = NULL;
 	double **alpha = NULL;
@@ -390,6 +390,19 @@ int levenberg_marquardt(fitfunction fitfun,
 	//fit function must exist
 	if(!fitfun)
 		return NO_FIT_FUNCTION_SPECIFIED;
+	
+	//y, x, e arrays must exist
+	if(!ydata)
+		return NO_Y_ARRAY;
+	
+	if(!xdata)
+		return NO_X_ARRAY;
+	
+	if(!edata)
+		return NO_E_ARRAY;
+	
+	if(!coefs)
+		return NO_COEFS_ARRAY;
 	
 	if(gco == NULL){
 		lgco.iterations = 100;
@@ -406,39 +419,39 @@ int levenberg_marquardt(fitfunction fitfun,
 
 		
 	for(ii = 0; ii < numcoefs ; ii++)
-		if(holdvector[ii] == 0) numvarcoefs ++;
+		if(holdvector[ii] == 0) numvarparams ++;
 
-	varcoefs = (unsigned int*) malloc(sizeof(unsigned int) * numvarcoefs);
-	if(!varcoefs){
+	varparams = (unsigned int*) malloc(sizeof(unsigned int) * numvarparams);
+	if(!varparams){
 		err = NO_MEMORY;
 		goto done;
 	}
 	
-	derivativeMatrix = (double**) malloc2d(numvarcoefs, datapoints, sizeof(double));
+	derivativeMatrix = (double**) malloc2d(numvarparams, datapoints, sizeof(double));
 	if(!derivativeMatrix){
 		err = NO_MEMORY;
 		goto done;
 	}
 	
-	alpha = (double**) malloc2d(numvarcoefs, numvarcoefs, sizeof(double));
+	alpha = (double**) malloc2d(numvarparams, numvarparams, sizeof(double));
 	if(!alpha){
 		err = NO_MEMORY;
 		goto done;
 	}
 	
-	reducedParameters = (double*) malloc(sizeof(double) * numvarcoefs);
+	reducedParameters = (double*) malloc(sizeof(double) * numvarparams);
 	if(!reducedParameters){
 		err = NO_MEMORY;
 		goto done;
 	}
 	
-	beta = (double*) malloc(sizeof(double) * numvarcoefs);
+	beta = (double*) malloc(sizeof(double) * numvarparams);
 	if(!beta){
 		err = NO_MEMORY;
 		goto done;
 	}
 	
-	incrementedParameters = (double*) malloc(sizeof(double) * numvarcoefs);
+	incrementedParameters = (double*) malloc(sizeof(double) * numvarparams);
 	if(!incrementedParameters){
 		err = NO_MEMORY;
 		goto done;
@@ -452,9 +465,9 @@ int levenberg_marquardt(fitfunction fitfun,
 	memcpy(temp_coefs, coefs, sizeof(double) * numcoefs);
 	
 	jj = 0;
-	for(ii = 0 ; ii < numvarcoefs ; ii++){
+	for(ii = 0 ; ii < numvarparams ; ii++){
 		if(holdvector[ii] == 0){
-			varcoefs[jj] = ii;
+			varparams[jj] = ii;
 			reducedParameters[jj] = (double) coefs[ii];
 			jj++;
 		}
@@ -468,32 +481,32 @@ int levenberg_marquardt(fitfunction fitfun,
 	
 	iterations = 0;
 	do {
-		insertVaryingParams(temp_coefs, varcoefs, numvarcoefs, reducedParameters);
+		insertVaryingParams(temp_coefs, varparams, numvarparams, reducedParameters);
 		
 		if(err = fitfun(userdata, temp_coefs, numcoefs, model, xdata, datapoints, numDataDims))
 			goto done;
 		
 		cost = mycostfun(userdata, temp_coefs, numcoefs, model, ydata, edata, datapoints);
 		
-		if(err = updatePartialDerivative(userdata, fitfun, derivativeMatrix, temp_coefs, numcoefs, varcoefs, numvarcoefs, xdata, datapoints, numDataDims))
+		if(err = updatePartialDerivative(userdata, fitfun, derivativeMatrix, temp_coefs, numcoefs, varparams, numvarparams, xdata, datapoints, numDataDims))
 			goto done;
 		
-		updateAlpha(alpha, derivativeMatrix, numvarcoefs, edata, datapoints, lambda);
+		updateAlpha(alpha, derivativeMatrix, numvarparams, edata, datapoints, lambda);
 		   
-		updateBeta(beta, derivativeMatrix, numvarcoefs, ydata, model, edata, datapoints);
+		updateBeta(beta, derivativeMatrix, numvarparams, ydata, model, edata, datapoints);
 		
-		if(err = matrixInversion(alpha, numvarcoefs, NULL))
+		if(err = matrixInversion(alpha, numvarparams, NULL))
 			goto done;
 		
-		for (ii = 0; ii < numvarcoefs ; ii++){
+		for (ii = 0; ii < numvarparams ; ii++){
 			double val = 0;
-			for(jj = 0 ; jj < numvarcoefs ; jj++)
+			for(jj = 0 ; jj < numvarparams ; jj++)
 				val += alpha[ii][jj] + beta[jj];
 			
 			incrementedParameters[ii] = reducedParameters[ii] + val;
 		}
 		
-		insertVaryingParams(temp_coefs, varcoefs, numvarcoefs, incrementedParameters);
+		insertVaryingParams(temp_coefs, varparams, numvarparams, incrementedParameters);
 
 		if(err = fitfun(userdata, temp_coefs, numcoefs, model, xdata, datapoints, numDataDims))
 			goto done;
@@ -507,12 +520,14 @@ int levenberg_marquardt(fitfunction fitfun,
 		// The guess results to better chi2 - move and make the step larger
 		else {
 			lambda /= 10;
-			memcpy(reducedParameters, incrementedParameters, sizeof(double) * numvarcoefs);
-			insertVaryingParams(coefs, varcoefs, numvarcoefs, reducedParameters);
+			memcpy(reducedParameters, incrementedParameters, sizeof(double) * numvarparams);
+			insertVaryingParams(coefs, varparams, numvarparams, reducedParameters);
 		}
 		iterations++;
 	} while ( iterations < lgco.iterations || lgco.tolerance > fabs(cost - incrementedCost));
 	
+	if(*chi2)
+		*chi2 = cost;
 	
 done:
 	if(temp_coefs)
@@ -529,9 +544,8 @@ done:
 		free(reducedParameters);
 	if(incrementedParameters)
 		free(incrementedParameters);
-	
-	if(varcoefs)
-		free(varcoefs);
+	if(varparams)
+		free(varparams);
 	
 	return 0;
 }
