@@ -135,7 +135,7 @@ void fitWorker(void* arg) {
 								  eetemp,
 								  1,
 								  &chi2,
-								  &gco,
+								  NULL,
 								  p->userdata); 
 /*		
 		err = genetic_optimisation(p->fitfun,
