@@ -124,6 +124,20 @@ void fitWorker(void* arg) {
 		//			yytemp[ii] = p->yP[ii] + gnoise(p->eP[ii]);
 		
 		//do the genetic optimisation
+		err = levenberg_marquardt(p->fitfun,
+								  p->costfun,
+								  p->numcoefs,
+								  coefsTemp,
+								  p->holdvector,
+								  p->datapoints,
+								  yytemp,
+								  p->xP,
+								  eetemp,
+								  1,
+								  &chi2,
+								  &gco,
+								  p->userdata); 
+/*		
 		err = genetic_optimisation(p->fitfun,
 								   p->costfun,
 								   p->numcoefs,
@@ -138,7 +152,7 @@ void fitWorker(void* arg) {
 								   &chi2,
 								   &gco,
 								   p->userdata);
-		
+*/	
 		//output the results
 		if(err){
 			cout << err;
