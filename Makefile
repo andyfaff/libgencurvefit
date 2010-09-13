@@ -16,7 +16,7 @@ includedir = ${prefix}/include
 
 OBJS = src/gencurvefit.o src/mt19937p.o src/levenbergMarquardt.o
 
-all: libgencurvefit.a
+all: libgencurvefit.a gaussian
 
 libgencurvefit.a: $(OBJS)
 	$(AR) $@ $(OBJS)
@@ -36,4 +36,7 @@ install: install-libs
 	-@if [ ! -d $(DESTDIR)$(includedir)   ]; then mkdir -p $(DESTDIR)$(includedir); fi
 	cp src/gencurvefit.h $(DESTDIR)$(includedir)
 	chmod 644 $(DESTDIR)$(includedir)/gencurvefit.h
+
+gaussian: 
+	g++ examples/gaussian/*.cpp -L. -o examples/gaussian/gaussian_fitter -lgencurvefit
 	

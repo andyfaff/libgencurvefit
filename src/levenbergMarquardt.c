@@ -15,6 +15,7 @@
 #include "string.h"
 
 #define TINY 1.0e-20
+#define EPSILON 1.0e-6
 
 static double factorial(double num){
 	int ii;
@@ -311,7 +312,7 @@ static int partialDerivative(void *userdata, fitfunction fitfun, double** deriva
 	memcpy(coefs_temp, coefs, numcoefs * sizeof(double));
 
 	param = coefs[parameterIndex];	
-	diff = 1.e-4 * param;
+	diff = EPSILON * param;
 	coefs_temp[parameterIndex] = param + diff;
 	
 	if(err = fitfun(userdata, coefs_temp, numcoefs, *(derivativeMatrix + derivativeMatrixRow), (const double**)xdata, datapoints, numDataDims))
@@ -740,9 +741,9 @@ int levenberg_marquardt(fitfunction fitfun,
 			insertVaryingParams(coefs, varparams, numvarparams, reducedParameters);
 		}
 		iterations++;
-	} while ( iterations < lgco.iterations && lgco.tolerance > fabs(cost - incrementedCost));
+	} while (iterations < lgco.iterations && lgco.tolerance < fabs(incrementedCost - cost));
 	
-	if(*chi2)
+	if(chi2)
 		*chi2 = cost;
 	
 done:
