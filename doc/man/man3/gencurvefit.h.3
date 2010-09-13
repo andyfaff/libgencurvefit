@@ -1,4 +1,4 @@
-.TH "/Users/andrew/Documents/Andy/programming/libgencurvefit/src/gencurvefit.h" 3 "Sun Sep 12 2010" "libgencurvefit" \" -*- nroff -*-
+.TH "/Users/andrew/Documents/Andy/programming/libgencurvefit/src/gencurvefit.h" 3 "Mon Sep 13 2010" "libgencurvefit" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -39,6 +39,24 @@
 .br
 .ti -1c
 .RI "#define \fBNO_FIT_FUNCTION_SPECIFIED\fP   -8"
+.br
+.ti -1c
+.RI "#define \fBNO_Y_ARRAY\fP   -9"
+.br
+.ti -1c
+.RI "#define \fBNO_X_ARRAY\fP   -10"
+.br
+.ti -1c
+.RI "#define \fBNO_E_ARRAY\fP   -11"
+.br
+.ti -1c
+.RI "#define \fBNO_COEFS_ARRAY\fP   -12"
+.br
+.ti -1c
+.RI "#define \fBNO_LIMITS_ARRAY\fP   -13"
+.br
+.ti -1c
+.RI "#define \fBSINGULAR_MATRIX_ERROR\fP   -14"
 .br
 .ti -1c
 .RI "#define \fBPI\fP   3.14159265358979323846"
@@ -87,11 +105,17 @@
 .SS "#define COEFS_MUST_BE_WITHIN_LIMITS   -6"
 .SS "#define HOLDVECTOR_COEFS_MISMATCH   -3"
 .SS "#define INCORRECT_LIMITS   -2"
+.SS "#define NO_COEFS_ARRAY   -12"
+.SS "#define NO_E_ARRAY   -11"
 .SS "#define NO_FIT_FUNCTION_SPECIFIED   -8"
+.SS "#define NO_LIMITS_ARRAY   -13"
 .SS "#define NO_MEMORY   -1"the error codes returned by this library. They are all negative, allowing for user error codes >0 to be returned from genetic_optimisation 
 .SS "#define NO_VARYING_PARAMS   -4"
+.SS "#define NO_X_ARRAY   -10"
+.SS "#define NO_Y_ARRAY   -9"
 .SS "#define PI   3.14159265358979323846"The mathematical constant Pi 
 .SS "#define PROBLEM_CALCULATING_COVARIANCE   -7"
+.SS "#define SINGULAR_MATRIX_ERROR   -14"
 .SS "#define WRONG_NUMBER_OF_PARAMS   -5"
 .SH "Typedef Documentation"
 .PP 

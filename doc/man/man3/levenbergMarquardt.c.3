@@ -1,4 +1,4 @@
-.TH "/Users/andrew/Documents/Andy/programming/libgencurvefit/src/levenbergMarquardt.c" 3 "Sun Sep 12 2010" "libgencurvefit" \" -*- nroff -*-
+.TH "/Users/andrew/Documents/Andy/programming/libgencurvefit/src/levenbergMarquardt.c" 3 "Mon Sep 13 2010" "libgencurvefit" \" -*- nroff -*-
 .ad l
 .nh
 .SH NAME
@@ -21,10 +21,16 @@
 .ti -1c
 .RI "#define \fBTINY\fP   1.0e-20"
 .br
+.ti -1c
+.RI "#define \fBEPSILON\fP   1.0e-6"
+.br
 .in -1c
 .SS "Functions"
 
 .in +1c
+.ti -1c
+.RI "int \fBmatrixInversion_lu\fP (double **a, int N)"
+.br
 .ti -1c
 .RI "void \fBcalculateAlphaElement\fP (int row, int col, double **alpha, double **derivativeMatrix, const double *edata, long datapoints, double lambda)"
 .br
@@ -49,6 +55,7 @@
 .in -1c
 .SH "Define Documentation"
 .PP 
+.SS "#define EPSILON   1.0e-6"
 .SS "#define TINY   1.0e-20"
 .SH "Function Documentation"
 .PP 
@@ -123,6 +130,7 @@ An calculated element for the beta-matrix. NOTE: Does not change the value of be
 .RE
 .PP
 
+.SS "int matrixInversion_lu (double ** a, int N)"LU matrix inversion 
 .SS "void packAlphaSymmetric (double ** alpha, unsigned int numvarparams)"packs the upper right elements of the alpha matrix, because the alpha matrix should be symmetrical 
 .SS "void updateAlpha (double ** alpha, double ** derivativeMatrix, unsigned int numvarparams, const double * edata, long datapoints, double lambda)"Calculates the lower left elements for \fCthis.alpha\fP. 
 .SS "void updateBeta (double * b, double ** derivativeMatrix, int numvarparams, const double * ydata, const double * model, const double * edata, long datapoints)"Calculates all elements for \fCthis.beta\fP. 

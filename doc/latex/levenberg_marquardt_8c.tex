@@ -10,9 +10,13 @@
 \begin{DoxyCompactItemize}
 \item 
 \#define \hyperlink{levenberg_marquardt_8c_acf1c38f71f39386356edb151a131ad11}{TINY}~1.0e-\/20
+\item 
+\#define \hyperlink{levenberg_marquardt_8c_a002b2f4894492820fe708b1b7e7c5e70}{EPSILON}~1.0e-\/6
 \end{DoxyCompactItemize}
 \subsection*{Functions}
 \begin{DoxyCompactItemize}
+\item 
+int \hyperlink{levenberg_marquardt_8c_a6c3c609fa838b3794f126ecdf3337cbf}{matrixInversion\_\-lu} (double $\ast$$\ast$a, int N)
 \item 
 void \hyperlink{levenberg_marquardt_8c_a1c2881460f75436c3f3099ffe7ab8727}{calculateAlphaElement} (int row, int col, double $\ast$$\ast$alpha, double $\ast$$\ast$derivativeMatrix, const double $\ast$edata, long datapoints, double lambda)
 \item 
@@ -31,6 +35,11 @@ int \hyperlink{levenberg_marquardt_8c_a43bf2800e229ffef697a68b673c01ede}{levenbe
 
 
 \subsection{Define Documentation}
+\hypertarget{levenberg_marquardt_8c_a002b2f4894492820fe708b1b7e7c5e70}{
+\index{levenbergMarquardt.c@{levenbergMarquardt.c}!EPSILON@{EPSILON}}
+\index{EPSILON@{EPSILON}!levenbergMarquardt.c@{levenbergMarquardt.c}}
+\subsubsection[{EPSILON}]{\setlength{\rightskip}{0pt plus 5cm}\#define EPSILON~1.0e-\/6}}
+\label{levenberg_marquardt_8c_a002b2f4894492820fe708b1b7e7c5e70}
 \hypertarget{levenberg_marquardt_8c_acf1c38f71f39386356edb151a131ad11}{
 \index{levenbergMarquardt.c@{levenbergMarquardt.c}!TINY@{TINY}}
 \index{TINY@{TINY}!levenbergMarquardt.c@{levenbergMarquardt.c}}
@@ -123,7 +132,17 @@ does a levenberg marquardt fit to the data, instead of differential evolution. I
 
 \begin{DoxyParams}{Parameters}
 \item[{\em fitfun}]-\/ a function that calculates the dependent variable, given input parameters and independent variables. If you return a non-\/zero value from this function the fit will stop.\item[{\em costfun}]-\/ a function that calculates the costfunction to be minimised. This is normally a chi2 type function. i.e. sum (((model\mbox{[}i\mbox{]} -\/ data\mbox{[}i\mbox{]}) / dataerrors\mbox{[}i\mbox{]})$^\wedge$2 ) If costfun == NULL then a default chi2 function is used.\item[{\em numcoefs}]-\/ total number of fit parameters.\item[{\em coefs\mbox{[}numcoefs\mbox{]}}]-\/ an array containing all the parameters for the fit. After genetic\_\-optimisation this is populated by the parameters that best fit the data.\item[{\em holdvector\mbox{[}numcoefs\mbox{]}}]-\/ an array (with numcoefs elements) that specifies which parameters are going to be held during the fit. 0 = vary 1 = hold\item[{\em datapoints}]-\/ the total number of data points in the fit.\item[{\em ydata\mbox{[}datapoints\mbox{]}}]-\/ an array containing the dependent variable (i.e. the data one is trying to fit).\item[{\em xdata\mbox{[}numDataDims\mbox{]}\mbox{[}datapoints\mbox{]}}]-\/ a 2D array containing the independent variables that correspond to each of the datapoints. One can fit multidimensional data, e.g. y = f(n, m). In this case numDataDims = 2. You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)). If you want to pass in a 1D dataset simply pass a pointer to the array. e.g. if your array is: double $\ast$xP; then pass in: \&xP BUT YOU HAVE TO REMEMBER TO DEREFERENCE THE POINTER IN THE FIT FUNCTION BEFORE YOU USE THE ARRAY. model\mbox{[}ii\mbox{]} = ($\ast$xP)\mbox{[}ii\mbox{]}\item[{\em edata\mbox{[}datapoints\mbox{]}}]-\/ an array containing the experimental uncertainties for each of the datapoints. If you use the default chi2 costfunction then it should contain standard deviations. Set each element to 1 if you do not wish to weight the fit by the experimental uncertainties.\item[{\em numDataDims}]-\/ the number of independent variables in the fit. For y = f(x) numDataDims = 1. For y = f(n, m), numDataDims = 2, etc.\item[{\em chi2}]-\/ the final value of the cost function.\item[{\em gco}]-\/ options for the genetic optimisation. (see above). If gco == NULL, then a default set of options are used.\item[{\em userdata}]-\/ an (optional) pointer that is passed to the fitfunction, costfunction and updatefunction. Use this pointer to give extra information to your functions. \end{DoxyParams}
-\hypertarget{levenberg_marquardt_8c_a387dc3b3f3748402c0a68eb0c528e446}{
+\hypertarget{levenberg_marquardt_8c_a6c3c609fa838b3794f126ecdf3337cbf}{
+\index{levenbergMarquardt.c@{levenbergMarquardt.c}!matrixInversion\_\-lu@{matrixInversion\_\-lu}}
+\index{matrixInversion\_\-lu@{matrixInversion\_\-lu}!levenbergMarquardt.c@{levenbergMarquardt.c}}
+\subsubsection[{matrixInversion\_\-lu}]{\setlength{\rightskip}{0pt plus 5cm}int matrixInversion\_\-lu (
+\begin{DoxyParamCaption}
+\item[{double $\ast$$\ast$}]{ a, }
+\item[{int}]{ N}
+\end{DoxyParamCaption}
+)}}
+\label{levenberg_marquardt_8c_a6c3c609fa838b3794f126ecdf3337cbf}
+LU matrix inversion \hypertarget{levenberg_marquardt_8c_a387dc3b3f3748402c0a68eb0c528e446}{
 \index{levenbergMarquardt.c@{levenbergMarquardt.c}!packAlphaSymmetric@{packAlphaSymmetric}}
 \index{packAlphaSymmetric@{packAlphaSymmetric}!levenbergMarquardt.c@{levenbergMarquardt.c}}
 \subsubsection[{packAlphaSymmetric}]{\setlength{\rightskip}{0pt plus 5cm}void packAlphaSymmetric (
