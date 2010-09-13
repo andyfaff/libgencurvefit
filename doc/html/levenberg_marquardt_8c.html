@@ -60,8 +60,10 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <tr><td colspan="2"><h2><a name="define-members"></a>
 Defines</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">#define&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="levenberg_marquardt_8c.html#acf1c38f71f39386356edb151a131ad11">TINY</a>&nbsp;&nbsp;&nbsp;1.0e-20</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">#define&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="levenberg_marquardt_8c.html#a002b2f4894492820fe708b1b7e7c5e70">EPSILON</a>&nbsp;&nbsp;&nbsp;1.0e-6</td></tr>
 <tr><td colspan="2"><h2><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="levenberg_marquardt_8c.html#a6c3c609fa838b3794f126ecdf3337cbf">matrixInversion_lu</a> (double **a, int N)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="levenberg_marquardt_8c.html#a1c2881460f75436c3f3099ffe7ab8727">calculateAlphaElement</a> (int row, int col, double **alpha, double **derivativeMatrix, const double *edata, long datapoints, double lambda)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="levenberg_marquardt_8c.html#a387dc3b3f3748402c0a68eb0c528e446">packAlphaSymmetric</a> (double **alpha, unsigned int numvarparams)</td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="levenberg_marquardt_8c.html#a62c16b92e037ac2258a8ee86b51a6188">updateAlpha</a> (double **alpha, double **derivativeMatrix, unsigned int numvarparams, const double *edata, long datapoints, double lambda)</td></tr>
@@ -71,6 +73,19 @@ Functions</h2></td></tr>
 <tr><td class="memItemLeft" align="right" valign="top">int&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="levenberg_marquardt_8c.html#a43bf2800e229ffef697a68b673c01ede">levenberg_marquardt</a> (<a class="el" href="gencurvefit_8h.html#a7a7ea9c36bfca151fe1556d1f5e61c26">fitfunction</a> fitfun, <a class="el" href="gencurvefit_8h.html#a655dc6f3bd77f814c6127a0556709cfe">costfunction</a> costfun, unsigned int numcoefs, double *coefs, const unsigned int *holdvector, long datapoints, const double *ydata, const double **xdata, const double *edata, unsigned int numDataDims, double *chi2, const <a class="el" href="structgencurvefit_options.html">gencurvefitOptions</a> *gco, void *userdata)</td></tr>
 </table>
 <hr/><h2>Define Documentation</h2>
+<a class="anchor" id="a002b2f4894492820fe708b1b7e7c5e70"></a><!-- doxytag: member="levenbergMarquardt.c::EPSILON" ref="a002b2f4894492820fe708b1b7e7c5e70" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">#define EPSILON&nbsp;&nbsp;&nbsp;1.0e-6</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
 <a class="anchor" id="acf1c38f71f39386356edb151a131ad11"></a><!-- doxytag: member="levenbergMarquardt.c::TINY" ref="acf1c38f71f39386356edb151a131ad11" args="" -->
 <div class="memitem">
 <div class="memproto">
@@ -418,6 +433,34 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a6c3c609fa838b3794f126ecdf3337cbf"></a><!-- doxytag: member="levenbergMarquardt.c::matrixInversion_lu" ref="a6c3c609fa838b3794f126ecdf3337cbf" args="(double **a, int N)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int matrixInversion_lu </td>
+          <td>(</td>
+          <td class="paramtype">double **&nbsp;</td>
+          <td class="paramname"> <em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&nbsp;</td>
+          <td class="paramname"> <em>N</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>LU matrix inversion </p>
+
+</div>
+</div>
 <a class="anchor" id="a387dc3b3f3748402c0a68eb0c528e446"></a><!-- doxytag: member="levenbergMarquardt.c::packAlphaSymmetric" ref="a387dc3b3f3748402c0a68eb0c528e446" args="(double **alpha, unsigned int numvarparams)" -->
 <div class="memitem">
 <div class="memproto">
@@ -571,7 +614,7 @@ Functions</h2></td></tr>
 </iframe>
 </div>
 
-<hr class="footer"/><address class="footer"><small>Generated on Sun Sep 12 2010 22:48:54 for libgencurvefit by&nbsp;
+<hr class="footer"/><address class="footer"><small>Generated on Mon Sep 13 2010 22:57:09 for libgencurvefit by&nbsp;
 <a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.7.1 </small></address>
 </body>
