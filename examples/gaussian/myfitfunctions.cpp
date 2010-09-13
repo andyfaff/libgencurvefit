@@ -35,7 +35,7 @@ int line(void *userdata, const double *coefs, unsigned int numcoefs, double *mod
 int gaussian(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims){
 	int err = 0;
 	long ii;
-	
+		
 	for(ii = 0 ; ii < numpnts ; ii += 1)
 	    model[ii] = coefs[0] + coefs[1] * exp(-1 * pow((coefs[2] - (*xdata)[ii])/coefs[3], 2));
 

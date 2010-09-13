@@ -47,6 +47,7 @@ libgencurvefit is a lightweight library for data regression using differential e
 #define NO_E_ARRAY -11	
 #define NO_COEFS_ARRAY -12
 #define NO_LIMITS_ARRAY -13
+#define	SINGULAR_MATRIX_ERROR -14
 
 /**
  The mathematical constant Pi
