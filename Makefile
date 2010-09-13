@@ -16,7 +16,7 @@ includedir = ${prefix}/include
 
 OBJS = src/gencurvefit.o src/mt19937p.o src/levenbergMarquardt.o
 
-all: libgencurvefit.a gaussian
+all: libgencurvefit.a gaussian globalfitting
 
 libgencurvefit.a: $(OBJS)
 	$(AR) $@ $(OBJS)
@@ -38,5 +38,7 @@ install: install-libs
 	chmod 644 $(DESTDIR)$(includedir)/gencurvefit.h
 
 gaussian: 
-	g++ examples/gaussian/*.cpp -L. -o examples/gaussian/gaussian_fitter -lgencurvefit
+	g++ -O3 examples/gaussian/*.cpp -L. -fopenmp -o examples/gaussian/gaussian_fitter -lgencurvefit -lgomp -lpthread
 	
+globalfitting:
+	g++ -O3 examples/globalfitting/*.cpp -fopenmp -L. -o examples/globalfitting/global_fitter -lgencurvefit -lgomp -lpthread
