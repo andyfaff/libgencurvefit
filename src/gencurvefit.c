@@ -480,6 +480,8 @@ static waveStats getWaveStats(double *sort, long length,int moment){
 	double nx2 = 0, nx = 0;
 	waveStats retval;
 	
+	memset(&retval, 0, sizeof(retval));
+	
 	switch(moment){
 		case 0:
 			for(ii = 0 ; ii < length ; ii += 1){
@@ -603,11 +605,11 @@ static int initialiseFit(genoptStruct *p){
 	
 	//initialise Chi2array, will require a bit of calculation of the model function for each of the initial guesses.
 	for(ii = 0 ; ii < p->totalpopsize ; ii += 1){
-		if(err = insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector + ii)))
+		if((err = insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector + ii))))
 			goto done;
 		
 		//calculate the model
-		if(err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->numcoefs, p->model, p->xdata, p->datapoints, p->numDataDims))
+		if((err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->numcoefs, p->model, p->xdata, p->datapoints, p->numDataDims)))
 			goto done;
 		
 		/*calculate the costfunction*/
@@ -619,15 +621,15 @@ static int initialiseFit(genoptStruct *p){
 	wavStats = getWaveStats(p->chi2Array, p->totalpopsize, 0);
 	
 	swapChi2values(p, 0, wavStats.V_minloc);
-	if(err = swapPopVector(p, p->totalpopsize, 0, wavStats.V_minloc))
+	if((err = swapPopVector(p, p->totalpopsize, 0, wavStats.V_minloc)))
 		goto done;
 		
 	//put the best fit from the intialisation into the coeffcients to return		   
-	if(err = insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector)))
+	if((err = insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector))))
 		goto done;
 	
 	if(p->updatefun && (4 & p->updatefrequency))
-		if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, 0, *(p->chi2Array), 4, -1))
+		if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, 0, *(p->chi2Array), 4, -1)))
 			goto done;
 	
 	memcpy(p->coefs, p->temp_coefs, p->numcoefs * sizeof(double));
@@ -655,10 +657,10 @@ static int optimiseloop(genoptStruct *p){
 		p->numfititers = kk;
 		
 		if(p->updatefun && (8 & p->updatefrequency)){
-			if(err = insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector)))
+			if((err = insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector))))
 				goto done;
 						
-			if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 8, convergenceNumber))
+			if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 8, convergenceNumber)))
 				goto done;
 		}
 		
@@ -676,10 +678,10 @@ static int optimiseloop(genoptStruct *p){
 			/*
 			 find out the chi2 value of the trial vector		
 			 */
-			if(err = insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, p->gen_trial))
+			if((err = insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, p->gen_trial)))
 				goto done;
 			
-			if(err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->numcoefs, p->model, p->xdata, p->datapoints, p->numDataDims))
+			if((err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->numcoefs, p->model, p->xdata, p->datapoints, p->numDataDims)))
 				goto done;
 
 			/*calculate the costfunction*/
@@ -689,7 +691,7 @@ static int optimiseloop(genoptStruct *p){
 			if(isfinite(p->MCtemp) && p->MCtemp > 0 && (exp(-chi2trial / chi2pvector / p->MCtemp) < randomDouble(&(p->myMT19937), 0, 1)) ){
 				acceptMoveGrudgingly = 1;				
 				if(p->updatefun && (2 & p->updatefrequency))
-					if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 2, convergenceNumber))
+					if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 2, convergenceNumber)))
 						goto done;
 			}
 			
@@ -697,7 +699,7 @@ static int optimiseloop(genoptStruct *p){
 			 if the chi2 of the trial vector is less than the current populationvector then replace it
 			 */
 			if(chi2trial < chi2pvector  || (acceptMoveGrudgingly && ii)){
-				if(err = setPopVector(p, p->gen_trial, p->numvarparams, currentpvector))
+				if((err = setPopVector(p, p->gen_trial, p->numvarparams, currentpvector)))
 					goto done;
 				
 				*(p->chi2Array + ii) = chi2trial;
@@ -705,7 +707,7 @@ static int optimiseloop(genoptStruct *p){
 				 if chi2 of the trial vector is less than that of the best fit, then replace the best fit vector
 				 */
 				if(chi2trial < *(p->chi2Array)){		/*if this trial vector is better than the current best then replace it*/
-					if(err = setPopVector(p, p->gen_trial, p->numvarparams, 0))
+					if((err = setPopVector(p, p->gen_trial, p->numvarparams, 0)))
 						goto done;
 					
 					/*
@@ -713,7 +715,7 @@ static int optimiseloop(genoptStruct *p){
 					  appraised of fit progress.
 					*/
 					if(p->updatefun && (1 & p->updatefrequency))
-						if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 1, convergenceNumber))
+						if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 1, convergenceNumber)))
 							goto done;
 	
 					/*
@@ -732,7 +734,7 @@ static int optimiseloop(genoptStruct *p){
 					convergenceNumber = wavStats.V_avg * p->tolerance / wavStats.V_stdev;
 					if(convergenceNumber > 1){	
 						if(p->updatefun && (16 & p->updatefrequency))
-							if(err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 16, convergenceNumber))
+							if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 16, convergenceNumber)))
 								goto done;
 						goto done;
 					}
@@ -940,7 +942,7 @@ int genetic_optimisation(fitfunction fitfun,
 	/*
 	 at this stage we can initialise the fit, before looping.
 	 */
-	if(err = initialiseFit(&gos))
+	if((err = initialiseFit(&gos)))
 		goto done;
 	
 	/*
@@ -1003,5 +1005,5 @@ double robust(void *userdata, const double *params, unsigned int numcoefs, const
 		 chi += val;
  }
  return chi;
- };
+ }
  
