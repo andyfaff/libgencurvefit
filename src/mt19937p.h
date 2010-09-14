@@ -20,10 +20,10 @@
 #define MT19937P
 
 #define MATRIX_A 0x9908b0df /* constant vector a */
-#define N 624
+#define NN 624
 
 struct mt19937p {
-	unsigned long mt[N];
+	unsigned long mt[NN];
 	int mti;
 	unsigned long mag01[2];
 }; 
@@ -38,4 +38,5 @@ genrand(struct mt19937p* config);
 
 unsigned long /* for integer generation */
 genrand_int(struct mt19937p* config);
+
 #endif

@@ -161,7 +161,7 @@ typedef struct genoptStruct genoptStruct;
  randomInteger returns an integer between 0 and upper EXclusive
  i.e. you will never get upper returned.
  */
-static int randomInteger (mt19937p *myMT19937, int upper){
+int randomInteger (mt19937p *myMT19937, int upper){
 	int val;
 	while (upper <= (val = genrand_int(myMT19937) / (0xffffffff / upper)));
 //	while (upper <= (val = random() / (RAND_MAX/upper)));
@@ -171,7 +171,7 @@ static int randomInteger (mt19937p *myMT19937, int upper){
 /*
  randomDouble returns a double value between lower <= x <= upper OR [lower,upper]
  */
-static double randomDouble(mt19937p *myMT19937, double lower, double upper){
+double randomDouble(mt19937p *myMT19937, double lower, double upper){
 	return lower + (upper - lower) * genrand(myMT19937);
 	//double val = lower + random()/(((double)RAND_MAX + 1)/(upper - lower));
 	//return val;

@@ -30,8 +30,8 @@
 #include "mt19937p.h"
 
 /* Period parameters */  
-#define N 624
-#define M 397
+#define NN 624
+#define MM 397
 #define MATRIX_A 0x9908b0df   /* constant vector a */
 #define UPPER_MASK 0x80000000 /* most significant w-r bits */
 #define LOWER_MASK 0x7fffffff /* least significant r bits */
@@ -52,11 +52,11 @@ sgenrand(unsigned long seed, struct mt19937p* config)
     /* the generator Line 25 of Table 1 in          */
     /* [KNUTH 1981, The Art of Computer Programming */
     /*    Vol. 2 (2nd Ed.), pp102]                  */
-	config->mti = N+1;
+	config->mti = NN+1;
 	config->mag01[0] = 0x0;
 	config->mag01[1] = MATRIX_A;
     config->mt[0]= seed & 0xffffffff;
-    for (config->mti=1; config->mti<N; config->mti++)
+    for (config->mti=1; config->mti<NN; config->mti++)
         config->mt[config->mti] = (69069 * config->mt[config->mti-1]) & 0xffffffff;
 }
 
@@ -68,22 +68,22 @@ genrand(struct mt19937p* config)
     static unsigned long mag01[2]={0x0, MATRIX_A};
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
 
-    if (config->mti >= N) { /* generate N words at one time */
+    if (config->mti >= NN) { /* generate NN words at one time */
         int kk;
 
-/*        if (config->mti == N+1)*/   /* if sgenrand() has not been called, */
+/*        if (config->mti == NN+1)*/   /* if sgenrand() has not been called, */
 /*            sgenrand(4357);*/ /* a default initial seed is used   */
 
-        for (kk=0;kk<N-M;kk++) {
+        for (kk=0;kk<NN-MM;kk++) {
             y = (config->mt[kk]&UPPER_MASK)|(config->mt[kk+1]&LOWER_MASK);
-            config->mt[kk] = config->mt[kk+M] ^ (y >> 1) ^ config->mag01[y & 0x1];
+            config->mt[kk] = config->mt[kk+MM] ^ (y >> 1) ^ config->mag01[y & 0x1];
         }
-        for (;kk<N-1;kk++) {
+        for (;kk<NN-1;kk++) {
             y = (config->mt[kk]&UPPER_MASK)|(config->mt[kk+1]&LOWER_MASK);
-            config->mt[kk] = config->mt[kk+(M-N)] ^ (y >> 1) ^ config->mag01[y & 0x1];
+            config->mt[kk] = config->mt[kk+(MM-NN)] ^ (y >> 1) ^ config->mag01[y & 0x1];
         }
-        y = (config->mt[N-1]&UPPER_MASK)|(config->mt[0]&LOWER_MASK);
-        config->mt[N-1] = config->mt[M-1] ^ (y >> 1) ^ config->mag01[y & 0x1];
+        y = (config->mt[NN-1]&UPPER_MASK)|(config->mt[0]&LOWER_MASK);
+        config->mt[NN-1] = config->mt[MM-1] ^ (y >> 1) ^ config->mag01[y & 0x1];
 
         config->mti = 0;
     }
@@ -105,22 +105,22 @@ genrand_int(struct mt19937p* config)
     static unsigned long mag01[2]={0x0, MATRIX_A};
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
 	
-    if (config->mti >= N) { /* generate N words at one time */
+    if (config->mti >= NN) { /* generate N words at one time */
         int kk;
 		
-		/*        if (config->mti == N+1)*/   /* if sgenrand() has not been called, */
+		/*        if (config->mti == NN+1)*/   /* if sgenrand() has not been called, */
 		/*            sgenrand(4357);*/ /* a default initial seed is used   */
 		
-        for (kk=0;kk<N-M;kk++) {
+        for (kk=0;kk<NN-MM;kk++) {
             y = (config->mt[kk]&UPPER_MASK)|(config->mt[kk+1]&LOWER_MASK);
-            config->mt[kk] = config->mt[kk+M] ^ (y >> 1) ^ config->mag01[y & 0x1];
+            config->mt[kk] = config->mt[kk+MM] ^ (y >> 1) ^ config->mag01[y & 0x1];
         }
-        for (;kk<N-1;kk++) {
+        for (;kk<NN-1;kk++) {
             y = (config->mt[kk]&UPPER_MASK)|(config->mt[kk+1]&LOWER_MASK);
-            config->mt[kk] = config->mt[kk+(M-N)] ^ (y >> 1) ^ config->mag01[y & 0x1];
+            config->mt[kk] = config->mt[kk+(MM-NN)] ^ (y >> 1) ^ config->mag01[y & 0x1];
         }
-        y = (config->mt[N-1]&UPPER_MASK)|(config->mt[0]&LOWER_MASK);
-        config->mt[N-1] = config->mt[M-1] ^ (y >> 1) ^ config->mag01[y & 0x1];
+        y = (config->mt[NN-1]&UPPER_MASK)|(config->mt[0]&LOWER_MASK);
+        config->mt[NN-1] = config->mt[MM-1] ^ (y >> 1) ^ config->mag01[y & 0x1];
 		
         config->mti = 0;
     }
