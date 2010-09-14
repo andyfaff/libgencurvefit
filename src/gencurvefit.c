@@ -101,7 +101,7 @@ struct genoptStruct {
 	//have a pointer to data that users can pass around.
 	void *userdata;
 	
-	struct mt19937p myMT19937;
+	mt19937p myMT19937;
 };
 typedef struct genoptStruct genoptStruct;
 
@@ -161,7 +161,7 @@ typedef struct genoptStruct genoptStruct;
  randomInteger returns an integer between 0 and upper EXclusive
  i.e. you will never get upper returned.
  */
-static int randomInteger (struct mt19937p *myMT19937, int upper){
+static int randomInteger (mt19937p *myMT19937, int upper){
 	int val;
 	while (upper <= (val = genrand_int(myMT19937) / (0xffffffff / upper)));
 //	while (upper <= (val = random() / (RAND_MAX/upper)));
@@ -171,15 +171,14 @@ static int randomInteger (struct mt19937p *myMT19937, int upper){
 /*
  randomDouble returns a double value between lower <= x <= upper OR [lower,upper]
  */
-static double randomDouble(struct mt19937p *myMT19937, double lower, double upper){
+static double randomDouble(mt19937p *myMT19937, double lower, double upper){
 	return lower + (upper - lower) * genrand(myMT19937);
 	//double val = lower + random()/(((double)RAND_MAX + 1)/(upper - lower));
 	//return val;
 }
 
-
 //returns gaussian noise, which is from a distribution with sd = 2.
-double gnoise(struct mt19937p *myMT19937, double sd){
+double gnoise(mt19937p *myMT19937, double sd){
 	double en0, en1;
 	do{
 		en0 = randomDouble(myMT19937, 0, 1);
@@ -190,7 +189,7 @@ double gnoise(struct mt19937p *myMT19937, double sd){
 	return sd * sqrt(-2 * log(en0))*cos(2 * PI * en1);
 }
 
-static void SelectSamples(struct mt19937p *myMT19937, long popsize, long candidate, long *r1, long *r2, long *r3, long *r4, long *r5){
+static void SelectSamples(mt19937p *myMT19937, long popsize, long candidate, long *r1, long *r2, long *r3, long *r4, long *r5){
 	if (r1){
 		do
 			*r1 = randomInteger(myMT19937, popsize);	
@@ -479,7 +478,7 @@ static waveStats getWaveStats(double *sort, long length,int moment){
 	double minval = *sort, maxval = *sort;
 	long minpos = 0, maxpos = 0;
 	double nx2 = 0, nx = 0;
-	struct waveStats retval;
+	waveStats retval;
 	
 	switch(moment){
 		case 0:

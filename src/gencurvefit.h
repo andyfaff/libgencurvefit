@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-	
+
 /**\mainpage
 libgencurvefit is a lightweight library for data regression using differential evolution.  To use you will have to:
  1) include gencurvefit.h.
@@ -438,6 +438,8 @@ int genetic_optimisation(fitfunction fitfun,
 	 @param datapoints			- the number of datapoints being fitted.
 	 
 	 */
+	
+
 double chisquared(void *userdata, const double *coefs, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints);
 
 	/**
