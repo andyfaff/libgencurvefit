@@ -1,8 +1,7 @@
 # Define required macros here
 SHELL = /bin/sh
 
-OBJ =  gencurvefit.o mt19937p.o
-CFLAG = -O3 -funroll-loops -c -fopenmp
+CFLAGS = -O3 -funroll-loops -c -fopenmp -std=c99
 CC = gcc
 STATICLIB=libgencurvefit.a
 LIBS=$(STATICLIB)
@@ -21,7 +20,10 @@ all: libgencurvefit.a gaussian globalfitting
 libgencurvefit.a: $(OBJS)
 	$(AR) $@ $(OBJS)
 	-@ ($(RANLIB) $@ || true) >/dev/null 2>&1
-	
+
+.c.o:
+	$(CC) $(CFLAGS) -c -o $@ $< 
+
 clean:
 	rm src/*.o
 	rm *.a
@@ -38,7 +40,7 @@ install: install-libs
 	chmod 644 $(DESTDIR)$(includedir)/gencurvefit.h
 
 gaussian: 
-	g++ -O3 examples/gaussian/*.cpp -L. -fopenmp -o examples/gaussian/gaussian_fitter -lgencurvefit -lgomp -lpthread
+	g++ -O3 examples/gaussian/*.cpp -Isrc -L. -fopenmp -o examples/gaussian/gaussian_fitter -lgencurvefit -lgomp -lpthread -lm
 	
 globalfitting:
-	g++ -O3 examples/globalfitting/*.cpp -fopenmp -L. -o examples/globalfitting/global_fitter -lgencurvefit -lgomp -lpthread
+	g++ -O3 examples/globalfitting/*.cpp -Isrc -fopenmp -L. -o examples/globalfitting/global_fitter -lgencurvefit -lgomp -lpthread -lm
