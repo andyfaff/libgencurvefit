@@ -380,7 +380,7 @@ void packAlphaSymmetric(double** alpha, unsigned int numvarparams){
 			alpha[ii][jj] = alpha[jj][ii];	
 }
 
-/** Calculates the lower left elements for <code>this.alpha</code>. */
+/** Calculates the lower left elements for <code>alpha</code>. */
 void updateAlpha(double **alpha, double **derivativeMatrix,  unsigned int numvarparams, const double *edata, long datapoints, double lambda) {
 	int ii, jj;
 	for (ii = 0; ii < numvarparams; ii++) {
@@ -405,7 +405,7 @@ double calculateBetaElement(double **derivativeMatrix, int row, const double *yd
 	return result;
 }
 
-/** Calculates all elements for <code>this.beta</code>. */
+/** Calculates all elements for <code>beta</code>. */
 void updateBeta(double *b, double **derivativeMatrix, int numvarparams, const double *ydata, const double *model, const double *edata, long datapoints) {
 	int ii;
 	for (ii = 0; ii < numvarparams; ii++)

@@ -26,7 +26,8 @@ struct mt19937p {
 	unsigned long mt[N];
 	int mti;
 	unsigned long mag01[2];
-};
+}; 
+typedef struct mt19937p mt19937p;
 
 /* initializing the array with a NONZERO seed */
 void sgenrand(unsigned long seed, struct mt19937p* config);
