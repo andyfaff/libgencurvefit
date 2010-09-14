@@ -282,16 +282,16 @@ int main (int argc, char *argv[]) {
 	}
 	
 	//set up the xpoints
-	xdata = (double**)malloc2d(yy.size(), 1, sizeof(double));
+	xdata = (double**)malloc2d(1, yy.size(), sizeof(double));
 	if(!xdata){
 		err = NO_MEMORY;
 		goto done;
 	}
-	for(ii=0 ; ii<yy.size(); ii+=1)
-		xdata[ii][0] = xx[ii];
+	for(ii=0 ; ii < yy.size(); ii+=1)
+		xdata[0][ii] = xx[ii];
 	
 	//allocate memory for the fit parameter results.
-	fittedCoefs = (double**)malloc2d(coefs.size(), myMCiters, sizeof(double));
+	fittedCoefs = (double**)malloc2d(myMCiters, coefs.size(), sizeof(double));
 	if(!fittedCoefs){
 		err = NO_MEMORY;
 		goto done;
@@ -320,7 +320,7 @@ int main (int argc, char *argv[]) {
 		MC_arg[ii].costfun = &COST_FUNCTION;
 		MC_arg[ii].holdvector = &bs[0];
 		MC_arg[ii].chi2Results = fittedChi2 + ii;
-		MC_arg[ii].coefResults = fittedCoefs + (ii * coefs.size()); //&fittedcoefs[iterations_consumed][0]
+		MC_arg[ii].coefResults = *(fittedCoefs + ii); //&fittedcoefs[iterations_consumed][0]
 		MC_arg[ii].coefP = &coefs[0];
 		MC_arg[ii].numcoefs = coefs.size();
 		MC_arg[ii].dimensions = 1;
