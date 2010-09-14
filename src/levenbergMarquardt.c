@@ -37,7 +37,7 @@ static double factorial(double num){
  */
 
 static int ludcmp(double **a, int n, int *indx, double *d){
-	int i, imax, j, k, err = 0;
+	int i, imax = 0, j, k, err = 0;
 	double big, dum, sum, temp;
 	double *vv = NULL;
 	
@@ -146,8 +146,6 @@ static int choldc (double **a, int N, double *p){
 		}
 	}
 	
-	
-done:
 	return err;
 }
 
@@ -203,7 +201,7 @@ int matrixInversion_lu(double **a, int N){
 		goto done;
 	}
 	
-	if(err = ludcmp(tempA,N,indx,&d))
+	if((err = ludcmp(tempA,N,indx,&d)))
 		goto done;
 	
 	for(j=0 ; j<N ; j++){
@@ -260,7 +258,7 @@ static int matrixInversion_chol(double **a, int N, double *detA){
 	memset(b, 0, sizeof(double) * N);
 	
 	//perform the cholesky decomposition
-	if(err = choldc(tempA, N, p)) goto done;
+	if((err = choldc(tempA, N, p))) goto done;
 	
 	//now do the back substitution
 	for(j = 0 ; j < N ; j++){
@@ -315,7 +313,7 @@ static int partialDerivative(void *userdata, fitfunction fitfun, double** deriva
 	diff = EPSILON * param;
 	coefs_temp[parameterIndex] = param + diff;
 	
-	if(err = fitfun(userdata, coefs_temp, numcoefs, *(derivativeMatrix + derivativeMatrixRow), (const double**)xdata, datapoints, numDataDims))
+	if((err = fitfun(userdata, coefs_temp, numcoefs, *(derivativeMatrix + derivativeMatrixRow), (const double**)xdata, datapoints, numDataDims)))
 		goto done;
 	
 	coefs_temp[parameterIndex] = param - diff;
@@ -326,7 +324,7 @@ static int partialDerivative(void *userdata, fitfunction fitfun, double** deriva
 		goto done;
 	}
 	
-	if(err = fitfun(userdata, coefs_temp, numcoefs, dataTemp, (const double**)xdata, datapoints, numDataDims))
+	if((err = fitfun(userdata, coefs_temp, numcoefs, dataTemp, (const double**)xdata, datapoints, numDataDims)))
 		goto done;
 	
 	for(jj = 0 ; jj < datapoints ; jj++)
@@ -346,7 +344,7 @@ static int updatePartialDerivative(void *userdata, fitfunction fitfun, double **
 	int err = 0;
 	int ii;
 	for(ii = 0 ; ii < numvarparams ; ii++){
-		if(err = partialDerivative(userdata, fitfun, derivativeMatrix, ii, varparams[ii], coefs, numcoefs, xdata, datapoints, numDataDims))
+		if((err = partialDerivative(userdata, fitfun, derivativeMatrix, ii, varparams[ii], coefs, numcoefs, xdata, datapoints, numDataDims)))
 			return err;
 	} 
 	return err;
@@ -430,9 +428,8 @@ int getCovarianceMatrix(double **covarianceMatrix,
 	double **derivativeMatrix = NULL;
 	double **reducedCovarianceMatrix = NULL;
 	double hessianDeterminant = 0;
-	double val = 0;
 	unsigned int *varparams = NULL;
-	int ii,jj, numvarparams;
+	int ii,jj, numvarparams = 0;
 	err = 0;
 	
 	//fit function must exist
@@ -469,12 +466,13 @@ int getCovarianceMatrix(double **covarianceMatrix,
 		goto done;
 	}
 	
-	if(err = updatePartialDerivative(userdata, fitfun, derivativeMatrix, coefs, numcoefs, varparams, numvarparams, xdata, datapoints, numDataDims))
+	if((err = updatePartialDerivative(userdata, fitfun, derivativeMatrix, coefs, numcoefs, varparams, numvarparams, xdata, datapoints, numDataDims)))
 	   goto done;
 	   	
 	updateAlpha(reducedCovarianceMatrix, derivativeMatrix, numvarparams, edata, datapoints, 0);
 
-	if(err = matrixInversion_chol(reducedCovarianceMatrix, numvarparams, &hessianDeterminant)) goto done;
+	if((err = matrixInversion_chol(reducedCovarianceMatrix, numvarparams, &hessianDeterminant)))
+		goto done;
 		
 	if(unitSD)
 		for(ii = 0; ii < numvarparams ; ii++)
@@ -491,12 +489,9 @@ int getCovarianceMatrix(double **covarianceMatrix,
 		for(jj = 0 ; jj < numcoefs ; jj++)
 			covarianceMatrix[ii][jj] = sqrt(-1);
 	
-	for (ii = 0; ii < numvarparams; ii++) {
-		for(jj = 0 ; jj < numvarparams ; jj++){
-			val = reducedCovarianceMatrix[ii][jj];
-			covarianceMatrix[varparams[ii]][varparams[jj]];
-		}
-	}
+	for (ii = 0; ii < numvarparams; ii++)
+		for(jj = 0 ; jj < numvarparams ; jj++)
+			covarianceMatrix[varparams[ii]][varparams[jj]] =  reducedCovarianceMatrix[ii][jj];
 		
 done:
 	if(varparams != NULL)
@@ -699,20 +694,20 @@ int levenberg_marquardt(fitfunction fitfun,
 	do {
 		insertVaryingParams(temp_coefs, varparams, numvarparams, reducedParameters);
 		
-		if(err = fitfun(userdata, temp_coefs, numcoefs, model, xdata, datapoints, numDataDims))
+		if((err = fitfun(userdata, temp_coefs, numcoefs, model, xdata, datapoints, numDataDims)))
 			goto done;
 		
 
 		cost = mycostfun(userdata, temp_coefs, numcoefs, model, ydata, edata, datapoints);
 		
-		if(err = updatePartialDerivative(userdata, fitfun, derivativeMatrix, temp_coefs, numcoefs, varparams, numvarparams, xdata, datapoints, numDataDims))
+		if((err = updatePartialDerivative(userdata, fitfun, derivativeMatrix, temp_coefs, numcoefs, varparams, numvarparams, xdata, datapoints, numDataDims)))
 			goto done;
 		
 		updateAlpha(alpha, derivativeMatrix, numvarparams, edata, datapoints, lambda);
 		   
 		updateBeta(beta, derivativeMatrix, numvarparams, ydata, model, edata, datapoints);
 		
-		if(err = matrixInversion_lu(alpha, numvarparams))
+		if((err = matrixInversion_lu(alpha, numvarparams)))
 			goto done;
 		
 		for (ii = 0; ii < numvarparams ; ii++){
@@ -725,7 +720,7 @@ int levenberg_marquardt(fitfunction fitfun,
 		
 		insertVaryingParams(temp_coefs, varparams, numvarparams, incrementedParameters);
 
-		if(err = fitfun(userdata, temp_coefs, numcoefs, model, xdata, datapoints, numDataDims))
+		if((err = fitfun(userdata, temp_coefs, numcoefs, model, xdata, datapoints, numDataDims)))
 			goto done;
 		
 		incrementedCost = mycostfun(userdata, temp_coefs, numcoefs, model, ydata, edata, datapoints);

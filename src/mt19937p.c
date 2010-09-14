@@ -65,7 +65,7 @@ double /* generating reals */
 genrand(struct mt19937p* config)
 {
     unsigned long y;
-    static unsigned long mag01[2]={0x0, MATRIX_A};
+ //   static unsigned long mag01[2]={0x0, MATRIX_A};
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
 
     if (config->mti >= NN) { /* generate NN words at one time */
@@ -102,7 +102,7 @@ genrand(struct mt19937p* config)
 genrand_int(struct mt19937p* config)
 {
     unsigned long y;
-    static unsigned long mag01[2]={0x0, MATRIX_A};
+//    static unsigned long mag01[2]={0x0, MATRIX_A};
     /* mag01[x] = x * MATRIX_A  for x=0,1 */
 	
     if (config->mti >= NN) { /* generate N words at one time */
