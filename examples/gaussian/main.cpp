@@ -320,7 +320,7 @@ int main (int argc, char *argv[]) {
 		MC_arg[ii].costfun = &COST_FUNCTION;
 		MC_arg[ii].holdvector = &bs[0];
 		MC_arg[ii].chi2Results = fittedChi2 + ii;
-		MC_arg[ii].coefResults = *(fittedCoefs + ii); //&fittedcoefs[iterations_consumed][0]
+		MC_arg[ii].coefResults = fittedCoefs; //&fittedcoefs[iterations_consumed][0]
 		MC_arg[ii].coefP = &coefs[0];
 		MC_arg[ii].numcoefs = coefs.size();
 		MC_arg[ii].dimensions = 1;
