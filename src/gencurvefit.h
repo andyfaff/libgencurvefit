@@ -10,14 +10,18 @@
 /*
  we only ever want one version of the symbols in this file
  */
+
 #ifndef GENCURVEFIT_H
 #define GENCURVEFIT_H
+
+#include "mt19937p.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 
+	
 /**\mainpage
 libgencurvefit is a lightweight library for data regression using differential evolution.  To use you will have to:
  1) include gencurvefit.h.
@@ -463,7 +467,22 @@ double chisquared(void *userdata, const double *coefs, unsigned int numcoefs, co
 	 */
 double robust(void *userdata, const double *coefs, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints);
 
+/**
+ randomInteger returns an integer between 0 and upper EXclusive
+ i.e. you will never get upper returned.
+ */
+int randomInteger (mt19937p *myMT19937, int upper);
 
+/**
+randomDouble returns a double value between lower <= x <= upper OR [lower,upper]
+ */
+double randomDouble(mt19937p *myMT19937, double lower, double upper);
+	
+/**
+ returns gaussian noise, which is from a distribution with standard deviation sd
+ */
+double gnoise(mt19937p *myMT19937, double sd);
+		
 #ifdef __cplusplus
 }
 #endif
