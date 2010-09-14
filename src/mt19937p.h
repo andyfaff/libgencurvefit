@@ -29,6 +29,10 @@ struct mt19937p {
 }; 
 typedef struct mt19937p mt19937p;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* initializing the array with a NONZERO seed */
 void sgenrand(unsigned long seed, struct mt19937p* config);
 
@@ -39,4 +43,8 @@ genrand(struct mt19937p* config);
 unsigned long /* for integer generation */
 genrand_int(struct mt19937p* config);
 
+#ifdef __cplusplus
+}
+#endif
+		
 #endif
