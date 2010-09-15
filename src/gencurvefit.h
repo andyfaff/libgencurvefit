@@ -169,23 +169,28 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 		 iterations				- the maximum number of times the population is evolved during the fit (unless convergence is reached).
 		*/
 		unsigned int iterations;
+		
 		/**
 		 popsizemultiplier		- the total size of the genetic population is popsizemultiplier multiplied by the number of varying parameters.
 		 */
 		unsigned int popsizeMultiplier;
+		
 		/**
 		 k_m						- the mutation constant 0 < k_m < 2.  A typical value is 0.7.  Make larger to get more mutation.
 		 */
 		double k_m;
+		
 		/**
 		 recomb					- the recombination constant, 0 < recomb < 1.  A typical value is 0.5.  Make smaller to get more exploration of parameter space.
 		 */
 		double recomb;
+		
 		/**
 		 tolerance				- specifies the stopping tolerance for the fit, which is when the standard deviation of the chi2 values of the entire population
 		 divided by its mean is less than tolerance.
 		 */
 		double tolerance;
+		
 		/**
 		 strategy				- Choose the Differential Evolution strategy (see http://www.icsi.berkeley.edu/~storn/code.html#prac)
 		 0 = Best1Bin;
@@ -201,6 +206,7 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 		 Try Best1Bin to start with.
 		 */
 		unsigned int strategy;
+		
 		/**
 		 temp					- Normally if the chi2 value of the trial vector is lower than vector i from the population then the trial vector replaces vector i. 
 		 However, if you specify temp  is specified then the probability of the trial vector being accepted is now done on a Monte Carlo basis. I.e.:
@@ -214,11 +220,13 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 		 IF YOU DON'T WANT THIS TEMPERING SET temp TO A NUMBER LESS THAN 0 (e.g. -1) .
 		 */
 		double temp;
+		
 		/**
 		 updatefun				- an (optional) function that is called each time the costfunction improves.  Use this function to keep track of the fit.
 		 If you return a non-zero value from this function the fit will stop. This function will also be called if a move is accepted on a monte carlo basis (see temp). 		 
 		 */		 
 		updatefunction updatefun;
+		
 		/**
 		 updatefrequency		- Bitwise operator that specifies how often the update function is called.
 		 Bit No:
@@ -229,20 +237,23 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 		 4 = after the fit has finished.
 		*/		 
 		unsigned int updatefrequency;
+		
 		/**
 		seed					- seed the random number generator (must be an integer > 0)
 		 */
-		int seed;
+		unsigned int seed;
+		
 		/**
 		useinitialguesses		- uses the initial guesses as a starting point for the fit.  If you specify this
 			option then the starting coefficients must lie in between the limits
 		 */
-		int useinitialguesses;
+		unsigned int useinitialguesses;
 		
 		/**
 		monteCarlo			- when a fit is initialised a dataset is synthesised by adding gaussian deviates to
 			each of the y datapoints.  The gaussian deviates for each point are taken from a distribution whose standard deviation
 			is equal to the error bar for that point.  This means you aren't fitting the data you inputted, but a slightly altered version
+			This is NOT the same as using the tempering above.  Default = 0 (no adjustment)
 		*/
 		unsigned int monteCarlo;
 	};
