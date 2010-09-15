@@ -894,7 +894,6 @@ int genetic_optimisation(fitfunction fitfun,
 		}
 	}
 	gos.limits = limits;
-	
 
 	/*
 	 if you want to use the initial guesses to start the fit, then they need to be within the limits
