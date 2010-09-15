@@ -153,7 +153,7 @@ void fitWorker(fitWorkerParm* p) {
 //	outputString.append(to_a_string((double*)p->userdata, 1));
 //	outputString.append(" ");
 	outputString.append(to_a_string(p->coefResults, p->numcoefs));
-	outputString.append("\r\n");
+	outputString.append("\n");
 	cout << outputString;
 	cout.flush();
 	
@@ -191,6 +191,7 @@ int main (int argc, char *argv[]) {
 	
 	int numprocs = 1;
 	int myid = 0;	
+	
 #ifdef USE_MPI
 	MPI_Init(&argc,&argv); /* all MPI programs start with MPI_Init; all 'N' processes exist thereafter */
 	MPI_Comm_size(MPI_COMM_WORLD,&numprocs); /* find out how big the SPMD world is */
