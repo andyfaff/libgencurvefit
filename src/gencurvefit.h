@@ -238,6 +238,13 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 			option then the starting coefficients must lie in between the limits
 		 */
 		int useinitialguesses;
+		
+		/**
+		monteCarlo			- when a fit is initialised a dataset is synthesised by adding gaussian deviates to
+			each of the y datapoints.  The gaussian deviates for each point are taken from a distribution whose standard deviation
+			is equal to the error bar for that point.  This means you aren't fitting the data you inputted, but a slightly altered version
+		*/
+		unsigned int monteCarlo;
 	};
 	typedef struct gencurvefitOptions gencurvefitOptions;
 	
