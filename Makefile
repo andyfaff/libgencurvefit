@@ -15,7 +15,7 @@ includedir = ${prefix}/include
 
 OBJS = src/gencurvefit.o src/mt19937p.o src/levenbergMarquardt.o
 
-all: libgencurvefit.a gaussian globalfitting
+all: libgencurvefit.a gaussian globalfitting processglobalfitting
 
 libgencurvefit.a: $(OBJS)
 	$(AR) $@ $(OBJS)
@@ -44,3 +44,6 @@ gaussian:
 	
 globalfitting:
 	g++ -O3 examples/globalfitting/*.cpp -Isrc -fopenmp -L. -o examples/globalfitting/global_fitter -lgencurvefit -lgomp -lpthread -lm
+
+processglobalfitting:
+	g++ -O3 examples/processglobalfitting/*.cpp -Isrc -fopenmp -L. -o examples/processglobalfitting/processglobalfitting -lgencurvefit
