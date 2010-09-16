@@ -371,7 +371,7 @@ void calculateAlphaElement(int row, int col, double **alpha, double **derivative
 
 /** packs the upper right elements of the alpha matrix, because the alpha matrix should be symmetrical*/
 void packAlphaSymmetric(double** alpha, unsigned int numvarparams){  
-	int ii,jj;
+	unsigned int ii,jj;
 	
 	for(ii = 0 ; ii < numvarparams ; ii++)
 		for(jj = numvarparams - 1 ; jj > ii ; jj--)
@@ -380,7 +380,7 @@ void packAlphaSymmetric(double** alpha, unsigned int numvarparams){
 
 /** Calculates the lower left elements for <code>alpha</code>. */
 void updateAlpha(double **alpha, double **derivativeMatrix,  unsigned int numvarparams, const double *edata, long datapoints, double lambda) {
-	int ii, jj;
+	unsigned int ii, jj;
 	for (ii = 0; ii < numvarparams; ii++) {
 		for (jj = 0; jj < ii+1 ; jj++)
 			calculateAlphaElement(ii, jj, alpha, derivativeMatrix, edata, datapoints, lambda);
@@ -510,14 +510,12 @@ done:
  returns 0 if no error
  returns errorcode otherwise
  */
-static int
+static void
 insertVaryingParams(double *coefs, const unsigned int* varparams, unsigned int numvarparams, double *vector){
-	int err=0, ii;
+	unsigned int ii;
 	
 	for(ii = 0 ; ii < numvarparams ; ii += 1)
 		*(coefs + *(varparams + ii)) =  *(vector + ii);
-	
-	return err;
 }
 
 /**
@@ -585,7 +583,7 @@ int levenberg_marquardt(fitfunction fitfun,
 					 void* userdata){
 
 	int err = 0;
-	int ii, jj, numvarparams = 0, iterations;
+	unsigned int ii, jj, numvarparams = 0, iterations;
 	unsigned int *varparams = NULL;
 	double cost = -1, incrementedCost = -1, lambda = 0.001;
 	double **derivativeMatrix = NULL;

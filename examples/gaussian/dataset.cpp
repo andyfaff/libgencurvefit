@@ -78,10 +78,8 @@ int dataset::readDataFile(const char* filename){
 			columndata.clear();
 		}
 		datapoints = yy.size();
-
-done:
 		
-		if(file_to_read.is_open())
+	if(file_to_read.is_open())
 			file_to_read.close();
 		
 		return err;
@@ -146,8 +144,7 @@ int readCoefficientFile(const char* filename, vector <double> &coefficients, vec
 		
 		columndata.clear();
 	}
-	
-done:
+
 	if(file_to_read.is_open())
 		file_to_read.close();
 	

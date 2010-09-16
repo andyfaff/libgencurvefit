@@ -18,7 +18,13 @@
 extern "C" {
 #endif
 
+#ifdef WIN32
+#include "float.h"
 
+	int isfinite(double x){
+		return _finite(x);
+	}
+#endif
 	
 /**\mainpage
 libgencurvefit is a lightweight library for data regression using differential evolution.  To use you will have to:
@@ -55,6 +61,7 @@ libgencurvefit is a lightweight library for data regression using differential e
  The mathematical constant Pi
  */
 #define PI 3.14159265358979323846
+
 
 	/**
 	 Create a two-dimensional array in a single allocation

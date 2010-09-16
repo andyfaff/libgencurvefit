@@ -6,7 +6,7 @@
  */
 #include "gencurvefit.h"
 #include "mt19937p.h"
-#include <stdlib.h>
+#include "stdlib.h"
 #include <time.h>
 #include "math.h"
 #include "string.h"
@@ -70,7 +70,7 @@ struct genoptStruct {
 	unsigned int iterations;
 	
 	/*totalsize of the population = popsizeMultiplier * numvarparams*/
-	long totalpopsize;
+	unsigned int totalpopsize;
 	
 	/*did you want to use the intial guesses to initialise the fit*/
 	int useinitialguesses;
@@ -228,7 +228,7 @@ static void SelectSamples(mt19937p *myMT19937, long popsize, long candidate, lon
 
 static void Best1Bin(genoptStruct *p, long candidate){
 	long r1, r2;
-	long n, i;
+	unsigned int n, i;
 	
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate, &r1, &r2, NULL, NULL, NULL);
 	n = randomInteger(&(p->myMT19937),  p->numvarparams);
@@ -247,7 +247,7 @@ static void Best1Bin(genoptStruct *p, long candidate){
 
 static void Best1Exp(genoptStruct *p, long candidate){
 	long r1, r2;
-	long n, i;
+	unsigned int n, i;
 	
 	SelectSamples(&(p->myMT19937),  p->totalpopsize, candidate, &r1, &r2, NULL, NULL, NULL);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -265,7 +265,7 @@ static void Best1Exp(genoptStruct *p, long candidate){
 
 static void Rand1Exp(genoptStruct *p, long candidate){
 	long r1, r2, r3;
-	long n, i;
+	unsigned int n, i;
 	
 	SelectSamples(&(p->myMT19937),  p->totalpopsize, candidate,&r1,&r2,&r3, NULL, NULL);
 	n = randomInteger(&(p->myMT19937),  p->numvarparams);
@@ -284,7 +284,7 @@ static void Rand1Exp(genoptStruct *p, long candidate){
 
 static void RandToBest1Exp(genoptStruct *p, long candidate){
 	long r1, r2;
-	long n,  i;
+	unsigned int n,  i;
 	
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2, NULL, NULL, NULL);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -303,7 +303,7 @@ static void RandToBest1Exp(genoptStruct *p, long candidate){
 
 static void Best2Exp(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4;
-	long n, i;
+	unsigned int n, i;
 	
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,&r4, NULL);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -324,7 +324,7 @@ static void Best2Exp(genoptStruct *p, long candidate){
 
 static void Rand2Exp(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4, r5;
-	long n, i;
+	unsigned int n, i;
 	
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,&r4,&r5);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -345,7 +345,7 @@ static void Rand2Exp(genoptStruct *p, long candidate){
 
 static void RandToBest1Bin(genoptStruct *p, long candidate){
 	long r1, r2;
-	long n, i;
+	unsigned int n, i;
 	
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate, &r1, &r2, NULL, NULL, NULL);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -365,7 +365,7 @@ static void RandToBest1Bin(genoptStruct *p, long candidate){
 
 static void Best2Bin(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4;
-	long n, i;
+	unsigned int n, i;
 	
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,&r4, NULL);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -387,7 +387,7 @@ static void Best2Bin(genoptStruct *p, long candidate){
 
 static void Rand2Bin(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4, r5;
-	long n, i;
+	unsigned int n, i;
 	
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,&r4,&r5);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -409,7 +409,7 @@ static void Rand2Bin(genoptStruct *p, long candidate){
 
 static void Rand1Bin(genoptStruct *p, long candidate){
 	long r1, r2, r3;
-	long n, i;
+	unsigned int n, i;
 	
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,NULL, NULL);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -539,14 +539,12 @@ ensureConstraints(genoptStruct *p){
  returns 0 if no error
  returns errorcode otherwise
  */
-static int
+static void
 insertVaryingParams(double *coefs, const unsigned int* varparams, unsigned int numvarparams, double *vector){
-	int err=0, ii;
+	unsigned int ii;
 	
 	for(ii = 0 ; ii < numvarparams ; ii += 1)
 		coefs[varparams[ii]] =  vector[ii];
-
-	return err;
 }
 
 /*
@@ -591,7 +589,7 @@ swapPopVector(genoptStruct *p, long popsize, long i, long j){
 static int initialiseFit(genoptStruct *p){
 	int err = 0;
 	
-	long ii, jj;
+	unsigned int ii, jj;
 	double bot, top, chi2;
 	waveStats wavStats;
 	
@@ -606,8 +604,7 @@ static int initialiseFit(genoptStruct *p){
 	
 	//initialise Chi2array, will require a bit of calculation of the model function for each of the initial guesses.
 	for(ii = 0 ; ii < p->totalpopsize ; ii += 1){
-		if((err = insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector + ii))))
-			goto done;
+		insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector + ii));
 		
 		//calculate the model
 		if((err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->numcoefs, p->model, p->xdata, p->datapoints, p->numDataDims)))
@@ -626,8 +623,7 @@ static int initialiseFit(genoptStruct *p){
 		goto done;
 		
 	//put the best fit from the intialisation into the coeffcients to return		   
-	if((err = insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector))))
-		goto done;
+	insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector));
 	
 	if(p->updatefun && (4 & p->updatefrequency))
 		if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, 0, *(p->chi2Array), 4, -1)))
@@ -646,8 +642,8 @@ done:
  returns errorcode otherwise.
  */
 static int optimiseloop(genoptStruct *p){
-	long ii, kk, currentpvector;
 	int err = 0;
+	unsigned int ii, kk, currentpvector;
 	double chi2pvector,chi2trial;
 	int acceptMoveGrudgingly;
 	waveStats wavStats;
@@ -658,8 +654,7 @@ static int optimiseloop(genoptStruct *p){
 		p->numfititers = kk;
 		
 		if(p->updatefun && (8 & p->updatefrequency)){
-			if((err = insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector))))
-				goto done;
+			insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector));
 						
 			if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 8, convergenceNumber)))
 				goto done;
@@ -679,8 +674,7 @@ static int optimiseloop(genoptStruct *p){
 			/*
 			 find out the chi2 value of the trial vector		
 			 */
-			if((err = insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, p->gen_trial)))
-				goto done;
+			insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, p->gen_trial);
 			
 			if((err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->numcoefs, p->model, p->xdata, p->datapoints, p->numDataDims)))
 				goto done;
@@ -765,8 +759,11 @@ int genetic_optimisation(fitfunction fitfun,
 							){
 	int err = 0, popsizeMultiplier = 20;
 	
-	unsigned int ii, jj;
+	long ii, jj;
+	unsigned int kk;
 	double *yyMC = NULL;
+	/*the overall structure to contain the entire fit*/
+	genoptStruct gos;
 	
 	//fit function must exist
 	if(!fitfun)
@@ -788,8 +785,7 @@ int genetic_optimisation(fitfunction fitfun,
 	if(!limits)
 		return NO_LIMITS_ARRAY;
 	
-	/*the overall structure to contain the entire fit*/
-	genoptStruct gos;
+
 	memset(&gos, 0, sizeof(gos));
 		
 	//initialise the random number generators
@@ -835,8 +831,8 @@ int genetic_optimisation(fitfunction fitfun,
 	gos.userdata = userdata;
 		
 	//work out which parameters are being held
-	for(ii = 0 ; ii < numcoefs ; ii += 1)
-		if(holdvector[ii] == 0)
+	for(kk = 0 ; kk < numcoefs ; kk += 1)
+		if(holdvector[kk] == 0)
 		    gos.numvarparams += 1;
 	
 	if(gos.numvarparams < 1){
@@ -851,9 +847,9 @@ int genetic_optimisation(fitfunction fitfun,
 		goto done;
 	}
 	jj=0;
-	for(ii = 0 ; ii < numcoefs ; ii += 1){
-		if(holdvector[ii] == 0){
-		    gos.varparams[jj] = ii;
+	for(kk = 0 ; kk < numcoefs ; kk += 1){
+		if(holdvector[kk] == 0){
+		    gos.varparams[jj] = kk;
 			jj+=1;
 		}
 	}
@@ -888,8 +884,8 @@ int genetic_optimisation(fitfunction fitfun,
 	gos.totalpopsize = gos.numvarparams * popsizeMultiplier;
 	
 	//these are the upper and lower bounds for the limits, check them
-	for(ii = 0 ; ii < numcoefs ; ii += 1){
-		if(holdvector[ii] == 0 && limits[0][ii] > limits[1][ii]){
+	for(kk = 0 ; kk < numcoefs ; kk += 1){
+		if(holdvector[kk] == 0 && limits[0][kk] > limits[1][kk]){
 			err = INCORRECT_LIMITS;
 			goto done;
 		}
@@ -901,8 +897,8 @@ int genetic_optimisation(fitfunction fitfun,
 	 otherwise we don't care
 	 */
 	if(gos.useinitialguesses){
-		for(ii = 0 ; ii < gos.numcoefs ; ii++)
-			if(gos.coefs[ii] > gos.limits[1][ii] || gos.coefs[ii] < gos.limits[0][ii]){
+		for(kk = 0 ; kk < gos.numcoefs ; kk++)
+			if(gos.coefs[kk] > gos.limits[1][kk] || gos.coefs[kk] < gos.limits[0][kk]){
 				err = COEFS_MUST_BE_WITHIN_LIMITS;
 				goto done;
 			}
