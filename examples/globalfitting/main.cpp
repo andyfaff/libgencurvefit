@@ -31,7 +31,7 @@ int NUM_CPUS = 1;
 #define GO_POPSIZEMULTIPLIER 20
 #define GO_ITERS 500
 #define GO_STRATEGY 0
-#define GO_MONTECARLO 0
+#define GO_MONTECARLO 1
 
 
 typedef struct{
