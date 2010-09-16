@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libgencurvefit", "libgencurvefit.vcproj", "{CE92A1A8-AECE-4089-9F8B-877E8FE4E21E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gaussian", "gaussian.vcproj", "{9BFAB88C-5169-4381-969B-BC9EF4A8EFC8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CE92A1A8-AECE-4089-9F8B-877E8FE4E21E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{CE92A1A8-AECE-4089-9F8B-877E8FE4E21E}.Debug|Win32.Build.0 = Debug|Win32
+		{CE92A1A8-AECE-4089-9F8B-877E8FE4E21E}.Release|Win32.ActiveCfg = Release|Win32
+		{CE92A1A8-AECE-4089-9F8B-877E8FE4E21E}.Release|Win32.Build.0 = Release|Win32
+		{9BFAB88C-5169-4381-969B-BC9EF4A8EFC8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9BFAB88C-5169-4381-969B-BC9EF4A8EFC8}.Debug|Win32.Build.0 = Debug|Win32
+		{9BFAB88C-5169-4381-969B-BC9EF4A8EFC8}.Release|Win32.ActiveCfg = Release|Win32
+		{9BFAB88C-5169-4381-969B-BC9EF4A8EFC8}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
