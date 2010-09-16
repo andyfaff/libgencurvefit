@@ -27,6 +27,7 @@ int NUM_CPUS = 1;
 #define GO_RECOMB 0.5
 #define GO_POPSIZEMULTIPLIER 20
 #define GO_ITERS 500
+#define GO_MONTECARLO 1 
 
 typedef struct{
 	const double *coefP;
@@ -71,8 +72,6 @@ void fitWorker(void* arg) {
 	gencurvefitOptions gco;
 	
 	double *coefsTemp = NULL;
-	double *yytemp = NULL;
-	double *eetemp = NULL;
 	
 	string outputString;	
 	double chi2;
@@ -83,27 +82,7 @@ void fitWorker(void* arg) {
 		goto done;
 	}
 	memcpy(coefsTemp, p->coefP, sizeof(double) * p->numcoefs);
-	
-	yytemp = (double *)malloc(sizeof(double)*p->datapoints);
-	if(!yytemp){
-		err= NO_MEMORY;
-		goto done;
-	}
-	memcpy(yytemp, p->yP, sizeof(double)*p->datapoints);
-	
-	eetemp = (double *)malloc(sizeof(double)*p->datapoints);
-	if(!eetemp){
-		err= NO_MEMORY;
-		goto done;
-	}
-	
-	if(p->useErrors)
-		memcpy(eetemp, p->eP, sizeof(double) * p->datapoints);
-	else{
-		for(ii=0 ; ii< p->datapoints ; ii+=1)
-			eetemp[ii] = 1.0;
-	}
-	
+		
 	gco.iterations = GO_ITERS;
 	gco.popsizeMultiplier = GO_POPSIZEMULTIPLIER;
 	gco.k_m = GO_KM;
@@ -115,17 +94,14 @@ void fitWorker(void* arg) {
 	gco.updatefrequency = 0;
 	gco.seed = -1;
 	gco.useinitialguesses = 0;
+	gco.monteCarlo = GO_MONTECARLO;
 	
 	//at this point we have 3 columns of data and the coefficients
 	//we can start doing the fit.
 	//do a load of montecarlo iterations
-	for(jj= 0 ; jj < p->iterationsToPerform ; jj+=1){
-		//add on the gaussian noise, we're going to be fitting on a log10 scale as well
-		//		for(ii=0 ; ii< p->datapoints ; ii+=1)
-		//			yytemp[ii] = p->yP[ii] + gnoise(p->eP[ii]);
-		
+	for(jj= 0 ; jj < p->iterationsToPerform ; jj+=1){		
 		//do the genetic optimisation
-		err = levenberg_marquardt(p->fitfun,
+/*		err = levenberg_marquardt(p->fitfun,
 								  p->costfun,
 								  p->numcoefs,
 								  coefsTemp,
@@ -138,7 +114,7 @@ void fitWorker(void* arg) {
 								  &chi2,
 								  NULL,
 								  p->userdata); 
-/*		
+*/		
 		err = genetic_optimisation(p->fitfun,
 								   p->costfun,
 								   p->numcoefs,
@@ -146,14 +122,14 @@ void fitWorker(void* arg) {
 								   p->holdvector,
 								   p->limits,
 								   p->datapoints,
-								   yytemp,
+								   p->yP,
 								   p->xP,
-								   eetemp,
+								   p->eP,
 								   1, 
 								   &chi2,
 								   &gco,
 								   p->userdata);
-*/	
+	
 		//output the results
 		if(err){
 			cout << err;
@@ -164,16 +140,12 @@ void fitWorker(void* arg) {
 		outputString.append(to_a_string(&chi2, 1));
 		outputString.append(" ");
 		outputString.append(to_a_string(coefsTemp, p->numcoefs));
-		outputString.append("\r\n");
+		outputString.append("\n");
 		cout << outputString;
 		cout.flush();
 	}
 	
 done:
-	if(yytemp)
-		free(yytemp);
-	if(eetemp)
-		free(eetemp);
 	if(coefsTemp)
 		free(coefsTemp);
 	
