@@ -246,9 +246,9 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 		unsigned int updatefrequency;
 		
 		/**
-		seed					- seed the random number generator (must be an integer > 0)
+		seed					- seed the random number generator (must be an integer > 0).  If you don't want to seed put -1 in here
 		 */
-		unsigned int seed;
+		int seed;
 		
 		/**
 		useinitialguesses		- uses the initial guesses as a starting point for the fit.  If you specify this
