@@ -23,4 +23,5 @@ int globalFitWrapper(void *userdata, const double *coefs, unsigned int numcoefs,
 
 //costfunctions
 double smoother(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
+double log10ChiSquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
 
