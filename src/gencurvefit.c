@@ -797,35 +797,6 @@ int genetic_optimisation(fitfunction fitfun,
 		sgenrand(clock(), &(gos.myMT19937));
 	else
 		sgenrand(gco->seed, &gos.myMT19937);
-	
-	//optional parameters
-	if(!gco){
-		gos.updatefun = NULL;
-		gos.MCtemp = -1;
-		popsizeMultiplier = 20;
-		gos.k_m = 0.7;
-		gos.recomb = 0.5;
-		gos.popsizeMultiplier = 20;
-		gos.iterations = 100;
-		gos.tolerance = 0.001;
-		gos.updatefrequency = 1;
-		gos.useinitialguesses = 0;
-	} else {
-		gos.updatefun = gco->updatefun;
-		if(gco->temp <= 0)
-			gos.MCtemp = -1;
-		else
-			gos.MCtemp = gco->temp;
-		popsizeMultiplier = gco->popsizeMultiplier;
-		gos.popsizeMultiplier = gco->popsizeMultiplier;
-		gos.k_m = gco->k_m;
-		gos.recomb = gco->recomb;
-		gos.iterations = gco->iterations;
-		gos.tolerance = gco->tolerance;
-		gos.updatefrequency = gco->updatefrequency;
-		gos.useinitialguesses = gco->useinitialguesses;
-	}
-	gos.totalpopsize = gos.numvarparams * popsizeMultiplier;
 
 	//setup the data.
 	//the user may wish to alter the data to do a monte carlo iteration
@@ -838,6 +809,7 @@ int genetic_optimisation(fitfunction fitfun,
 		for( ii = 0 ; ii < datapoints ; ii++)
 			yyMC[ii] = ydata[ii] + gnoise(&(gos.myMT19937), edata[ii]);
 		
+		gos.ydata = yyMC;
 	} else {
 		gos.ydata = ydata;
 	}
@@ -885,6 +857,35 @@ int genetic_optimisation(fitfunction fitfun,
 			jj+=1;
 		}
 	}
+	
+	//optional parameters
+	if(!gco){
+		gos.updatefun = NULL;
+		gos.MCtemp = -1;
+		popsizeMultiplier = 20;
+		gos.k_m = 0.7;
+		gos.recomb = 0.5;
+		gos.popsizeMultiplier = 20;
+		gos.iterations = 100;
+		gos.tolerance = 0.001;
+		gos.updatefrequency = 1;
+		gos.useinitialguesses = 0;
+	} else {
+		gos.updatefun = gco->updatefun;
+		if(gco->temp <= 0)
+			gos.MCtemp = -1;
+		else
+			gos.MCtemp = gco->temp;
+		popsizeMultiplier = gco->popsizeMultiplier;
+		gos.popsizeMultiplier = gco->popsizeMultiplier;
+		gos.k_m = gco->k_m;
+		gos.recomb = gco->recomb;
+		gos.iterations = gco->iterations;
+		gos.tolerance = gco->tolerance;
+		gos.updatefrequency = gco->updatefrequency;
+		gos.useinitialguesses = gco->useinitialguesses;
+	}
+	gos.totalpopsize = gos.numvarparams * popsizeMultiplier;
 	
 	//these are the upper and lower bounds for the limits, check them
 	for(ii = 0 ; ii < numcoefs ; ii += 1){

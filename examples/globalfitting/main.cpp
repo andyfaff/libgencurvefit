@@ -24,13 +24,14 @@ using namespace std;
 int NUM_CPUS = 1;
 #define FIT_FUNCTION globalFitWrapper
 #define FIT_FUNCTION_INDIVIDUAL Abeles
-#define COST_FUNCTION chisquared
+#define COST_FUNCTION log10ChiSquared
 #define GO_TOL 0.0005
 #define GO_KM 0.7
 #define GO_RECOMB 0.5
 #define GO_POPSIZEMULTIPLIER 20
 #define GO_ITERS 500
 #define GO_STRATEGY 0
+#define GO_MONTECARLO 0
 
 
 typedef struct{
@@ -40,7 +41,6 @@ typedef struct{
 	const double *yP;
 	const double **xP;
 	const double *eP;
-	bool useErrors;
 	const unsigned int *holdvector;
 	
 	long datapoints;
@@ -72,47 +72,14 @@ std::string to_a_string(double *nums, long numthings)
 
 void fitWorker(fitWorkerParm* p) { 
 	int err = 0;
-	
-	int ii;
 	gencurvefitOptions gco;
-	double *yytemp = NULL;
-	double *eetemp = NULL;
 	
 	string outputString;	
 	double chi2;
 	
 	//copy the coefficients from the supplied coefficient vector into the results.
 	memcpy(p->coefResults, p->coefP, sizeof(double) * p->numcoefs);
-	
-	yytemp = (double *)malloc(sizeof(double)*p->datapoints);
-	if(!yytemp){
-		err= NO_MEMORY;
-		goto done;
-	}
-	memcpy(yytemp, p->yP, sizeof(double)*p->datapoints);
-	
-	eetemp = (double *)malloc(sizeof(double)*p->datapoints);
-	if(!eetemp){
-		err= NO_MEMORY;
-		goto done;
-	}
-	memcpy(eetemp, p->eP, sizeof(double) * p->datapoints);
-	
-	if(p->useErrors)
-		for(ii=0 ; ii< p->datapoints ; ii+=1)
-			eetemp[ii] = log10((p->yP[ii] + p->eP[ii]) / p->yP[ii]);
-	else{
-		for(ii=0 ; ii< p->datapoints ; ii+=1)
-			eetemp[ii] = 1.0;
-	}
-//
-//	//add on the gaussian noise, we're going to be fitting on a log10 scale as well
-//	//		for(ii=0 ; ii< p->datapoints ; ii+=1)
-//	//			yytemp[ii] = log10(p->yP[ii] + gnoise(p->eP[ii]));
-	for(ii=0 ; ii< p->datapoints ; ii+=1)
-		yytemp[ii] = log10(p->yP[ii]);
-	
-	
+		
 	memset(&gco, 0, sizeof(gencurvefitOptions));
 	gco.tolerance = p->tol;
 	gco.k_m = p->k_m;
@@ -121,7 +88,8 @@ void fitWorker(fitWorkerParm* p) {
 	gco.temp = -1;
 	gco.iterations = p->gen_iters;
 	gco.strategy = GO_STRATEGY;
-			
+	gco.monteCarlo = GO_MONTECARLO;
+	
 	//at this point we have 3 columns of data and the coefficients
 	//we can start doing the fit.
 	//do a load of montecarlo iterations
@@ -133,9 +101,9 @@ void fitWorker(fitWorkerParm* p) {
 							   p->holdvector,
 							   p->limits,
 							   p->datapoints,
-							   yytemp,
+							   p->yP,
 							   p->xP,
-							   eetemp,
+							   p->eP,
 							   1, 
 							   &chi2,
 							   &gco,
@@ -144,7 +112,6 @@ void fitWorker(fitWorkerParm* p) {
 	//output the results
 	if(err){
 		cout << err;
-		goto done;
 	}
 	outputString.clear();
 	
@@ -157,11 +124,6 @@ void fitWorker(fitWorkerParm* p) {
 	cout << outputString;
 	cout.flush();
 	
-done:
-	if(yytemp)
-		free(yytemp);
-	if(eetemp)
-		free(eetemp);
 };
 
 
@@ -179,8 +141,6 @@ int main (int argc, char *argv[]) {
 	vector<double> hilim;
 	double **limits = NULL;
 	vector<unsigned int> bs;
-	bool useErrors;
-	string crap;
 	int MCiters, myMCiters;
 	double **xdata = NULL;
 	double **fittedCoefs = NULL;
@@ -201,14 +161,13 @@ int main (int argc, char *argv[]) {
 	myid = 0;
 #endif
 	
-	if(argc != 4){
-		cout << "Useage:\n ./motoMC globalpilot useerrors iterations\n";
+	if(argc != 3){
+		cout << "Useage:\n ./motoMC globalpilot iterations\n";
 		err = WRONG_NUMBER_OF_PARAMS;
 		goto done;
 	}
 	
-	useErrors = strtol(argv[2], NULL, 10);
-	MCiters = (int) strtol(argv[3], NULL, 10);
+	MCiters = (int) strtol(argv[2], NULL, 10);
 	myMCiters = MCiters / numprocs;
 
 	if(myid == numprocs - 1)
@@ -278,7 +237,6 @@ int main (int argc, char *argv[]) {
 
 #pragma omp parallel for shared(MC_arg) private(ii) 
 	for (ii = 0 ; ii < myMCiters ; ii++){					
-		MC_arg[ii].useErrors = useErrors;
 		MC_arg[ii].fitfun = &FIT_FUNCTION;
 		MC_arg[ii].costfun = &COST_FUNCTION;
 		MC_arg[ii].holdvector = &bs[0];

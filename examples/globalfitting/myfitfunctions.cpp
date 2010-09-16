@@ -243,7 +243,7 @@ AbelesCalcAll(void *userdata, const double *coefP, double *yP, const double *xP,
 		
 		den=compnorm(MRtotal[0][0]);
 		num=compnorm(MRtotal[1][0]);
-		answer=log10(((num/den)*scale)+bkg);
+		answer = ((num / den) * scale) + bkg;
 		
 		*yP++ = answer;
 	}
@@ -383,8 +383,8 @@ int AbelesModelWrapper(void *userdata, const double *coefs, unsigned int numcoef
 	return err;
 }
 
-/*
- cost functions
+/**
+ regularising cost function for reflectivity
  */
 double smoother(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts){
 	
@@ -410,5 +410,25 @@ double smoother(void *userdata, const double *params, unsigned int numparams, co
 	return chi2 + lambda * beta;
 }
 
+/**
+ a log10 cost function for reflectivity
+ */
+double log10ChiSquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts){
+	
+	long ii;
+	double chi2 = 0;
+	double val=0;
+	
+	for (ii = 0 ; ii < numpnts ; ii += 1){
+		val = log10(data[ii]) - log10(model[ii]);
+		val /= log10((data[ii] + errors[ii]) / data[ii]);
+		val = pow(val, 2);		
+		if(isfinite(val))
+			chi2 += val;
+	}
+	
+	return chi2;
+	
+}
 
 
