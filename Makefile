@@ -27,7 +27,10 @@ libgencurvefit.a: $(OBJS)
 clean:
 	rm src/*.o
 	rm *.a
-	
+	rm examples/processglobalfitting/processglobalfitting
+	rm examples/globalfitting/global_fitter
+	rm examples/gaussian/gaussian_fitter
+
 install-libs: $(LIBS)
 	-@if [ ! -d $(DESTDIR)$(exec_prefix)  ]; then mkdir -p $(DESTDIR)$(exec_prefix); fi
 	-@if [ ! -d $(DESTDIR)$(libdir)       ]; then mkdir -p $(DESTDIR)$(libdir); fi
