@@ -961,6 +961,21 @@ int genetic_optimisation(fitfunction fitfun,
 	 */
 	err = optimiseloop(&gos);
 
+	if(!err && gco->polishUsingLM)
+		err = levenberg_marquardt(fitfun,
+								  costfun,
+								  numcoefs,
+								  gos.temp_coefs,
+								  holdvector,
+								  datapoints,
+								  ydata,
+								  xdata,
+								  edata,
+								  numDataDims,
+								  chi2,
+								  gco,
+								  userdata);
+
 	/*
 	 at this point we have the best fit.  Now return the results
 	 */
@@ -973,7 +988,6 @@ int genetic_optimisation(fitfunction fitfun,
 	insertVaryingParams(gos.temp_coefs, gos.varparams, gos.numvarparams, *(gos.gen_populationvector));
 	
 	memcpy(gos.coefs, gos.temp_coefs, gos.numcoefs * sizeof(double));
-	
 	
 done:
 	if(yyMC)
