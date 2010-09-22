@@ -18,7 +18,7 @@
 extern "C" {
 #endif
 
-#ifdef WIN32
+#ifdef WIN32 && !(__GNUC__)
 #include "float.h"
 
 	int isfinite(double x){
@@ -194,13 +194,13 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 		
 		/**
 		 tolerance				- specifies the stopping tolerance for the fit, which is when the standard deviation of the chi2 values of the entire population
-		 divided by its mean is less than tolerance.
+		 divided by its mean is less than tolerance.  The default tolerance is 0.005
 		 */
 		double tolerance;
 		
 		/**
 		 strategy				- Choose the Differential Evolution strategy (see http://www.icsi.berkeley.edu/~storn/code.html#prac)
-		 0 = Best1Bin;
+		 0 = Best1Bin (default);
 		 1 = Best1Exp;
 		 2 = Rand1Exp;
 		 3 = RandToBest1Exp;
@@ -251,8 +251,9 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 		int seed;
 		
 		/**
-		useinitialguesses		- uses the initial guesses as a starting point for the fit.  If you specify this
-			option then the starting coefficients must lie in between the limits
+		useinitialguesses		- uses the initial guesses as a starting point for the fit.  If you specify useinitialguesses = 1
+		 then the starting coefficients must lie in between the limits. 
+		 Default = useinitialguesses = 0.
 		 */
 		unsigned int useinitialguesses;
 		
@@ -263,6 +264,12 @@ typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int 
 			This is NOT the same as using the tempering above.  Default = 0 (no adjustment)
 		*/
 		unsigned int monteCarlo;
+		
+		/**
+		 polishUsingLM		- after a fit finishes the differential evolution may not be at the lowest costfunction that is reachable, due to the stochastic
+		 nature of the process.  If you	set polishUsingLM = 1, then a polishing fit using Levenberg Marquardt is carried out.
+		 */
+		unsigned int polishUsingLM;
 	};
 	typedef struct gencurvefitOptions gencurvefitOptions;
 	
