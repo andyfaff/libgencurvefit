@@ -78,11 +78,16 @@ struct genoptStruct {
 	/*which parameters are varying*/
 	unsigned int *varparams;
 	
-	/*an array which holds all the different guesses for the fit.*/
-	/*it has dimensions popsize*numvarparams, numvarparams*/
+	/*
+	 an array which holds all the different guesses for the fit.
+	it has dimensions popsize*numvarparams, numvarparams
+	it is scaled between 0 and 1
+	 */
 	double **gen_populationvector;
+	
 	/*an individual genetic guess.*/
 	double *gen_trial;
+	
 	/*which genetic strategy do you want?*/
 	int strategy;
 	
@@ -91,8 +96,10 @@ struct genoptStruct {
 	 
 	/*an array which holds all the chi2 values for all the different guesses in the population vector.*/
 	double *chi2Array;
+	
 	/*the current chi2*/
 	double chi2;
+	
 	/*number of fititerations done*/
 	long numfititers;
 	
@@ -528,9 +535,9 @@ static waveStats getWaveStats(double *sort, long length,int moment){
 static void
 ensureConstraints(genoptStruct *p){
 	unsigned int ii;	
-	for(ii = 0 ; ii < p->numvarparams ; ii+=1)
-		if(*(p->gen_trial + ii) < p->limits[0][*(p->varparams + ii)] || *(p->gen_trial + ii) > (p->limits[1][*(p->varparams + ii)]))
-			*(p->gen_trial + ii) = randomDouble(&(p->myMT19937), p->limits[0][*(p->varparams + ii)], p->limits[1][*(p->varparams + ii)]);
+	for(ii = 0 ; ii < p->numvarparams ; ii++)
+		if(p->gen_trial[ii] < 0 || p->gen_trial[ii] > 1)
+			p->gen_trial[ii] = randomDouble(&(p->myMT19937), 0, 1);
 }
 
 /*
@@ -540,11 +547,11 @@ ensureConstraints(genoptStruct *p){
  returns errorcode otherwise
  */
 static void
-insertVaryingParams(double *coefs, const unsigned int* varparams, unsigned int numvarparams, double *vector){
+insertVaryingParams(double *coefs, const unsigned int* varparams, unsigned int numvarparams, double *scaledVector, const double **limits){
 	unsigned int ii;
 	
 	for(ii = 0 ; ii < numvarparams ; ii += 1)
-		coefs[varparams[ii]] =  vector[ii];
+		coefs[varparams[ii]] = limits[0][varparams[ii]] + scaledVector[ii] * (limits[1][varparams[ii]] - limits[0][varparams[ii]]);
 }
 
 /*
@@ -589,22 +596,19 @@ swapPopVector(genoptStruct *p, long popsize, long i, long j){
 static int initialiseFit(genoptStruct *p){
 	int err = 0;
 	
-	unsigned int ii, jj;
-	double bot, top, chi2;
+	unsigned int ii;
+	double chi2;
+	double *val;
 	waveStats wavStats;
 	
-	//initialise population vector guesses, from between the limits
-	for(jj = 0 ; jj < p->numvarparams ; jj += 1){
-		bot = p->limits[0][*(p->varparams + jj)];
-		top = p->limits[1][*(p->varparams + jj)];
-		for(ii = 0 ; ii < p->totalpopsize ; ii += 1)
-			p->gen_populationvector[ii][jj] = randomDouble(&(p->myMT19937), bot, top);
-	}
-	
+	//initialise population vector guesses
+	val = *p->gen_populationvector;
+	for(ii = 0 ; ii < p->numvarparams * p->totalpopsize ; ii++)
+		*val++ = randomDouble(&(p->myMT19937), 0, 1);
 	
 	//initialise Chi2array, will require a bit of calculation of the model function for each of the initial guesses.
 	for(ii = 0 ; ii < p->totalpopsize ; ii += 1){
-		insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector + ii));
+		insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector + ii), p->limits);
 		
 		//calculate the model
 		if((err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->numcoefs, p->model, p->xdata, p->datapoints, p->numDataDims)))
@@ -623,7 +627,7 @@ static int initialiseFit(genoptStruct *p){
 		goto done;
 		
 	//put the best fit from the intialisation into the coeffcients to return		   
-	insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector));
+	insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector), p->limits);
 	
 	if(p->updatefun && (4 & p->updatefrequency))
 		if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, 0, *(p->chi2Array), 4, -1)))
@@ -654,7 +658,7 @@ static int optimiseloop(genoptStruct *p){
 		p->numfititers = kk;
 		
 		if(p->updatefun && (8 & p->updatefrequency)){
-			insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector));
+			insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector), p->limits);
 						
 			if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 8, convergenceNumber)))
 				goto done;
@@ -674,7 +678,7 @@ static int optimiseloop(genoptStruct *p){
 			/*
 			 find out the chi2 value of the trial vector		
 			 */
-			insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, p->gen_trial);
+			insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, p->gen_trial, p->limits);
 			
 			if((err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->numcoefs, p->model, p->xdata, p->datapoints, p->numDataDims)))
 				goto done;
@@ -939,7 +943,7 @@ int genetic_optimisation(fitfunction fitfun,
 		err = NO_MEMORY;
 		goto done;
 	}
-	memcpy(gos.temp_coefs, coefs, numcoefs*sizeof(double));
+	memcpy(gos.temp_coefs, coefs, numcoefs * sizeof(double));
 	
 	/*
 	 initialise space for a full array copy of the coefficients
@@ -985,7 +989,7 @@ int genetic_optimisation(fitfunction fitfun,
 	/*
 	 put the best fit into the coeffcient array that will be returned to the user
 	 */
-	insertVaryingParams(gos.temp_coefs, gos.varparams, gos.numvarparams, *(gos.gen_populationvector));
+	insertVaryingParams(gos.temp_coefs, gos.varparams, gos.numvarparams, *(gos.gen_populationvector), limits);
 	
 	memcpy(gos.coefs, gos.temp_coefs, gos.numcoefs * sizeof(double));
 	

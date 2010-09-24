@@ -411,7 +411,8 @@ void updateBeta(double *b, double **derivativeMatrix, int numvarparams, const do
 }
 
 
-int getCovarianceMatrix(double **covarianceMatrix,
+int getCovarianceMatrix(double ***covarianceMatrix,
+						double *hessianDeterminant,
 						void *userdata,
 						fitfunction fitfun,
 						double cost,
@@ -427,7 +428,7 @@ int getCovarianceMatrix(double **covarianceMatrix,
 	int err;
 	double **derivativeMatrix = NULL;
 	double **reducedCovarianceMatrix = NULL;
-	double hessianDeterminant = 0;
+	double hess = 0;
 	unsigned int *varparams = NULL;
 	int ii,jj, numvarparams = 0;
 	err = 0;
@@ -435,7 +436,6 @@ int getCovarianceMatrix(double **covarianceMatrix,
 	//fit function must exist
 	if(!fitfun)
 		return NO_FIT_FUNCTION_SPECIFIED;
-	
 	
 	for(ii = 0 ; ii < numcoefs ; ii++)
 		if(holdvector[ii] == 0)
@@ -471,7 +471,7 @@ int getCovarianceMatrix(double **covarianceMatrix,
 	   	
 	updateAlpha(reducedCovarianceMatrix, derivativeMatrix, numvarparams, edata, datapoints, 0);
 
-	if((err = matrixInversion_chol(reducedCovarianceMatrix, numvarparams, &hessianDeterminant)))
+	if((err = matrixInversion_chol(reducedCovarianceMatrix, numvarparams, &hess)))
 		goto done;
 		
 	if(unitSD)
@@ -479,7 +479,7 @@ int getCovarianceMatrix(double **covarianceMatrix,
 			for(jj = 0 ; jj < numvarparams ; jj += 1)
 				reducedCovarianceMatrix[ii][jj] *= cost/(datapoints - numvarparams);
 	
-	covarianceMatrix = (double**) malloc2d(numcoefs, numcoefs, sizeof(double));
+	*covarianceMatrix = (double**) malloc2d(numcoefs, numcoefs, sizeof(double));
 	if(!covarianceMatrix){
 		err = NO_MEMORY;
 		goto done;
@@ -487,12 +487,15 @@ int getCovarianceMatrix(double **covarianceMatrix,
 	
 	for(ii = 0 ; ii < numcoefs ; ii++)
 		for(jj = 0 ; jj < numcoefs ; jj++)
-			covarianceMatrix[ii][jj] = sqrt(-1);
+			(*covarianceMatrix)[ii][jj] = sqrt(-1);
 	
 	for (ii = 0; ii < numvarparams; ii++)
 		for(jj = 0 ; jj < numvarparams ; jj++)
-			covarianceMatrix[varparams[ii]][varparams[jj]] =  reducedCovarianceMatrix[ii][jj];
-		
+			(*covarianceMatrix)[varparams[ii]][varparams[jj]] =  reducedCovarianceMatrix[ii][jj];
+	
+	if(hessianDeterminant)
+		*hessianDeterminant = hess;
+			
 done:
 	if(varparams != NULL)
 		free(varparams);

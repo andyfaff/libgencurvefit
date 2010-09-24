@@ -412,7 +412,9 @@ int genetic_optimisation(fitfunction fitfun,
 	 in levenbergMarquardt.c.  Calculates a hessian gradient matrix based covariance matrix.
 	 The covariance matrix is returned via the covarianceMatrix pointer and must be freed afterwards.
 	 
-	 @param covarianceMatrix	-	the covariance matrix is returned in this array.  It must be free'd afterwards.
+	 @param covarianceMatrix	-	a pointer to a 2D array is returned.  The array (*covarianceMatrix) must be free'd afterwards.
+	 
+	 @param hessianDeterminant  -	the determinant of the hessian matrix is placed in this value.
 	 
 	 @param userdata			-	pass in user specific information to the fitfunction with this pointer.
 	 
@@ -439,7 +441,8 @@ int genetic_optimisation(fitfunction fitfun,
 	 @param unitSD				-	specify as 1 if the datapoints were unit weighted.
 	 
 	 */
-	int getCovarianceMatrix(double **covarianceMatrix,
+	int getCovarianceMatrix(double ***covarianceMatrix,
+							double *hessianDeterminant,
 							void *userdata,
 							fitfunction fitfun,
 							double cost,
