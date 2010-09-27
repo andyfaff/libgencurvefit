@@ -11,6 +11,15 @@
 #include "math.h"
 #include "string.h"
 
+#ifdef WIN32
+#ifndef __GNUC__
+#include "float.h"
+
+	int isfinite(double x){
+		return _finite(x);
+	}
+#endif
+#endif
 
 /**
  A structure to hold statistics of an array
