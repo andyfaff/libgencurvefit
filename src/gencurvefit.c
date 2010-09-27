@@ -989,9 +989,10 @@ int genetic_optimisation(fitfunction fitfun,
 	/*
 	 put the best fit into the coeffcient array that will be returned to the user
 	 */
-	insertVaryingParams(gos.temp_coefs, gos.varparams, gos.numvarparams, *(gos.gen_populationvector), limits);
-	
-	memcpy(gos.coefs, gos.temp_coefs, gos.numcoefs * sizeof(double));
+	if(!err){
+		insertVaryingParams(gos.temp_coefs, gos.varparams, gos.numvarparams, *(gos.gen_populationvector), limits);
+		memcpy(gos.coefs, gos.temp_coefs, gos.numcoefs * sizeof(double));
+	}
 	
 done:
 	if(yyMC)
