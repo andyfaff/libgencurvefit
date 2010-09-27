@@ -18,13 +18,6 @@
 extern "C" {
 #endif
 
-#ifdef WIN32 && !(__GNUC__)
-#include "float.h"
-
-	int isfinite(double x){
-		return _finite(x);
-	}
-#endif
 	
 /**\mainpage
 libgencurvefit is a lightweight library for data regression using differential evolution.  To use you will have to:
