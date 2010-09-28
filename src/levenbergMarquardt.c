@@ -485,10 +485,6 @@ int getCovarianceMatrix(double ***covarianceMatrix,
 		goto done;
 	}
 	
-	for(ii = 0 ; ii < numcoefs ; ii++)
-		for(jj = 0 ; jj < numcoefs ; jj++)
-			(*covarianceMatrix)[ii][jj] = sqrt(-1);
-	
 	for (ii = 0; ii < numvarparams; ii++)
 		for(jj = 0 ; jj < numvarparams ; jj++)
 			(*covarianceMatrix)[varparams[ii]][varparams[jj]] =  reducedCovarianceMatrix[ii][jj];
