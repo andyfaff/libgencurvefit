@@ -85,7 +85,7 @@
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="1"
-			WholeProgramOptimization="1"
+			WholeProgramOptimization="0"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -107,9 +107,9 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="3"
 			/>
@@ -151,15 +151,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\src\gencurvefit.c"
+				RelativePath="..\src\gencurvefit.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\levenbergMarquardt.c"
+				RelativePath="..\src\levenbergMarquardt.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\mt19937p.c"
+				RelativePath="..\src\mt19937p.c"
 				>
 			</File>
 		</Filter>
@@ -169,11 +169,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\src\gencurvefit.h"
+				RelativePath="..\src\gencurvefit.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\mt19937p.h"
+				RelativePath="..\src\mt19937p.h"
 				>
 			</File>
 		</Filter>

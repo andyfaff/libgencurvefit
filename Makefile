@@ -1,7 +1,7 @@
 # Define required macros here
 SHELL = /bin/sh
 
-CFLAGS = -O3 -funroll-loops -c -fopenmp -std=c99 -Wall -pedantic
+CFLAGS = -O3 -funroll-loops -c -std=c99 -Wall -pedantic
 CC = gcc
 STATICLIB=libgencurvefit.a
 LIBS=$(STATICLIB)
