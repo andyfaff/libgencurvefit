@@ -614,7 +614,7 @@ int levenberg_marquardt(fitfunction fitfun,
 	
 	if(gco == NULL){
 		lgco.iterations = 100;
-		lgco.tolerance = 0.001;
+		lgco.tolerance = 1.0e-8;
 	} else {
 		lgco.iterations = gco->iterations;
 		lgco.tolerance = gco->tolerance;
