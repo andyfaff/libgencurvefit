@@ -676,7 +676,7 @@ static int optimiseloop(genoptStruct *p){
 			if(isfinite(p->MCtemp) && p->MCtemp > 0 && (exp(-chi2trial / chi2pvector / p->MCtemp) < randomDouble(&(p->myMT19937), 0, 1)) ){
 				acceptMoveGrudgingly = 1;				
 				if(p->updatefun && (2 & p->updatefrequency))
-					if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 2, convergenceNumber)))
+					if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 2, convergenceNumber)))
 						goto done;
 			}
 			
@@ -692,14 +692,6 @@ static int optimiseloop(genoptStruct *p){
 				 */
 				if(chi2trial < *(p->chi2Array)){		/*if this trial vector is better than the current best then replace it*/
 					setPopVector(p, p->gen_trial, p->numvarparams, 0);
-					
-					/*
-					 a user defined update function that can be used to halt the fit early, and keep 
-					  appraised of fit progress.
-					*/
-					if(p->updatefun && (1 & p->updatefrequency))
-						if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 1, convergenceNumber)))
-							goto done;
 	
 					/*
 					 if the fractional decrease in chi2 is less than the tolerance then abort the fit
@@ -712,12 +704,20 @@ static int optimiseloop(genoptStruct *p){
 					*(p->chi2Array) = chi2trial;
 					
 					/*
+					 a user defined update function that can be used to halt the fit early, and keep 
+					 appraised of fit progress.
+					 */
+					if(p->updatefun && (1 & p->updatefrequency))
+						if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 1, convergenceNumber)))
+							goto done;
+					
+					/*
 					 if the SD of the population divided by it's average is less than tolerance stop.
 					 */
 					convergenceNumber = wavStats.V_avg * p->tolerance / wavStats.V_stdev;
 					if(convergenceNumber > 1){	
 						if(p->updatefun && (16 & p->updatefrequency))
-							if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, chi2trial, 16, convergenceNumber)))
+							if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 16, convergenceNumber)))
 								goto done;
 						goto done;
 					}
