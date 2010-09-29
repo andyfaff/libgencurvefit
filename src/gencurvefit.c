@@ -237,8 +237,6 @@ static void SelectSamples(mt19937p *myMT19937, long popsize, long candidate, lon
 		while ((*r5 == candidate) || (*r5 == *r4) || (*r5 == *r3)
 			   || (*r5 == *r2) || (*r5 == *r1));
 	}
-	
-	return;
 }
 
 
@@ -258,7 +256,6 @@ static void Best1Bin(genoptStruct *p, long candidate){
 		
 		n = (n + 1) % p->numvarparams;
 	}
-	return;
 }
 
 static void Best1Exp(genoptStruct *p, long candidate){
@@ -276,7 +273,6 @@ static void Best1Exp(genoptStruct *p, long candidate){
 		
 		n = (n + 1) % p->numvarparams;
 	}
-	return;
 }
 
 static void Rand1Exp(genoptStruct *p, long candidate){
@@ -294,8 +290,6 @@ static void Rand1Exp(genoptStruct *p, long candidate){
 		
 		n = (n + 1) % p->numvarparams;
 	}
-	
-	return;
 }
 
 static void RandToBest1Exp(genoptStruct *p, long candidate){
@@ -313,8 +307,6 @@ static void RandToBest1Exp(genoptStruct *p, long candidate){
 					   - p->gen_populationvector[r2][n]);
 		n = (n + 1) % p->numvarparams;
 	}
-	
-	return;
 }
 
 static void Best2Exp(genoptStruct *p, long candidate){
@@ -334,8 +326,6 @@ static void Best2Exp(genoptStruct *p, long candidate){
 					 - p->gen_populationvector[r4][n]);
 		n = (n + 1) % p->numvarparams;
 	}
-	
-	return;
 }
 
 static void Rand2Exp(genoptStruct *p, long candidate){
@@ -355,8 +345,6 @@ static void Rand2Exp(genoptStruct *p, long candidate){
 					   - p->gen_populationvector[r5][n]);
 		n = (n + 1) % p->numvarparams;
 	}
-	
-	return;
 }
 
 static void RandToBest1Bin(genoptStruct *p, long candidate){
@@ -375,8 +363,6 @@ static void RandToBest1Bin(genoptStruct *p, long candidate){
 						   - p->gen_populationvector[r2][n]);
 		n = (n + 1) % p->numvarparams;
 	}
-	
-	return;
 }
 
 static void Best2Bin(genoptStruct *p, long candidate){
@@ -397,8 +383,6 @@ static void Best2Bin(genoptStruct *p, long candidate){
 						   - p->gen_populationvector[r4][n]);
 		n = (n + 1) % p->numvarparams;
 	}
-	
-	return;
 }
 
 static void Rand2Bin(genoptStruct *p, long candidate){
@@ -419,8 +403,6 @@ static void Rand2Bin(genoptStruct *p, long candidate){
 						   - p->gen_populationvector[r5][n]);
 		n = (n + 1) % p->numvarparams;
 	}
-	
-	return;
 }
 
 static void Rand1Bin(genoptStruct *p, long candidate){
@@ -439,8 +421,6 @@ static void Rand1Bin(genoptStruct *p, long candidate){
 						   - p->gen_populationvector[r3][n]);
 		n = (n + 1) % p->numvarparams;
 	}
-	
-	return;
 }
 
 /*
@@ -568,11 +548,9 @@ insertVaryingParams(double *coefs, const unsigned int* varparams, unsigned int n
  returns 0 if no error
  returns errorcode otherwise
  */
-static int 
+static void
 setPopVector(genoptStruct *p, double* vector, int vectorsize, long replace){
-	//p->gen_populationvector[replace][] = vector[q]
 	memcpy(*(p->gen_populationvector + replace), vector, vectorsize * sizeof(double));
-	return 0;
 }
 
 /*
@@ -590,14 +568,13 @@ swapChi2values(genoptStruct *p, long i, long j){
  returns 0 if no error
  returns errorcode otherwise
  */
-static int
+static void
 swapPopVector(genoptStruct *p, long popsize, long i, long j){
 	double *tempparams = NULL;
 	//do swap with pointers
 	tempparams = *(p->gen_populationvector + j);
 	*(p->gen_populationvector + j) = *(p->gen_populationvector + i);
 	*(p->gen_populationvector + i) = tempparams;
-	return 0;
 }
 
 
@@ -632,7 +609,7 @@ static int initialiseFit(genoptStruct *p){
 	wavStats = getWaveStats(p->chi2Array, p->totalpopsize, 0);
 	
 	swapChi2values(p, 0, wavStats.V_minloc);
-	if((err = swapPopVector(p, p->totalpopsize, 0, wavStats.V_minloc)))
+	swapPopVector(p, p->totalpopsize, 0, wavStats.V_minloc);
 		goto done;
 		
 	//put the best fit from the intialisation into the coeffcients to return		   
@@ -707,15 +684,14 @@ static int optimiseloop(genoptStruct *p){
 			 if the chi2 of the trial vector is less than the current populationvector then replace it
 			 */
 			if(chi2trial < chi2pvector  || (acceptMoveGrudgingly && ii)){
-				if((err = setPopVector(p, p->gen_trial, p->numvarparams, currentpvector)))
-					goto done;
+				setPopVector(p, p->gen_trial, p->numvarparams, currentpvector);
 				
 				*(p->chi2Array + ii) = chi2trial;
 				/*
 				 if chi2 of the trial vector is less than that of the best fit, then replace the best fit vector
 				 */
 				if(chi2trial < *(p->chi2Array)){		/*if this trial vector is better than the current best then replace it*/
-					if((err = setPopVector(p, p->gen_trial, p->numvarparams, 0)))
+					setPopVector(p, p->gen_trial, p->numvarparams, 0);
 						goto done;
 					
 					/*
