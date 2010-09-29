@@ -692,7 +692,6 @@ static int optimiseloop(genoptStruct *p){
 				 */
 				if(chi2trial < *(p->chi2Array)){		/*if this trial vector is better than the current best then replace it*/
 					setPopVector(p, p->gen_trial, p->numvarparams, 0);
-						goto done;
 					
 					/*
 					 a user defined update function that can be used to halt the fit early, and keep 
