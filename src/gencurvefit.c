@@ -582,7 +582,7 @@ swapPopVector(genoptStruct *p, long popsize, long i, long j){
 static int initialiseFit(genoptStruct *p){
 	int err = 0;
 	
-	unsigned int ii = 0;
+	unsigned int ii = 0, startIt = 0;
 	double chi2 = 0;
 	double *val = NULL;
 	waveStats wavStats;
@@ -603,9 +603,9 @@ static int initialiseFit(genoptStruct *p){
 				value = p->limits[1][p->varparams[ii]];
 			*val++ = value;	
 		}
-		ii = p->numvarparams;
+		startIt = p->numvarparams;
 	} else {
-		ii = 0;
+		startIt = 0;
 	}
 		
 	/*
@@ -614,7 +614,7 @@ static int initialiseFit(genoptStruct *p){
 	 It's initialised to p->numvarparams, which should correspond to the second row
 	 of the population vector (p->gen_populationvector[numvarparams][p->totalpopsize])
 	 */
-	for(; ii < p->numvarparams * p->totalpopsize ; ii++)
+	for(ii = startIt; ii < p->numvarparams * p->totalpopsize - startIt ; ii++)
 		*val++ = randomDouble(&(p->myMT19937), 0, 1);
 	
 	//initialise Chi2array, will require a bit of calculation of the model function for each of the initial guesses.
