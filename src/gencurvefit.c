@@ -593,8 +593,8 @@ static int initialiseFit(genoptStruct *p){
 	 The population vector is scaled between 0 and 1, so you have to rescale the coefficient from a position between the bottom and upper limits.
 	 If the limits are the same than the value will be NaN (divide by 0), so set the value to one of the limits.
 	 */
+	val = *(p->gen_populationvector);
 	if(p->useinitialguesses){
-		val = *(p->gen_populationvector);
 		for(ii = 0 ; ii < p->numvarparams ; ii++){
 			double value = (p->coefs[p->varparams[ii]] - p->limits[0][p->varparams[ii]])
 			/
