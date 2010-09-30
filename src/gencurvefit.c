@@ -584,7 +584,7 @@ static int initialiseFit(genoptStruct *p){
 	
 	unsigned int ii = 0;
 	double chi2 = 0;
-	double *val;
+	double *val = NULL;
 	waveStats wavStats;
 	
 	/*
