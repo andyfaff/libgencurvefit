@@ -582,14 +582,39 @@ swapPopVector(genoptStruct *p, long popsize, long i, long j){
 static int initialiseFit(genoptStruct *p){
 	int err = 0;
 	
-	unsigned int ii;
-	double chi2;
+	unsigned int ii = 0;
+	double chi2 = 0;
 	double *val;
 	waveStats wavStats;
 	
-	//initialise population vector guesses
-	val = *p->gen_populationvector;
-	for(ii = 0 ; ii < p->numvarparams * p->totalpopsize ; ii++)
+	/*
+	 initialise population vector guesses
+	 if you want to seed with the initial guesses, you have to insert them into the first row of the population vector.
+	 The population vector is scaled between 0 and 1, so you have to rescale the coefficient from a position between the bottom and upper limits.
+	 If the limits are the same than the value will be NaN (divide by 0), so set the value to one of the limits.
+	 */
+	if(p->useinitialguesses){
+		val = *(p->gen_populationvector);
+		for(ii = 0 ; ii < p->numvarparams ; ii++){
+			double value = (p->coefs[p->varparams[ii]] - p->limits[0][p->varparams[ii]])
+			/
+			(p->limits[1][p->varparams[ii]] - p->limits[0][p->varparams[ii]]);
+			if(!isfinite(value))
+				value = p->limits[1][p->varparams[ii]];
+			*val++ = value;	
+		}
+		ii = p->numvarparams;
+	} else {
+		ii = 0;
+	}
+		
+	/*
+	 we initialise the loop counter, ii, before here.
+	 this is because we may want to use the initial guesses to seed the fit.
+	 It's initialised to p->numvarparams, which should correspond to the second row
+	 of the population vector (p->gen_populationvector[numvarparams][p->totalpopsize])
+	 */
+	for(; ii < p->numvarparams * p->totalpopsize ; ii++)
 		*val++ = randomDouble(&(p->myMT19937), 0, 1);
 	
 	//initialise Chi2array, will require a bit of calculation of the model function for each of the initial guesses.
