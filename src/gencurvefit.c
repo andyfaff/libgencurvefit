@@ -668,6 +668,20 @@ static int optimiseloop(genoptStruct *p){
 	for(kk = 1; kk <= p->iterations ; kk += 1){
 		p->numfititers = kk;
 		
+		/*
+		 if the SD of the population divided by it's average is less than tolerance stop.
+		 */		
+		wavStats = getWaveStats(p->chi2Array, p->totalpopsize, 1);		
+		convergenceNumber = wavStats.V_avg * p->tolerance / wavStats.V_stdev;
+		if(convergenceNumber > 1){	
+			if(p->updatefun && (16 & p->updatefrequency))
+				insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector), p->limits);
+
+				if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 16, convergenceNumber)))
+					goto done;
+			goto done;
+		}
+		
 		if(p->updatefun && (8 & p->updatefrequency)){
 			insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector), p->limits);
 						
