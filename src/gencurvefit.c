@@ -675,31 +675,38 @@ static int optimiseloop(genoptStruct *p){
 		convergenceNumber = wavStats.V_avg * p->tolerance / wavStats.V_stdev;
 		if(convergenceNumber > 1){	
 			if(p->updatefun && (16 & p->updatefrequency))
-				insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector), p->limits);
-
-				if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 16, convergenceNumber)))
+				/*
+				 send the best fit to the update function
+				 */
+				if((err = (*(p->updatefun))(p->userdata, p->coefs, p->numcoefs, kk, *(p->chi2Array), 16, convergenceNumber)))
 					goto done;
 			goto done;
 		}
 		
 		if(p->updatefun && (8 & p->updatefrequency)){
-			insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector), p->limits);
-						
-			if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 8, convergenceNumber)))
+			/*
+			 send the best fit to the update function
+			 */
+			if((err = (*(p->updatefun))(p->userdata, p->coefs, p->numcoefs, kk, *(p->chi2Array), 8, convergenceNumber)))
 				goto done;
 		}
 		
 		/*iterate over all the individual members of the population*/
 		for(ii = 0 ; ii < p->totalpopsize ; ii += 1){			
 			currentpvector = ii;
-			/*now set up the trial vector using a wave from the populationvector and bprime
-			//first set the pvector 
-			// create a mutated trial vector from the best fit and two random population members*/
+			/*
+			 now set up the trial vector using a wave from the populationvector and bprime
+			first set the pvector and create a mutated trial vector from the best fit and two random population members
+			 */
 			createTrialVector(p, currentpvector);
-			/*/ make sure the trial vector parameters lie between the user defined limits*/
+			
+			/*
+			 make sure the trial vector parameters lie between the user defined limits
+			 */
 			ensureConstraints(p);
 			
 			chi2pvector = *(p->chi2Array + ii);
+			
 			/*
 			 find out the chi2 value of the trial vector		
 			 */
@@ -731,7 +738,12 @@ static int optimiseloop(genoptStruct *p){
 				 */
 				if(chi2trial < *(p->chi2Array)){		/*if this trial vector is better than the current best then replace it*/
 					setPopVector(p, p->gen_trial, p->numvarparams, 0);
-	
+					
+					/*
+					 update the best fit vector (p->temp_coefs should hold the best vector still)
+					 */
+					memcpy(p->coefs, p->temp_coefs, p->numcoefs * sizeof(double));
+
 					/*
 					 if the fractional decrease in chi2 is less than the tolerance then abort the fit
 					 */
@@ -747,7 +759,7 @@ static int optimiseloop(genoptStruct *p){
 					 appraised of fit progress.
 					 */
 					if(p->updatefun && (1 & p->updatefrequency))
-						if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 1, convergenceNumber)))
+						if((err = (*(p->updatefun))(p->userdata, p->coefs, p->numcoefs, kk, *(p->chi2Array), 1, convergenceNumber)))
 							goto done;
 					
 					/*
@@ -756,7 +768,7 @@ static int optimiseloop(genoptStruct *p){
 					convergenceNumber = wavStats.V_avg * p->tolerance / wavStats.V_stdev;
 					if(convergenceNumber > 1){	
 						if(p->updatefun && (16 & p->updatefrequency))
-							if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 16, convergenceNumber)))
+							if((err = (*(p->updatefun))(p->userdata, p->coefs, p->numcoefs, kk, *(p->chi2Array), 16, convergenceNumber)))
 								goto done;
 						goto done;
 					}
