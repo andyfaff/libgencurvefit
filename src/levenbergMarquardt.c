@@ -515,6 +515,7 @@ insertVaryingParams(double *coefs, const unsigned int* varparams, unsigned int n
 	
 	for(ii = 0 ; ii < numvarparams ; ii += 1)
 		*(coefs + *(varparams + ii)) =  *(vector + ii);
+		
 }
 
 /**
@@ -673,7 +674,7 @@ int levenberg_marquardt(fitfunction fitfun,
 	memcpy(temp_coefs, coefs, sizeof(double) * numcoefs);
 	
 	jj = 0;
-	for(ii = 0 ; ii < numvarparams ; ii++){
+	for(ii = 0 ; ii < numcoefs ; ii++){
 		if(holdvector[ii] == 0){
 			varparams[jj] = ii;
 			reducedParameters[jj] = (double) coefs[ii];
