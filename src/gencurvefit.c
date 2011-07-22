@@ -535,12 +535,19 @@ ensureConstraints(genoptStruct *p){
  returns 0 if no error
  returns errorcode otherwise
  */
-static void
-insertVaryingParams(double *coefs, const unsigned int* varparams, unsigned int numvarparams, double *scaledVector, const double **limits){
+ void
+insertVaryingParams(double *coefs, const unsigned int* varparams, unsigned int numvarparams, const double *scaledVector, const double **limits){
 	unsigned int ii;
+	int ival;
+	double dval,dval2,dval3, dval4;
 	
-	for(ii = 0 ; ii < numvarparams ; ii += 1)
-		coefs[varparams[ii]] = limits[0][varparams[ii]] + scaledVector[ii] * (limits[1][varparams[ii]] - limits[0][varparams[ii]]);
+	for(ii = 0 ; ii < numvarparams ; ii += 1){
+		ival = varparams[ii];
+		dval = scaledVector[ii];
+		dval2 = limits[1][varparams[ii]];
+		dval3 = limits[0][varparams[ii]];
+		dval4 = coefs[varparams[ii]] = limits[0][varparams[ii]] + scaledVector[ii] * (limits[1][varparams[ii]] - limits[0][varparams[ii]]);		
+	}
 }
 
 /*
