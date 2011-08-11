@@ -145,7 +145,7 @@ int parseGlobalPilotFile(const char* filename,
 	if(err = gFS.makedatasets(numdatasets))
 		goto done;	
 
-	globalDataSet.numDataDims = 1;
+	globalDataSet.numDataDims = 2;
 	for(ii = 0 ; ii < columndata.size() ; ii++){
 		dataset tempdataset;
 				
@@ -158,7 +158,7 @@ int parseGlobalPilotFile(const char* filename,
 		globalDataSet.dx.insert( globalDataSet.dx.end(), tempdataset.dx.begin(), tempdataset.dx.end() );
 		globalDataSet.datapoints += tempdataset.datapoints;
 		gFS.globalFitIndividualArray[ii].datafilename = columndata.at(ii);
-		gFS.globalFitIndividualArray[ii].numDataDims = 1;
+		gFS.globalFitIndividualArray[ii].numDataDims = 2;
 		gFS.globalFitIndividualArray[ii].datapoints = tempdataset.datapoints;
 		//gFS.globalFitIndividualArray[ii].ffp = gaussian;
 	}

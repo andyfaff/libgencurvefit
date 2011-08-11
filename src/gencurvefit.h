@@ -115,7 +115,13 @@ libgencurvefit is a lightweight library for data regression using differential e
 	
 	@param numDataDims				- the number of independent variables in the fit. For y = f(x) numDataDims = 1.  For y = f(n, m), numDataDims = 2, etc.
 */
-typedef int (*fitfunction)(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long datapoints, unsigned int numDataDims);
+typedef int (*fitfunction)(void *userdata,
+						   const double *coefs,
+						   unsigned int numcoefs,
+						   double *model,
+						   const double **xdata,
+						   long datapoints,
+						   unsigned int numDataDims);
 	
 	
 /**
@@ -136,7 +142,13 @@ typedef int (*fitfunction)(void *userdata, const double *coefs, unsigned int num
 	 @param datapoints				- the number of datapoints you are trying to fit.
 	 */
 	
-typedef double (*costfunction)(void *userdata, const double *coefs, unsigned int numcoefs, const double *data, const double *model, const double *errors, long datapoints);
+typedef double (*costfunction)(void *userdata,
+							   const double *coefs,
+							   const unsigned int numcoefs,
+							   const double *data,
+							   const double *model,
+							   const double *errors,
+							   long datapoints);
 
 /**
  an (optional) user defined hook function to keep themselves of the fit progress.  If the user wishes to halt the fit early, then they should return a non
@@ -158,7 +170,13 @@ typedef double (*costfunction)(void *userdata, const double *coefs, unsigned int
  @param convergenceNumber				- corresponds to how close the fit is to finishing (> 1 = finished)
  */
 	
-typedef int (*updatefunction)(void *userdata, const double *coefs, unsigned int numcoefs, unsigned int iterations, double cost, unsigned int updatetime, double convergenceNumber);
+typedef int (*updatefunction)(void *userdata,
+							  const double *coefs,
+							  unsigned int numcoefs,
+							  unsigned int iterations,
+							  double cost,
+							  unsigned int updatetime,
+							  double convergenceNumber);
 
 	
 /**

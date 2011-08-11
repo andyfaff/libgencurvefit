@@ -272,6 +272,57 @@ typedef struct{
 	void *userdata;
 }  refCalcParm;
 
+int smearedAbeles(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims){
+	int err = 0;
+	int ii;
+	int respoints=13;
+	double *dyP = NULL;
+	double *ddxP = NULL;
+	double *yP = model;
+	const double *xP = *xdata;
+	const double *dxP = *(xdata + 1);
+	
+	dyP = (double*)malloc(numpnts * respoints * sizeof(double));
+	if(!dyP)
+		err = NO_MEMORY;
+	
+	ddxP = (double*)malloc(numpnts * respoints * sizeof(double));
+	if(!ddxP)
+		err = NO_MEMORY;
+	
+	for(ii = 0 ; ii < numpnts * respoints ; ii += 1)
+		*(ddxP + ii) = *(xP+ii/respoints) + (double)((ii%respoints)-(respoints-1)/2)*0.2*(*(dxP+ii/respoints));
+	
+	if(err = Abeles(userdata, coefs, numcoefs, dyP, (const double**) &ddxP, numpnts, 1))
+		goto done;
+	
+	for(ii=0 ; ii < numpnts ; ii += 1, yP++){
+		*yP = 0.056 * (*(dyP + ii * respoints));
+		*yP += 0.135 * (*(dyP + ii * respoints + 1));														
+		*yP += 0.278 * (*(dyP + ii * respoints + 2));
+		*yP += 0.487 * (*(dyP + ii * respoints + 3));
+		*yP += 0.726 * (*(dyP + ii * respoints + 4));
+		*yP += 0.923 * (*(dyP + ii * respoints + 5));
+		*yP += (*(dyP+ii*respoints + 6));
+		*yP += 0.923 * (*(dyP + ii * respoints + 7));
+		*yP += 0.726 * (*(dyP + ii * respoints + 8));
+		*yP += 0.487 * (*(dyP + ii * respoints + 9));
+		*yP += 0.278 * (*(dyP + ii * respoints + 10));
+		*yP += 0.135 * (*(dyP + ii * respoints + 11));
+		*yP += 0.056 * (*(dyP + ii * respoints + 12));
+		*yP /= 6.211;
+	}
+	
+done:
+	if(dyP)
+		free(dyP);
+	if(ddxP)
+		free(ddxP);
+	
+	return err;
+};
+
+
 void *AbelesThreadWorker(void *arg){
 	int err = 0;
 	refCalcParm *p = (refCalcParm *) arg;
