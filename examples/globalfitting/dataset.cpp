@@ -75,6 +75,8 @@ int dataset::readDataFile(const char* filename){
 			xx.push_back(strtod(columndata[0].c_str(), NULL));
 			yy.push_back(strtod(columndata[1].c_str(), NULL));
 			dy.push_back(fabs(strtod(columndata[2].c_str(), NULL)));
+			dx.push_back(fabs(strtod(columndata[3].c_str(), NULL)));
+			
 			columndata.clear();
 		}
 		datapoints = yy.size();

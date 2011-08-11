@@ -24,7 +24,7 @@ using namespace std;
 
 int NUM_CPUS = 1;
 #define FIT_FUNCTION globalFitWrapper
-#define FIT_FUNCTION_INDIVIDUAL Abeles
+#define FIT_FUNCTION_INDIVIDUAL smearedAbeles
 #define COST_FUNCTION log10ChiSquared
 #define GO_TOL 0.03
 #define GO_KM 0.7
@@ -92,7 +92,7 @@ void fitWorker(fitWorkerParm* p) {
 	gco.strategy = GO_STRATEGY;
 	gco.monteCarlo = GO_MONTECARLO;
 	gco.seed = p->seed;
-	
+
 	//at this point we have 3 columns of data and the coefficients
 	//we can start doing the fit.
 	//do a load of montecarlo iterations
@@ -107,7 +107,7 @@ void fitWorker(fitWorkerParm* p) {
 							   p->yP,
 							   p->xP,
 							   p->eP,
-							   1, 
+							   2, 
 							   &chi2,
 							   &gco,
 							   p->userdata);
@@ -205,14 +205,15 @@ int main (int argc, char *argv[]) {
 		if(gFS.globalFitIndividualArray[ii].datapoints > highestNumberOfPoints)
 			highestNumberOfPoints = gFS.globalFitIndividualArray[ii].datapoints;
 
-	xdata = (double**)malloc2d(gFS.numDataSets, highestNumberOfPoints, sizeof(double));
+	xdata = (double**)malloc2d(gFS.numDataSets * 2, highestNumberOfPoints, sizeof(double));
 	if(!xdata){
 		err = NO_MEMORY;
 		goto done;
 	}
 	for(ii = 0 ; ii < gFS.numDataSets ; ii++){
 		long datasetpoints = gFS.globalFitIndividualArray[ii].datapoints;
-		memcpy(*(xdata + ii), &(theDataSet.xx[pointOffset]), datasetpoints * sizeof(double));
+		memcpy(*(xdata + 2 * ii), &(theDataSet.xx[pointOffset]), datasetpoints * sizeof(double));
+		memcpy(*(xdata + (2 * ii) + 1), &(theDataSet.dx[pointOffset]), datasetpoints * sizeof(double));
 		pointOffset += datasetpoints;
 	}
 	
@@ -247,7 +248,7 @@ int main (int argc, char *argv[]) {
 		MC_arg[ii].coefResults = *(fittedCoefs + ii);
 		MC_arg[ii].coefP = &coefs[0];
 		MC_arg[ii].numcoefs = coefs.size();
-		MC_arg[ii].dimensions = 1;
+		MC_arg[ii].dimensions = 2;
 		MC_arg[ii].datapoints = theDataSet.datapoints;
 		MC_arg[ii].yP = &(theDataSet.yy[0]);
 		MC_arg[ii].xP = (const double **) xdata;
@@ -284,6 +285,3 @@ done:
 	
     return err;
 }
-
-
-
