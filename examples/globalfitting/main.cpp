@@ -26,7 +26,7 @@ int NUM_CPUS = 1;
 #define FIT_FUNCTION globalFitWrapper
 #define FIT_FUNCTION_INDIVIDUAL Abeles
 #define COST_FUNCTION log10ChiSquared
-#define GO_TOL 0.0005
+#define GO_TOL 0.03
 #define GO_KM 0.7
 #define GO_RECOMB 0.5
 #define GO_POPSIZEMULTIPLIER 20
@@ -54,6 +54,7 @@ typedef struct{
 	float k_recomb;
 	float tol;
 	int gen_iters;
+	int seed;
 	
 	double *coefResults;	//this is going to be where the coefficients for the fit are put
 	double *chi2Results;
@@ -90,6 +91,7 @@ void fitWorker(fitWorkerParm* p) {
 	gco.iterations = p->gen_iters;
 	gco.strategy = GO_STRATEGY;
 	gco.monteCarlo = GO_MONTECARLO;
+	gco.strategy = p->seed;
 	
 	//at this point we have 3 columns of data and the coefficients
 	//we can start doing the fit.
@@ -259,6 +261,7 @@ int main (int argc, char *argv[]) {
 		MC_arg[ii].popsizeMultiplier = GO_POPSIZEMULTIPLIER;
 		MC_arg[ii].gen_iters = GO_ITERS;
 		MC_arg[ii].userdata = &gFS;
+		MC_arg[ii].seed = clock() + ii;
 		
 		fitWorker(MC_arg + ii);
 	}
