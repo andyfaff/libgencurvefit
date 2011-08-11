@@ -91,7 +91,7 @@ void fitWorker(fitWorkerParm* p) {
 	gco.iterations = p->gen_iters;
 	gco.strategy = GO_STRATEGY;
 	gco.monteCarlo = GO_MONTECARLO;
-	gco.strategy = p->seed;
+	gco.seed = p->seed;
 	
 	//at this point we have 3 columns of data and the coefficients
 	//we can start doing the fit.
