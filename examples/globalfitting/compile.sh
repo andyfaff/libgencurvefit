@@ -2,4 +2,4 @@ mpic++ -O3 -funroll-loops -DUSE_MPI -I../../  -fopenmp *.cpp  -o ../build/Debug/
 
 
 On commodore
-mpic++ -O3 -funroll-loops -DUSE_MPI -I../libgencurvefit/  -L../libgencurvefit -fopenmp *.cpp  -o motoMPI -lgomp -lpthread -lgencurvefit
+mpic++ -O3 -funroll-loops -DUSE_MPI -I../../src  -L../../../libgencurvefit -fopenmp *.cpp  -o ~/bin/global_fitter -lgomp -lpthread -lgencurvefit
