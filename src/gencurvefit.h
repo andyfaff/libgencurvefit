@@ -312,9 +312,13 @@ typedef int (*updatefunction)(void *userdata,
  
 	@param datapoints				- the total number of data points in the fit.
  
-	@param ydata[datapoints]		- an array containing the dependent variable (i.e. the data one is trying to fit).
+	@param ydata[datapoints]		- an array containing the dependent variable (i.e. the data one is trying to fit).  This array _needs_ to be
+									datapoints long
 
 	@param xdata[numDataDims][datapoints]  - a 2D array containing the independent variables that correspond to each of the datapoints.
+										This pointer is passed directly to your fitfunction without alteration.  gencurvefit does not use _any_
+										of the values in it.  Thus, the xdata array could be simply:  double **xdata = NULL;
+ 
 										One can fit multidimensional data, e.g. y = f(n, m).  In this case numDataDims = 2.
 										You can allocate a 2D dataset with m points using malloc2D(2, m, sizeof(double)).
 										If you want to pass in a 1D dataset simply pass a pointer to the array.
@@ -327,7 +331,7 @@ typedef int (*updatefunction)(void *userdata,
  
 	@param edata[datapoints]		- an array containing the experimental uncertainties for each of the datapoints.  If you use the default chi2 costfunction
 								then it should contain standard deviations.  Set each element to 1 if you do not wish to weight the fit by the experimental
-								uncertainties.  
+								uncertainties.  This array _needs_ to be datapoints long.
  
 	@param numDataDims				- the number of independent variables in the fit. For y = f(x) numDataDims = 1.  For y = f(n, m), numDataDims = 2, etc.
  
