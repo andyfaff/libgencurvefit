@@ -282,18 +282,19 @@ int smearedAbeles(void *userdata, const double *coefs, unsigned int numcoefs, do
 	const double *xP = *xdata;
 	const double *dxP = *(xdata + 1);
 	
+	
 	dyP = (double*)malloc(numpnts * respoints * sizeof(double));
 	if(!dyP)
 		err = NO_MEMORY;
-	
+
 	ddxP = (double*)malloc(numpnts * respoints * sizeof(double));
 	if(!ddxP)
 		err = NO_MEMORY;
 	
 	for(ii = 0 ; ii < numpnts * respoints ; ii += 1)
 		*(ddxP + ii) = *(xP+ii/respoints) + (double)((ii%respoints)-(respoints-1)/2)*0.2*(*(dxP+ii/respoints));
-	
-	if(err = Abeles(userdata, coefs, numcoefs, dyP, (const double**) &ddxP, numpnts, 1))
+		
+	if(err = Abeles(userdata, coefs, numcoefs, dyP, (const double**) &ddxP, numpnts * respoints, 1))
 		goto done;
 	
 	for(ii=0 ; ii < numpnts ; ii += 1, yP++){
