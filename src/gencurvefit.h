@@ -177,7 +177,7 @@ typedef double (*costfunction)(void *userdata,
  
  @param popsize					- how many members in the population.
  
- @param costmap					- 1D array containing all the values of the cost function for the population.
+ @param costmap					- 1D array containing all the values of the cost function for the population. popsize elements long.
  */
 	
 typedef int (*updatefunction)(void *userdata,

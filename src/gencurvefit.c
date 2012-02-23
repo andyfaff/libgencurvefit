@@ -661,7 +661,7 @@ static int initialiseFit(genoptStruct *p){
 									p->varparams,
 									p->numvarparams,
 									p->popsizeMultiplier * p->numvarparams,
-									p->chi2Array)))
+									(const double *)p->chi2Array)))
 			goto done;
 	
 	memcpy(p->coefs, p->temp_coefs, p->numcoefs * sizeof(double));
@@ -709,7 +709,7 @@ static int optimiseloop(genoptStruct *p){
 											p->varparams,
 											p->numvarparams,
 											p->popsizeMultiplier * p->numvarparams,
-											p->chi2Array)))
+											(const double*)p->chi2Array)))
 					goto done;
 			goto done;
 		}
@@ -729,7 +729,7 @@ static int optimiseloop(genoptStruct *p){
 										p->varparams,
 										p->numvarparams,
 										p->popsizeMultiplier * p->numvarparams,
-										p->chi2Array)))
+										(const double*)p->chi2Array)))
 				goto done;
 		}
 		
@@ -787,7 +787,7 @@ static int optimiseloop(genoptStruct *p){
 												p->varparams,
 												p->numvarparams,
 												p->popsizeMultiplier * p->numvarparams,
-												p->chi2Array)))
+												(const double*)	p->chi2Array)))
 						goto done;
 			}
 			
@@ -835,7 +835,7 @@ static int optimiseloop(genoptStruct *p){
 													p->varparams,
 													p->numvarparams,
 													p->popsizeMultiplier * p->numvarparams,
-													p->chi2Array)))
+													(const double*)	p->chi2Array)))
 							goto done;
 					
 					/*
@@ -855,7 +855,7 @@ static int optimiseloop(genoptStruct *p){
 														p->varparams,
 														p->numvarparams,
 														p->popsizeMultiplier * p->numvarparams,
-														p->chi2Array)))
+														(const double*)	p->chi2Array)))
 								goto done;
 						goto done;
 					}
