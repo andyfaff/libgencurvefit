@@ -168,6 +168,16 @@ typedef double (*costfunction)(void *userdata,
  @param updatetime				- corresponds to the bitwise settings of gencurvefitOptions.updatefrequency
  
  @param convergenceNumber				- corresponds to how close the fit is to finishing (> 1 = finished)
+ 
+ @param population				- the current population.  This is a 2D array having dimensions population[popsize][numvaryingparams].
+ 
+ @param varying params			- those parameters that are varying. This 1D array is numvarying parameters long.
+ 
+ @param numvaryingparams		- the number of varying parameters.
+ 
+ @param popsize					- how many members in the population.
+ 
+ @param costmap					- 1D array containing all the values of the cost function for the population.
  */
 	
 typedef int (*updatefunction)(void *userdata,
@@ -176,9 +186,13 @@ typedef int (*updatefunction)(void *userdata,
 							  unsigned int iterations,
 							  double cost,
 							  unsigned int updatetime,
-							  double convergenceNumber);
+							  double convergenceNumber,
+							  const double **population,
+							  const unsigned int *varyingparams,
+							  int numvaryingparams,
+							  int popsize,
+							  const double *costmap);
 
-	
 /**
  gencurvefitOptions contains options for the genetic optimisation
  */																		  

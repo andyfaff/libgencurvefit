@@ -616,9 +616,11 @@ static int initialiseFit(genoptStruct *p){
 	}
 		
 	/*
-	 we initialise the loop counter, ii, before here.
+	 initialise population vector with random numbers between 0 and 1.
+
+	 the loop counter, ii, is initialised before here.
 	 this is because we may want to use the initial guesses to seed the fit.
-	 It's initialised to p->numvarparams, which should correspond to the second row
+	 If so, then it is initialised to p->numvarparams, which should correspond to the second row
 	 of the population vector (p->gen_populationvector[numvarparams][p->totalpopsize])
 	 */
 	for(ii = startIt; ii < p->numvarparams * p->totalpopsize - startIt ; ii++)
@@ -648,7 +650,18 @@ static int initialiseFit(genoptStruct *p){
 	insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, *(p->gen_populationvector), p->limits);
 	
 	if(p->updatefun && (4 & p->updatefrequency))
-		if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, 0, *(p->chi2Array), 4, -1)))
+		if((err = (*(p->updatefun))(p->userdata,
+									p->temp_coefs,
+									p->numcoefs,
+									0,
+									*(p->chi2Array),
+									4,
+									-1,
+									(const double**) p->gen_populationvector,
+									p->varparams,
+									p->numvarparams,
+									p->popsizeMultiplier * p->numvarparams,
+									p->chi2Array)))
 			goto done;
 	
 	memcpy(p->coefs, p->temp_coefs, p->numcoefs * sizeof(double));
@@ -685,7 +698,18 @@ static int optimiseloop(genoptStruct *p){
 				/*
 				 send the best fit to the update function
 				 */
-				if((err = (*(p->updatefun))(p->userdata, p->coefs, p->numcoefs, kk, *(p->chi2Array), 16, convergenceNumber)))
+				if((err = (*(p->updatefun))(p->userdata,
+											p->coefs,
+											p->numcoefs,
+											kk,
+											*(p->chi2Array),
+											16,
+											convergenceNumber,
+											(const double **) p->gen_populationvector,
+											p->varparams,
+											p->numvarparams,
+											p->popsizeMultiplier * p->numvarparams,
+											p->chi2Array)))
 					goto done;
 			goto done;
 		}
@@ -694,7 +718,18 @@ static int optimiseloop(genoptStruct *p){
 			/*
 			 send the best fit to the update function
 			 */
-			if((err = (*(p->updatefun))(p->userdata, p->coefs, p->numcoefs, kk, *(p->chi2Array), 8, convergenceNumber)))
+			if((err = (*(p->updatefun))(p->userdata,
+										p->coefs,
+										p->numcoefs,
+										kk,
+										*(p->chi2Array),
+										8,
+										convergenceNumber,
+										(const double **) p->gen_populationvector,
+										p->varparams,
+										p->numvarparams,
+										p->popsizeMultiplier * p->numvarparams,
+										p->chi2Array)))
 				goto done;
 		}
 		
@@ -719,17 +754,40 @@ static int optimiseloop(genoptStruct *p){
 			 */
 			insertVaryingParams(p->temp_coefs, p->varparams, p->numvarparams, p->gen_trial, p->limits);
 			
-			if((err = (*(p->fitfun))(p->userdata, p->temp_coefs, p->numcoefs, p->model, p->xdata, p->datapoints, p->numDataDims)))
+			if((err = (*(p->fitfun))(p->userdata,
+									 p->temp_coefs,
+									 p->numcoefs,
+									 p->model,
+									 p->xdata,
+									 p->datapoints,
+									 p->numDataDims)))
 				goto done;
 
 			/*calculate the costfunction*/
-			chi2trial = (*(p->costfun))(p->userdata, p->temp_coefs, p->numcoefs, p->ydata, p->model, p->edata, p->datapoints);
+			chi2trial = (*(p->costfun))(p->userdata,
+										p->temp_coefs,
+										p->numcoefs,
+										p->ydata,
+										p->model,
+										p->edata,
+										p->datapoints);
 
 			acceptMoveGrudgingly = 0;
 			if(isfinite(p->MCtemp) && p->MCtemp > 0 && (exp(-chi2trial / chi2pvector / p->MCtemp) < randomDouble(&(p->myMT19937), 0, 1)) ){
 				acceptMoveGrudgingly = 1;				
 				if(p->updatefun && (2 & p->updatefrequency))
-					if((err = (*(p->updatefun))(p->userdata, p->temp_coefs, p->numcoefs, kk, *(p->chi2Array), 2, convergenceNumber)))
+					if((err = (*(p->updatefun))(p->userdata,
+												p->temp_coefs,
+												p->numcoefs,
+												kk,
+												*(p->chi2Array),
+												2,
+												convergenceNumber,
+												(const double**) p->gen_populationvector,
+												p->varparams,
+												p->numvarparams,
+												p->popsizeMultiplier * p->numvarparams,
+												p->chi2Array)))
 						goto done;
 			}
 			
@@ -766,7 +824,18 @@ static int optimiseloop(genoptStruct *p){
 					 appraised of fit progress.
 					 */
 					if(p->updatefun && (1 & p->updatefrequency))
-						if((err = (*(p->updatefun))(p->userdata, p->coefs, p->numcoefs, kk, *(p->chi2Array), 1, convergenceNumber)))
+						if((err = (*(p->updatefun))(p->userdata,
+													p->coefs,
+													p->numcoefs,
+													kk,
+													*(p->chi2Array),
+													1,
+													convergenceNumber,
+													(const double **) p->gen_populationvector,
+													p->varparams,
+													p->numvarparams,
+													p->popsizeMultiplier * p->numvarparams,
+													p->chi2Array)))
 							goto done;
 					
 					/*
@@ -775,7 +844,18 @@ static int optimiseloop(genoptStruct *p){
 					convergenceNumber = wavStats.V_avg * p->tolerance / wavStats.V_stdev;
 					if(convergenceNumber > 1){	
 						if(p->updatefun && (16 & p->updatefrequency))
-							if((err = (*(p->updatefun))(p->userdata, p->coefs, p->numcoefs, kk, *(p->chi2Array), 16, convergenceNumber)))
+							if((err = (*(p->updatefun))(p->userdata,
+														p->coefs,
+														p->numcoefs,
+														kk,
+														*(p->chi2Array),
+														16,
+														convergenceNumber,
+														(const double **) p->gen_populationvector,
+														p->varparams,
+														p->numvarparams,
+														p->popsizeMultiplier * p->numvarparams,
+														p->chi2Array)))
 								goto done;
 						goto done;
 					}
