@@ -171,11 +171,11 @@ typedef double (*costfunction)(void *userdata,
  
  @param population				- the current population.  This is a 2D array having dimensions population[popsize][numvaryingparams].
  
- @param varying params			- those parameters that are varying. This 1D array is numvarying parameters long.
+ @param varyingparams			- those parameters that are varying. This 1D array is numvarying parameters long.
  
  @param numvaryingparams		- the number of varying parameters.
  
- @param popsize					- how many members in the population.
+ @param totalpopsize					- how many members in the population.
  
  @param costmap					- 1D array containing all the values of the cost function for the population. popsize elements long.
  */
@@ -190,7 +190,7 @@ typedef int (*updatefunction)(void *userdata,
 							  const double **population,
 							  const unsigned int *varyingparams,
 							  int numvaryingparams,
-							  int popsize,
+							  int totalpopsize,
 							  const double *costmap);
 
 /**
