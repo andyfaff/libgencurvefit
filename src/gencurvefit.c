@@ -552,8 +552,6 @@ insertVaryingParams(double *coefs, const unsigned int* varparams, unsigned int n
 
 /*
  setPopVector sets the populationvector with index replace, with a double array
- returns 0 if no error
- returns errorcode otherwise
  */
 static void
 setPopVector(genoptStruct *p, double* vector, int vectorsize, long replace){
@@ -572,16 +570,13 @@ swapChi2values(genoptStruct *p, long i, long j){
 
 /*
  swapPopVector swaps the i vector with index j in the populationvector
- returns 0 if no error
- returns errorcode otherwise
+ overwrites gen_trial.
  */
 static void
 swapPopVector(genoptStruct *p, long popsize, long i, long j){
-	double *tempparams = NULL;
-	//do swap with pointers
-	tempparams = *(p->gen_populationvector + j);
-	*(p->gen_populationvector + j) = *(p->gen_populationvector + i);
-	*(p->gen_populationvector + i) = tempparams;
+	memcpy(p->gen_trial, *(p->gen_populationvector + j), p->numvarparams * sizeof(double));
+	memcpy(*(p->gen_populationvector + j), *(p->gen_populationvector + i), p->numvarparams * sizeof(double));
+	memcpy(*(p->gen_populationvector + i), p->gen_trial, p->numvarparams * sizeof(double));
 }
 
 
