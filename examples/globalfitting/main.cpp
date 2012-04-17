@@ -262,7 +262,7 @@ int main (int argc, char *argv[]) {
 		MC_arg[ii].popsizeMultiplier = GO_POPSIZEMULTIPLIER;
 		MC_arg[ii].gen_iters = GO_ITERS;
 		MC_arg[ii].userdata = &gFS;
-		MC_arg[ii].seed = clock() + ii;
+		MC_arg[ii].seed = clock() + ii + myid;
 		
 		fitWorker(MC_arg + ii);
 	}
