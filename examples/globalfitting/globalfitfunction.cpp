@@ -206,10 +206,11 @@ int parseGlobalPilotFile(const char* filename,
 
 	for(ii = 0 ; ii < gFS.numDataSets ; ii += 1){
 		if(err = readCoefficientFile(gFS.globalFitIndividualArray[ii].pilotfilename.c_str(),
-									 localcoefficientsArray[ii],
-									 localholdvectorArray[ii],
-									 locallowlimArray[ii],
-									 localhilimArray[ii])){
+									 &localcoefficientsArray[ii],
+									 &localholdvectorArray[ii],
+									 &locallowlimArray[ii],
+									 &localhilimArray[ii],
+									 &gFS.globalFitIndividualArray[ii].ffp)){
 			cout << "Error whilst parsing one of the pilot files\n";
 			goto done;
 		}

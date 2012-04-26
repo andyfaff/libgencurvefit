@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <fstream>
 #include <string>
+#include "gencurvefit.h"
 
 using namespace std;
 
@@ -33,6 +34,11 @@ public:
 
 void Tokenize(const string &str, vector<string> &tokens, const char* DELIMITERS, int szDELIMITERS);
 
-int readCoefficientFile(const char* filename, vector <double> &coefficients, vector <unsigned int> &holdvector, vector <double> &lowlim, vector <double> &hilim);
+int readCoefficientFile(const char* filename,
+						vector <double> *coefficients,
+						vector <unsigned int> *holdvector,
+						vector <double> *lowlim,
+						vector <double> *hilim,
+						fitfunction *ffp);
 
 
