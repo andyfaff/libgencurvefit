@@ -4,6 +4,8 @@
 
 using namespace std;
 
+int globalFitWrapper(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims);
+
 class globalFitIndividual{
 public:
 	fitfunction ffp;

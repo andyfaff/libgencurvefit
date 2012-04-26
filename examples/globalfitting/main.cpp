@@ -24,13 +24,12 @@ using namespace std;
 
 int NUM_CPUS = 1;
 #define FIT_FUNCTION globalFitWrapper
-#define FIT_FUNCTION_INDIVIDUAL smearedAbeles
 #define COST_FUNCTION log10ChiSquared
 #define GO_TOL 0.03
 #define GO_KM 0.7
 #define GO_RECOMB 0.5
 #define GO_POPSIZEMULTIPLIER 20
-#define GO_ITERS 500
+#define GO_ITERS 2000
 #define GO_STRATEGY 0
 #define GO_MONTECARLO 1
 
@@ -192,10 +191,6 @@ int main (int argc, char *argv[]) {
 		limits[0][ii] = lowlim[ii];
 		limits[1][ii] = hilim[ii];		
 	}
-	
-	//say what fit function you want to use
-	for(ii = 0 ; ii < gFS.numDataSets ; ii++)
-		gFS.globalFitIndividualArray[ii].ffp = FIT_FUNCTION_INDIVIDUAL;
 	
 	//we have to put the xdata for the global fit wave in an array that the globalfitwrapper can understant.
 	//currently they are in a vector.  We need them in a 2D array, where the rows are each dataset and the columns the datapoints

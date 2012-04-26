@@ -47,7 +47,7 @@ MyComplex fres(MyComplex a,MyComplex b,double rough){
 }
 
 int 
-AbelesCalcAll(void *userdata, const double *coefP, double *yP, const double *xP,long npoints, int Vmullayers, int Vmulappend, int Vmulrep){
+abelescalcall(void *userdata, const double *coefP, double *yP, const double *xP,long npoints, int Vmullayers, int Vmulappend, int Vmulrep){
 	int err = 0;
 	int j;
 	
@@ -272,7 +272,7 @@ typedef struct{
 	void *userdata;
 }  refCalcParm;
 
-int smearedAbeles(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims){
+int smearedabeles(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims){
 	int err = 0;
 	int ii;
 	int respoints=13;
@@ -294,7 +294,7 @@ int smearedAbeles(void *userdata, const double *coefs, unsigned int numcoefs, do
 	for(ii = 0 ; ii < numpnts * respoints ; ii += 1)
 		*(ddxP + ii) = *(xP+ii/respoints) + (double)((ii%respoints)-(respoints-1)/2)*0.2*(*(dxP+ii/respoints));
 		
-	if(err = Abeles(userdata, coefs, numcoefs, dyP, (const double**) &ddxP, numpnts * respoints, 1))
+	if(err = abeles(userdata, coefs, numcoefs, dyP, (const double**) &ddxP, numpnts * respoints, 1))
 		goto done;
 	
 	for(ii=0 ; ii < numpnts ; ii += 1, yP++){
@@ -327,13 +327,13 @@ done:
 void *AbelesThreadWorker(void *arg){
 	int err = 0;
 	refCalcParm *p = (refCalcParm *) arg;
-	err = AbelesCalcAll(p->userdata, p->coefP, p->yP, p->xP, p->npoints, p->Vmullayers, p->Vappendlayer, p->Vmulrep);
+	err = abelescalcall(p->userdata, p->coefP, p->yP, p->xP, p->npoints, p->Vmullayers, p->Vappendlayer, p->Vmulrep);
 	
 	pthread_exit((void*)err);
 	return NULL;
 }
 
-int Abeles(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims){
+int abeles(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims){
 	int err = 0;
 	pthread_t *threads;
 	extern int NUM_CPUS;
@@ -369,7 +369,7 @@ int Abeles(void *userdata, const double *coefs, unsigned int numcoefs, double *m
 		pointsConsumed += pointsEachThread;
 	}
 	
-	err = AbelesCalcAll(userdata, coefs, model + pointsConsumed, (*xdata) + pointsConsumed, pointsRemaining, 0, 0, 0);
+	err = abelescalcall(userdata, coefs, model + pointsConsumed, (*xdata) + pointsConsumed, pointsRemaining, 0, 0, 0);
 	
 	for (ii = 0; ii < NUM_CPUS - 1; ii++)
 		pthread_join(threads[ii], NULL);
@@ -384,7 +384,7 @@ done:
 };
 
 //this function is meant as a wrapper to allow analytic profiles.
-int AbelesModelWrapper(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims){
+int abelesmodelwrapper(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims){
 	int err = 0;
 	vector<double> coefstemp;
 	int ii;
@@ -431,7 +431,7 @@ int AbelesModelWrapper(void *userdata, const double *coefs, unsigned int numcoef
 	coefstemp.push_back(0);
 	coefstemp.push_back(coefs[10]);
 */
-	err = Abeles(userdata, &coefstemp[0], numcoefs, model, xdata, numpnts, numDataDims);
+	err = abeles(userdata, &coefstemp[0], numcoefs, model, xdata, numpnts, numDataDims);
 	return err;
 }
 

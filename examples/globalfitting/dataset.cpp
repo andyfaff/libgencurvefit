@@ -104,7 +104,9 @@ done:
  
  hilim				- a vector containing the upper limits
  
- The file format is 2 lines followed by lines containing the coefficients:
+ The file format is a 3 line header.  The first two are not used at the moment. The third is a string corresponding to the fit function
+ required for the dataset.
+ This header is then followed by lines containing the coefficients:
  Each of the coefficient lines is:
  number toHold lowerLim upperLim
  where number is a coefficient, toHold is either 0 or 1.  (see above) and lowerlim and upperlim
@@ -114,16 +116,18 @@ done:
  
  stuff1\n
  stuff2\n
+ smearedabeles\n
  1.023 1 0.9 1.1\n
  2.07 0 2 3\n
  */
 
-int readCoefficientFile(const char* filename, vector <double> &coefficients, vector <unsigned int> &holdvector, vector <double> &lowlim, vector <double> &hilim){
+int readCoefficientFile(const char* filename, vector <double> *coefficients, vector <unsigned int> *holdvector, vector <double> *lowlim, vector <double> *hilim, fitfunction *ffp){
 	int err = 0;
 	
 	ifstream file_to_read;
 	vector<string> columndata;
 	string linein;
+	string fitfunctionStr;
 	
 	//read the coefficient file, 1st two lines are headers.
 	file_to_read.open(filename, ios::in);
@@ -133,18 +137,34 @@ int readCoefficientFile(const char* filename, vector <double> &coefficients, vec
 	
 	columndata.clear();
 	
-	getline(file_to_read, linein, '\n');		//chi2value header
-	getline(file_to_read, linein, '\n');		//header describing columns
+	getline(file_to_read, linein, '\n');		//1st header line
+	getline(file_to_read, linein, '\n');		//2nd header line
+
+	//what fitfunction do you require
+	getline(file_to_read, fitfunctionStr, '\n');
+	
+	ffp = NULL;
+	if(fitfunctionStr == "smearedabeles")
+		*ffp = smearedabeles;
+	if(fitfunctionStr == "abeles")
+		*ffp = abeles;
+	if(fitfunctionStr == "line")
+		*ffp = &line;
+	if(fitfunctionStr == "gaussian")
+		*ffp = &gaussian;
+	
+	if(!ffp)
+		return NO_FIT_FUNCTION_SPECIFIED;
 	
 	//now read each line
 	while(getline(file_to_read, linein, '\n')){
 		Tokenize(linein, columndata, " ", sizeof(char));
 		//		std::cout << columndata[0] << "\t" << columndata[1] << "\t" << columndata[2] << "\r";
 		
-		coefficients.push_back(strtod(columndata[0].c_str(), NULL));
-		holdvector.push_back(strtol(columndata[1].c_str(), NULL, 10));			
-		lowlim.push_back(strtod(columndata[2].c_str(), NULL));
-		hilim.push_back(strtod(columndata[3].c_str(), NULL));
+		coefficients->push_back(strtod(columndata[0].c_str(), NULL));
+		holdvector->push_back(strtol(columndata[1].c_str(), NULL, 10));			
+		lowlim->push_back(strtod(columndata[2].c_str(), NULL));
+		hilim->push_back(strtod(columndata[3].c_str(), NULL));
 		
 		columndata.clear();
 	}
