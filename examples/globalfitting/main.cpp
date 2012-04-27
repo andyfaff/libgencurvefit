@@ -151,9 +151,7 @@ int main (int argc, char *argv[]) {
 	double **fittedCoefs = NULL;
 	double *fittedChi2 = NULL;
 	fitWorkerParm *MC_arg = NULL;
-	void *fitfunctionlibrary = NULL;
-	fitfunction ffp;
-	
+	void *fitfunctionlibrary = NULL;	
 	
 	time_t time1, time2;
 	
@@ -211,6 +209,7 @@ int main (int argc, char *argv[]) {
 		
 		if(!gFS.globalFitIndividualArray[ii].ffp){
 			err = NO_FIT_FUNCTION_SPECIFIED;
+			cout << dlerror() << endl;
 			goto done;
 		}
 	}
