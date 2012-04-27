@@ -6,7 +6,7 @@
  *  Copyright 2010 __MyCompanyName__. All rights reserved.
  *
  */
-#include "myfitfunctions.h"
+//#include "myfitfunctions.h"
 #include "dataset.h"
 #include "globalfitfunction.h"
 

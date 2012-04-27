@@ -13,7 +13,6 @@
 //#include "gencurvefit.h"
 #include "dataset.h"
 #include "globalfitfunction.h"
-//#include "myfitfunctions.h"
 
 
 
@@ -206,7 +205,7 @@ int main (int argc, char *argv[]) {
 	
 	for(ii = 0 ; ii < gFS.numDataSets ; ii++){
 		*(void **)(&(gFS.globalFitIndividualArray[ii].ffp)) = dlsym(fitfunctionlibrary, gFS.globalFitIndividualArray[ii].fitfunctionname.c_str());
-		
+//		gFS.globalFitIndividualArray[ii].ffp = &smearedabeles;
 		if(!gFS.globalFitIndividualArray[ii].ffp){
 			err = NO_FIT_FUNCTION_SPECIFIED;
 			cout << dlerror() << endl;

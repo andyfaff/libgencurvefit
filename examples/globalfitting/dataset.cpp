@@ -11,7 +11,6 @@
 #include <vector>
 #include <fstream>
 #include <math.h>
-#include "myfitfunctions.h"
 #include "gencurvefit.h"
 #include "iostream"
 

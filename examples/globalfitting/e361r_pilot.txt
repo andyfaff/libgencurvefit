@@ -1,6 +1,6 @@
 stuff
 value hold lowlim hilim
-smearedabelesall
+smearedabeles
 2 1 0 0
 1.0155 1 0 0
 2.07 1 0 0
