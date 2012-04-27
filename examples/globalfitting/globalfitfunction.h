@@ -14,6 +14,7 @@ public:
 	int numDataDims;
 	string datafilename;
 	string pilotfilename;
+	string fitfunctionname;
 	globalFitIndividual();
 };
 

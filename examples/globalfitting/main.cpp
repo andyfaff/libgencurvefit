@@ -8,11 +8,13 @@
 #include <math.h>
 #include <string.h>
 #include <ctime>
+#include <dlfcn.h>
 
 //#include "gencurvefit.h"
 #include "dataset.h"
 #include "globalfitfunction.h"
-#include "myfitfunctions.h"
+//#include "myfitfunctions.h"
+
 
 
 #ifdef USE_MPI
@@ -22,7 +24,6 @@
 
 using namespace std;
 
-int NUM_CPUS = 1;
 #define FIT_FUNCTION globalFitWrapper
 #define COST_FUNCTION log10ChiSquared
 #define GO_TOL 0.03
@@ -32,6 +33,8 @@ int NUM_CPUS = 1;
 #define GO_ITERS 2000
 #define GO_STRATEGY 0
 #define GO_MONTECARLO 1
+
+double log10ChiSquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
 
 
 typedef struct{
@@ -148,6 +151,9 @@ int main (int argc, char *argv[]) {
 	double **fittedCoefs = NULL;
 	double *fittedChi2 = NULL;
 	fitWorkerParm *MC_arg = NULL;
+	void *fitfunctionlibrary = NULL;
+	fitfunction ffp;
+	
 	
 	time_t time1, time2;
 	
@@ -190,6 +196,23 @@ int main (int argc, char *argv[]) {
 	for(ii=0 ; ii<coefs.size(); ii+=1){
 		limits[0][ii] = lowlim[ii];
 		limits[1][ii] = hilim[ii];		
+	}
+	
+	fitfunctionlibrary = dlopen("myfitfunctions.so", RTLD_LAZY);
+	if(!fitfunctionlibrary){
+		err = NO_FIT_FUNCTION_SPECIFIED;
+		cout << dlerror() << endl;
+		goto done;
+	}
+	
+	
+	for(ii = 0 ; ii < gFS.numDataSets ; ii++){
+		*(void **)(&(gFS.globalFitIndividualArray[ii].ffp)) = dlsym(fitfunctionlibrary, gFS.globalFitIndividualArray[ii].fitfunctionname.c_str());
+		
+		if(!gFS.globalFitIndividualArray[ii].ffp){
+			err = NO_FIT_FUNCTION_SPECIFIED;
+			goto done;
+		}
 	}
 	
 	//we have to put the xdata for the global fit wave in an array that the globalfitwrapper can understant.
@@ -262,13 +285,10 @@ int main (int argc, char *argv[]) {
 		fitWorker(MC_arg + ii);
 	}
 	
-#ifdef USE_MPI	
-	MPI_Finalize(); /* MPI Programs end with MPI Finalize; this is a weak synchronization point */
-#endif
-	time(&time2);
-//	cout << difftime(time2, time1) << "\n";
 done:
-	
+
+	if(fitfunctionlibrary)
+		dlclose(fitfunctionlibrary);
 	if(limits)
 		free(limits);
 	if(MC_arg)
@@ -278,5 +298,33 @@ done:
 	if(fittedChi2)
 		free(fittedChi2);
 	
+	#ifdef USE_MPI	
+	MPI_Finalize(); /* MPI Programs end with MPI Finalize; this is a weak synchronization point */
+	#endif
+	time(&time2);
+	//	cout << difftime(time2, time1) << "\n";
+	
     return err;
 }
+
+/**
+ a log10 cost function for reflectivity
+ */
+double log10ChiSquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts){
+	
+	long ii;
+	double chi2 = 0;
+	double val=0;
+	
+	for (ii = 0 ; ii < numpnts ; ii += 1){
+		val = log10(data[ii]) - log10(model[ii]);
+		val /= log10((data[ii] + errors[ii]) / data[ii]);
+		val = pow(val, 2);		
+		if(isfinite(val))
+			chi2 += val;
+	}
+	
+	return chi2;
+	
+}
+

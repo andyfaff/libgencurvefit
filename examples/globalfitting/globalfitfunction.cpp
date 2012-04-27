@@ -139,7 +139,7 @@ int parseGlobalPilotFile(const char* filename,
 		goto done;
 	}
 	
-	Tokenize(linein, columndata, " ", sizeof(char));
+	Tokenize(linein, columndata, " \t", 2 * sizeof(char));
 	numdatasets = columndata.size();
 
 	if(err = gFS.makedatasets(numdatasets))
@@ -170,7 +170,7 @@ int parseGlobalPilotFile(const char* filename,
 		goto done;
 	}
 	columndata.clear();
-	Tokenize(linein, columndata, " ", sizeof(char));
+	Tokenize(linein, columndata, " \t", 2 * sizeof(char));
 	
 	//number of datasets has to be the same as the number of pilot files
 	if(columndata.size() != gFS.numDataSets){
@@ -185,7 +185,7 @@ int parseGlobalPilotFile(const char* filename,
 	//lets read in the linkage matrix from the pilot file
 	while(getline(file_to_read, linein)){
 		columndata.clear();
-		Tokenize(linein, columndata, " ", sizeof(char));
+		Tokenize(linein, columndata, " ,\t", 3 * sizeof(char));
 
 		for(ii = 0 ; ii < columndata.size() ; ii += 1){
 			int val = strtol(columndata.at(ii).c_str(), NULL, 10);
@@ -210,7 +210,7 @@ int parseGlobalPilotFile(const char* filename,
 									 &localholdvectorArray[ii],
 									 &locallowlimArray[ii],
 									 &localhilimArray[ii],
-									 &gFS.globalFitIndividualArray[ii].ffp)){
+									 &gFS.globalFitIndividualArray[ii].fitfunctionname)){
 			cout << "Error whilst parsing one of the pilot files\n";
 			goto done;
 		}

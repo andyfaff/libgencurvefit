@@ -71,7 +71,7 @@ int dataset::readDataFile(const char* filename){
 		
 		//read the data
 		while(getline(file_to_read, linein, '\n')){
-			Tokenize(linein, columndata, "\t", sizeof(char));			
+			Tokenize(linein, columndata, " ,\t", 3 * sizeof(char));			
 			xx.push_back(strtod(columndata[0].c_str(), NULL));
 			yy.push_back(strtod(columndata[1].c_str(), NULL));
 			dy.push_back(fabs(strtod(columndata[2].c_str(), NULL)));
@@ -121,13 +121,12 @@ done:
  2.07 0 2 3\n
  */
 
-int readCoefficientFile(const char* filename, vector <double> *coefficients, vector <unsigned int> *holdvector, vector <double> *lowlim, vector <double> *hilim, fitfunction *ffp){
+int readCoefficientFile(const char* filename, vector <double> *coefficients, vector <unsigned int> *holdvector, vector <double> *lowlim, vector <double> *hilim, string *fitfunctionStr){
 	int err = 0;
 	
 	ifstream file_to_read;
 	vector<string> columndata;
 	string linein;
-	string fitfunctionStr;
 	
 	//read the coefficient file, 1st two lines are headers.
 	file_to_read.open(filename, ios::in);
@@ -141,24 +140,11 @@ int readCoefficientFile(const char* filename, vector <double> *coefficients, vec
 	getline(file_to_read, linein, '\n');		//2nd header line
 
 	//what fitfunction do you require
-	getline(file_to_read, fitfunctionStr, '\n');
-	
-	ffp = NULL;
-	if(fitfunctionStr == "smearedabeles")
-		*ffp = smearedabeles;
-	if(fitfunctionStr == "abeles")
-		*ffp = abeles;
-	if(fitfunctionStr == "line")
-		*ffp = &line;
-	if(fitfunctionStr == "gaussian")
-		*ffp = &gaussian;
-	
-	if(!ffp)
-		return NO_FIT_FUNCTION_SPECIFIED;
-	
+	getline(file_to_read, *fitfunctionStr, '\n');
+		
 	//now read each line
 	while(getline(file_to_read, linein, '\n')){
-		Tokenize(linein, columndata, " ", sizeof(char));
+		Tokenize(linein, columndata, " ,\t", 3 * sizeof(char));
 		//		std::cout << columndata[0] << "\t" << columndata[1] << "\t" << columndata[2] << "\r";
 		
 		coefficients->push_back(strtod(columndata[0].c_str(), NULL));
