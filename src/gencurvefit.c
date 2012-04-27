@@ -11,7 +11,7 @@
 #include "math.h"
 #include "string.h"
 
-#ifdef WIN32
+#ifdef _WINDOWS
 #ifndef __GNUC__
 #include "float.h"
 

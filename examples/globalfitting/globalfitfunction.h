@@ -2,6 +2,8 @@
 #include <vector>
 #include "gencurvefit.h"
 
+#define LINKAGE_MATRIX_WRONG 1
+
 using namespace std;
 
 int globalFitWrapper(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims);
