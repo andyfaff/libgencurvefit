@@ -202,10 +202,10 @@ int main (int argc, char *argv[]) {
 		goto done;
 	}
 	
-	
+	//load in the fitfunction at runtime. THis is so that you only need to recompile the fitfunctions, not the entire thing.
 	for(ii = 0 ; ii < gFS.numDataSets ; ii++){
 		*(void **)(&(gFS.globalFitIndividualArray[ii].ffp)) = dlsym(fitfunctionlibrary, gFS.globalFitIndividualArray[ii].fitfunctionname.c_str());
-//		gFS.globalFitIndividualArray[ii].ffp = &smearedabeles;
+
 		if(!gFS.globalFitIndividualArray[ii].ffp){
 			err = NO_FIT_FUNCTION_SPECIFIED;
 			cout << dlerror() << endl;
