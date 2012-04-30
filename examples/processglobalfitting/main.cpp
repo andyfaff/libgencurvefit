@@ -56,13 +56,15 @@ int main (int argc, char *argv[]) {
 	vector<double> coefs;
 	vector<double> lowlim;
 	vector<double> hilim;
-	vector<double> mean, standard_deviation;
 	
 	vector<unsigned int> bs;
 	string coefsToExpand;
 	string poop;
-	int ii, numiterations = 0;
+	int ii, jj, numiterations = 0;
 	vector<double> *expandedCoefs = NULL;
+	vector<double> *mean = NULL;
+	vector<double> *standard_deviation = NULL;	
+	
 	vector<string> coefsToExpandTokens;
 	ofstream *outputfiles = NULL;
 	
@@ -81,8 +83,12 @@ int main (int argc, char *argv[]) {
 	if(!expandedCoefs)
 		return 1;
 	
-	outputfiles = new (nothrow) ofstream[gFS.numDataSets];
-	if(!outputfiles)
+	mean = new (nothrow) vector<double>[gFS.numDataSets];
+	if(!mean)
+		return 1;
+	
+	standard_deviation = new (nothrow) vector<double>[gFS.numDataSets];
+	if(!standard_deviation)
 		return 1;
 	
 	for(ii = 0 ; ii < gFS.numDataSets ; ii++)
@@ -95,26 +101,30 @@ int main (int argc, char *argv[]) {
 		coefsToExpandTokens.clear();
 
 		Tokenize(coefsToExpand, coefsToExpandTokens, " \t", 2 * sizeof(char));
-		
-		mean.resize(coefsToExpandTokens.size());
-		standard_deviation.resize(coefsToExpandTokens.size());
-		
-		for(ii = 0 ; ii < coefsToExpandTokens.size() ; ii ++){
-			mean[ii] += strtod(coefsToExpandTokens.at(ii).c_str(), NULL);
-			standard_deviation[ii] += pow(strtod(coefsToExpandTokens.at(ii).c_str(), NULL), 2);
-		}
-		numiterations ++;
-		
-		for(ii = 0 ; ii < gFS.numDataSets ; ii++)
+				
+		for(ii = 0 ; ii < gFS.numDataSets ; ii++){
 			outputfiles[ii] << to_a_string(&((expandedCoefs[ii])[0]), expandedCoefs[ii].size()) << endl ;
-		
+			for(jj = 0 ; jj < expandedCoefs[ii].size() ; jj ++){
+				mean[ii][jj] += expandedCoefs[ii][jj];
+				standard_deviation[ii][jj] += pow(expandedCoefs[ii][jj], 2);
+			}
+		}
+		numiterations ++;		
 	}
 	
-	for(ii = 0 ; ii < mean.size() ; ii++){
-		mean[ii] /= numiterations; 
-		standard_deviation[ii] /= numiterations;
-		standard_deviation[ii] = sqrt(standard_deviation[ii] - pow(mean[ii], 2));
-		cout << mean[ii] << " +/- " << standard_deviation[ii] << endl;
+	for(ii = 0 ; ii < gFS.numDataSets ; ii++){
+		cout << "dataset" << ii << endl;
+		
+		for(jj = 0 ; jj < mean[ii].size() ; jj++){
+			mean[ii][jj]/=numiterations;
+			cout << mean[ii][jj] << " ";
+		}
+		cout << endl;
+		for(jj = 0 ; jj < mean[ii].size() ; jj++)
+			cout << sqrt((standard_deviation[ii][jj]/numiterations) - pow(mean[ii][jj], 2)) << " ";
+			
+		cout << endl;
+		cout << endl;
 	}
 	
 	for(ii = 0 ; ii<gFS.numDataSets ; ii++)
@@ -123,6 +133,11 @@ int main (int argc, char *argv[]) {
 done:
 	if(expandedCoefs)
 		delete [] expandedCoefs;
+	if(mean)
+		delete [] mean;
+	if(standard_deviation)
+		delete [] standard_deviation;
+	
 	if(outputfiles)
 		delete [] outputfiles;
     return err;
