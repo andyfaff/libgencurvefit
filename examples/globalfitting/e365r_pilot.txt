@@ -1,6 +1,7 @@
 stuff
 value hold lowlim hilim
 smearedabeles
+log10chisquared
 2 0 0 0
 1 1 0 0
 2.07 0 0 0
