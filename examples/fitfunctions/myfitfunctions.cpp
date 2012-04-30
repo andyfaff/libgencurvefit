@@ -436,6 +436,94 @@ int abelesmodelwrapper(void *userdata, const double *coefs, unsigned int numcoef
 	return err;
 }
 
+
+
+
+/*
+  
+ SAH SAMfloat_monolayer function
+ 
+	w[0] = scale
+	w[1] = SLD fronting
+	w[2] = SLD backing
+	w[3] = bkg
+	w[4]=backing rough
+
+	w[5]=oxide thickness
+	w[6]=oxide SLD
+	w[7]=oxide solvent
+	w[8]=Si rough
+
+	w[9]=TiO2 thickness
+	w[10]=TiO2 SLD
+	w[11]=TiO2 solvent
+	w[12]=oxide rough
+
+	w[13] = SAM A per mol
+	w[14] = HG thickness
+	w[15]= TiO2 roughness
+	w[16] = Tail thickness
+	w[17] = roughness of HG
+
+ */
+int stephenssamfloat_monolayer(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims){
+	int err = 0;
+	
+	vector<double> W_forreflectivity;
+	
+	double Vhead = 60.807;
+	double Vtail = 231.82;
+	double btail = -0.0001331;
+	double bhead = 0.0002835;
+
+	//#layers
+	W_forreflectivity.push_back(5);
+	//scale
+	W_forreflectivity.push_back(coefs[0]);
+	//fronting
+	W_forreflectivity.push_back(coefs[1]);
+	//backing
+	W_forreflectivity.push_back(coefs[2]);
+	//Bgd
+	W_forreflectivity.push_back(coefs[3]);
+	//backing rough
+	W_forreflectivity.push_back(coefs[4]);
+	
+	//SiO2 Layer
+	W_forreflectivity.push_back(coefs[5]);
+	W_forreflectivity.push_back(coefs[6]);
+	W_forreflectivity.push_back(coefs[7]);
+	//Si/SiO2 roughness
+	W_forreflectivity.push_back(coefs[8]);
+	
+	//TiO2
+	W_forreflectivity.push_back(coefs[9]);
+	W_forreflectivity.push_back(coefs[10]);
+	W_forreflectivity.push_back(coefs[11]);
+	//TiO2/SiO2 roughness
+	W_forreflectivity.push_back(coefs[12]);
+	
+	//SAM HG
+	W_forreflectivity.push_back(coefs[14]);
+	W_forreflectivity.push_back(bhead  / (coefs[14] * coefs[13]) + (1 - Vhead / (coefs[14] * coefs[13])) * coefs[2]);
+	W_forreflectivity.push_back(0);
+	//SAM/TiO2 roughness
+	W_forreflectivity.push_back(coefs[15]);
+	
+	
+	//SAM Tail
+	W_forreflectivity.push_back(coefs[16]);
+	W_forreflectivity.push_back(btail  / (coefs[16] * coefs[13]) + (1 - Vtail / (coefs[16] * coefs[13])) * coefs[2]);
+	W_forreflectivity.push_back(0);
+	//tail/HG rough
+	W_forreflectivity.push_back(coefs[17]);
+
+	err = smearedabeles(userdata, (const double*) &W_forreflectivity[0], W_forreflectivity.size(), model, xdata, numpnts, numDataDims);
+	return err;
+	
+}
+
+
 /**
  regularising cost function for reflectivity
  */
