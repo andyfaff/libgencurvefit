@@ -349,8 +349,7 @@ double globalCostWrapper(void *userdata, const double *coefs, unsigned int numpa
 		}
 		
 		if(gFI->costfun)
-			indivcost = log10chisquared(gFI, (const double*) &individualCoefs[0], gFI->numcoefs, data + dataOffset, model + dataOffset, errors + dataOffset, numpoints);
-			//			indivcost = (*(gFI->costfun))(gFI, (const double*) &individualCoefs[0], gFI->numcoefs, data + dataOffset, model + dataOffset, errors + dataOffset, numpoints);
+			indivcost = (*(gFI->costfun))(gFI, (const double*) &individualCoefs[0], gFI->numcoefs, data + dataOffset, model + dataOffset, errors + dataOffset, numpoints);
 		else
 			indivcost = chisquared(NULL, (const double*) &individualCoefs[0], gFI->numcoefs, data + dataOffset, model + dataOffset, errors + dataOffset, numpoints);
 
