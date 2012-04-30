@@ -1,0 +1,16 @@
+
+The global_fitter program is designed to work as a generalised regression program.  If has the additional features which may, or may not be, utilized:
+1) You can co-refine several datasets at once. In otherwords, you have several datasets whose models may share some of the same parameters.  This program uses a linkage system to specify which parameters are unique, and which will be common to several datasets. This linkage is specified in the pilot files. THe program can analyse one dataset just as well.
+
+2) You can specify a different model, or fitfunction, for each dataset.  These models should be contained in a dynamic library called myfitfunctions.so that is normally kept in the same directory as the globalfitting executable. You specify which fitfunction to use in the individual pilot files. The fitfunctions are contained in a separate library so that the entire program does not have to be recompiled.
+
+3) This program also performs Monte Carlo error analysis. Here one fits the combined dataset many, many times. Each time the fit is carried out a new dataset is synthesized by adding a gaussian deviate to each datapoint. The gaussian deviate is obtained from a gaussian noise distribution whose standard deviation is equal to the experimental uncertainty for that datapoint.  If one were to take the value of a certain datapoint from each of the synthesized datasets and work out the mean and standard deviation over the whole set of synthesized datasets they would be equivalent to the value and experimental uncertainty of the corresponding point in the original dataset.  This monte carlo technique allows you to work out the uncertainty on each of the model parameters, simply work out the mean and standard deviation of a given parameter over all the iterations performed.
+
+4) This Monte Carlo error analysis can be parallelised, massively reducing the time taken to perform the analysis. THe program is designed to scale from a normal PC (POSIX) up to cluster scale.  On a single compute node (a processor with several cores) parallel fits are obtained using OMP.  One can then fit on a cluster, parallelising over the cluster nodes by using MPI. The latter requires specification of the -DUSE_MPI flag during compilation.
+(e.g. mpic++ -O3 -funroll-loops -DUSE_MPI -I../../src  -L../../../libgencurvefit -fopenmp *.cpp  -o global_fitter -lgomp -lpthread -lgencurvefit
+)
+
+4) The program usage is:
+./global_fitter global_pilot N > iterations
+
+The global_pilot file tells the program which datasets are being fit and the linkages between parameters, N is the number of monte carlo iterations to be done. Here we redirect stdout (which is where the output from the program goes) to a file called iterations.
