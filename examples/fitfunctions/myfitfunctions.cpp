@@ -13,7 +13,6 @@
 #include "MyComplex.h"
 #include "pthread.h"
 #include <vector>
-#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -465,3 +464,23 @@ double smoother(void *userdata, const double *params, unsigned int numparams, co
 }
 
 
+/**
+ a log10 cost function for reflectivity
+ */
+double log10chisquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts){
+	
+	long ii;
+	double chi2 = 0;
+	double val=0;
+	
+	for (ii = 0 ; ii < numpnts ; ii += 1){
+		val = log10(data[ii]) - log10(model[ii]);
+		val /= log10((data[ii] + errors[ii]) / data[ii]);
+		val = pow(val, 2);		
+		if(isfinite(val))
+			chi2 += val;
+	}
+	
+	return chi2;
+	
+}

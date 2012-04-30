@@ -7,16 +7,20 @@
 using namespace std;
 
 int globalFitWrapper(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims);
+double globalCostWrapper(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
+
 
 class globalFitIndividual{
 public:
 	fitfunction ffp;
+	costfunction costfun;
 	int numcoefs;
 	long datapoints;
 	int numDataDims;
 	string datafilename;
 	string pilotfilename;
 	string fitfunctionname;
+	string costfunctionname;
 	globalFitIndividual();
 };
 

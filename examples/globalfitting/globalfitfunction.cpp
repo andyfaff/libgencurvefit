@@ -45,6 +45,7 @@ int globalFit::makedatasets(int dataSetsToCreate){
 
 globalFitIndividual::globalFitIndividual(){
 	ffp = NULL;
+	costfun = NULL;
 	numcoefs = 0;
 	datapoints = 0;
 	numDataDims = 0;
@@ -209,7 +210,8 @@ int parseGlobalPilotFile(const char* filename,
 									 &localholdvectorArray[ii],
 									 &locallowlimArray[ii],
 									 &localhilimArray[ii],
-									 &gFS.globalFitIndividualArray[ii].fitfunctionname)){
+									 &gFS.globalFitIndividualArray[ii].fitfunctionname,
+									 &gFS.globalFitIndividualArray[ii].costfunctionname)){
 			cout << "Error whilst parsing one of the pilot files\n";
 			goto done;
 		}
@@ -297,3 +299,47 @@ done:
 	return err;
 }
 
+double globalCostWrapper(void *userdata, const double *coefs, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts){
+	globalFit *gFS = (globalFit*) userdata;	
+	int val = 0, ii = 0, jj = 0;
+	
+	vector<double> individualCoefs;
+	double overallCost = 0.;
+	double indivcost = 0.;
+	long numpoints = 0, dataOffset = 0L;
+	
+	
+	for(ii = 0 ; ii < gFS->numDataSets; ii++ ){
+		indivcost = 0.;
+		
+		globalFitIndividual *gFI = (gFS->globalFitIndividualArray + ii);
+		numpoints = gFI->datapoints;
+		
+		//set up the coeffcients to be sent to the fitfunction
+		for(jj = 0 ; jj < gFI->numcoefs ; jj ++ ){
+			val = gFS->parameterLinkageTable[ii].at(jj);
+			individualCoefs.push_back(coefs[val]);
+		}
+	
+		if(individualCoefs.size() != gFI->numcoefs){
+			cout << "ERROR, the expanded points did not match the number of fit parameters for one of the datasets\n";
+			return -1;
+		}
+		
+		if(gFI->costfun)
+			indivcost = (*(gFI->costfun))(gFI, (const double*) &individualCoefs[0], gFI->numcoefs, data + dataOffset, model + dataOffset, errors + dataOffset, numpoints);
+		else
+			indivcost = chisquared(NULL, (const double*) &individualCoefs[0], gFI->numcoefs, data + dataOffset, model + dataOffset, errors + dataOffset, numpoints);
+
+		
+		//only increment the model pointer once you've called the function
+		overallCost += indivcost;
+		
+		dataOffset += numpoints;
+		individualCoefs.clear();
+	}
+	
+done:
+	return indivcost;
+	
+}
