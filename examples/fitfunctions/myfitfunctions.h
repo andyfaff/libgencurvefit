@@ -24,6 +24,8 @@ int line(void *userdata, const double *coefs, unsigned int numcoefs, double *mod
 int gaussian(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims);
 int abelesmodelwrapper(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims);
 
+	
+int stephenssamfloat_monolayer(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims);
 
 //costfunctions
 double smoother(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
