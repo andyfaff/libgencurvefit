@@ -10,10 +10,8 @@
 #include <ctime>
 #include <dlfcn.h>
 
-//#include "gencurvefit.h"
 #include "dataset.h"
 #include "globalfitfunction.h"
-
 
 
 #ifdef USE_MPI
@@ -24,7 +22,7 @@
 using namespace std;
 
 #define FIT_FUNCTION globalFitWrapper
-#define COST_FUNCTION log10ChiSquared
+#define COST_FUNCTION globalCostWrapper
 #define GO_TOL 0.03
 #define GO_KM 0.7
 #define GO_RECOMB 0.5
@@ -32,9 +30,6 @@ using namespace std;
 #define GO_ITERS 2000
 #define GO_STRATEGY 0
 #define GO_MONTECARLO 1
-
-double log10ChiSquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
-
 
 typedef struct{
 	const double *coefP;
@@ -203,7 +198,10 @@ int main (int argc, char *argv[]) {
 	}
 	
 	//load in the fitfunction at runtime. THis is so that you only need to recompile the fitfunctions, not the entire thing.
+	//also specify the costfunction
 	for(ii = 0 ; ii < gFS.numDataSets ; ii++){
+		dlerror();
+		
 		*(void **)(&(gFS.globalFitIndividualArray[ii].ffp)) = dlsym(fitfunctionlibrary, gFS.globalFitIndividualArray[ii].fitfunctionname.c_str());
 
 		if(!gFS.globalFitIndividualArray[ii].ffp){
@@ -211,6 +209,11 @@ int main (int argc, char *argv[]) {
 			cout << dlerror() << endl;
 			goto done;
 		}
+
+		*(void **)(&(gFS.globalFitIndividualArray[ii].costfun)) = dlsym(fitfunctionlibrary, gFS.globalFitIndividualArray[ii].costfunctionname.c_str());
+		if(!gFS.globalFitIndividualArray[ii].costfun)
+			gFS.globalFitIndividualArray[ii].costfun = &chisquared;
+		
 	}
 	
 	//we have to put the xdata for the global fit wave in an array that the globalfitwrapper can understant.
@@ -303,26 +306,5 @@ done:
 	//	cout << difftime(time2, time1) << "\n";
 	
     return err;
-}
-
-/**
- a log10 cost function for reflectivity
- */
-double log10ChiSquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts){
-	
-	long ii;
-	double chi2 = 0;
-	double val=0;
-	
-	for (ii = 0 ; ii < numpnts ; ii += 1){
-		val = log10(data[ii]) - log10(model[ii]);
-		val /= log10((data[ii] + errors[ii]) / data[ii]);
-		val = pow(val, 2);		
-		if(isfinite(val))
-			chi2 += val;
-	}
-	
-	return chi2;
-	
 }
 

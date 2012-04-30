@@ -39,6 +39,7 @@ int readCoefficientFile(const char* filename,
 						vector <unsigned int> *holdvector,
 						vector <double> *lowlim,
 						vector <double> *hilim,
-						string *fitfunctionStr);
+						string *fitfunctionStr,
+						string *costfunctionStr);
 
 

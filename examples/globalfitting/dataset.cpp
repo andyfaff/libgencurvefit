@@ -103,8 +103,12 @@ done:
  
  hilim				- a vector containing the upper limits
  
+ fitfunctionStr		- a string containing the fitfunction name
+ 
+ costfunctionStr	- a string containing the costfunction name
+ 
  The file format is a 3 line header.  The first two are not used at the moment. The third is a string corresponding to the fit function
- required for the dataset.
+ required for the dataset. The fourth is the cost function required for this dataset (may be a blank line)
  This header is then followed by lines containing the coefficients:
  Each of the coefficient lines is:
  number toHold lowerLim upperLim
@@ -116,11 +120,18 @@ done:
  stuff1\n
  stuff2\n
  smearedabeles\n
+ chisquared\n
  1.023 1 0.9 1.1\n
  2.07 0 2 3\n
  */
 
-int readCoefficientFile(const char* filename, vector <double> *coefficients, vector <unsigned int> *holdvector, vector <double> *lowlim, vector <double> *hilim, string *fitfunctionStr){
+int readCoefficientFile(const char* filename,
+						vector <double> *coefficients,
+						vector <unsigned int> *holdvector,
+						vector <double> *lowlim,
+						vector <double> *hilim,
+						string *fitfunctionStr,
+						string *costfunctionStr){
 	int err = 0;
 	
 	ifstream file_to_read;
@@ -140,7 +151,10 @@ int readCoefficientFile(const char* filename, vector <double> *coefficients, vec
 
 	//what fitfunction do you require
 	getline(file_to_read, *fitfunctionStr, '\n');
-		
+
+	//what fitfunction do you require
+	getline(file_to_read, *costfunctionStr, '\n');
+	
 	//now read each line
 	while(getline(file_to_read, linein, '\n')){
 		Tokenize(linein, columndata, " ,\t", 3 * sizeof(char));
