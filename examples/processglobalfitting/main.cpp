@@ -65,7 +65,6 @@ int main (int argc, char *argv[]) {
 	vector<double> *mean = NULL;
 	vector<double> *standard_deviation = NULL;	
 	
-	vector<string> coefsToExpandTokens;
 	ofstream *outputfiles = NULL;
 	
 	if(argc != 3){
@@ -91,6 +90,10 @@ int main (int argc, char *argv[]) {
 	if(!standard_deviation)
 		return 1;
 	
+	outputfiles = new (nothrow) ofstream[gFS.numDataSets];
+	if(!outputfiles)
+		return 1;
+	
 	for(ii = 0 ; ii < gFS.numDataSets ; ii++)
 		outputfiles[ii].open((gFS.globalFitIndividualArray[ii].datafilename + ".dat").c_str());
 	
@@ -98,12 +101,12 @@ int main (int argc, char *argv[]) {
 	while(getline(file_to_read, coefsToExpand, '\n')){
 		if(err = expandGlobalLinkageTable(gFS, coefsToExpand, expandedCoefs))
 			goto done;
-		coefsToExpandTokens.clear();
-
-		Tokenize(coefsToExpand, coefsToExpandTokens, " \t", 2 * sizeof(char));
 				
 		for(ii = 0 ; ii < gFS.numDataSets ; ii++){
 			outputfiles[ii] << to_a_string(&((expandedCoefs[ii])[0]), expandedCoefs[ii].size()) << endl ;
+			mean[ii].resize(expandedCoefs[ii].size());
+			standard_deviation[ii].resize(expandedCoefs[ii].size());
+			
 			for(jj = 0 ; jj < expandedCoefs[ii].size() ; jj ++){
 				mean[ii][jj] += expandedCoefs[ii][jj];
 				standard_deviation[ii][jj] += pow(expandedCoefs[ii][jj], 2);
@@ -117,11 +120,11 @@ int main (int argc, char *argv[]) {
 		
 		for(jj = 0 ; jj < mean[ii].size() ; jj++){
 			mean[ii][jj]/=numiterations;
-			cout << mean[ii][jj] << " ";
+			cout << mean[ii][jj] << "\t";
 		}
 		cout << endl;
 		for(jj = 0 ; jj < mean[ii].size() ; jj++)
-			cout << sqrt((standard_deviation[ii][jj]/numiterations) - pow(mean[ii][jj], 2)) << " ";
+			cout << sqrt((standard_deviation[ii][jj]/numiterations) - pow(mean[ii][jj], 2)) << "\t";
 			
 		cout << endl;
 		cout << endl;
