@@ -1,1 +1,1 @@
-../globalfitting/myfitfunctions.h
+../fitfunctions/myfitfunctions.h
