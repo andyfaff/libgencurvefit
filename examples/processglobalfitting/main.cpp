@@ -5,6 +5,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include "math.h"
 
 #include "dataset.h"
 #include "globalfitfunction.h"
@@ -55,11 +56,14 @@ int main (int argc, char *argv[]) {
 	vector<double> coefs;
 	vector<double> lowlim;
 	vector<double> hilim;
+	vector<double> mean, standard_deviation;
+	
 	vector<unsigned int> bs;
 	string coefsToExpand;
 	string poop;
-	int ii;
+	int ii, numiterations = 0;
 	vector<double> *expandedCoefs = NULL;
+	vector<string> coefsToExpandTokens;
 	ofstream *outputfiles = NULL;
 	
 	if(argc != 3){
@@ -84,13 +88,33 @@ int main (int argc, char *argv[]) {
 	for(ii = 0 ; ii < gFS.numDataSets ; ii++)
 		outputfiles[ii].open((gFS.globalFitIndividualArray[ii].datafilename + ".dat").c_str());
 	
+	
 	while(getline(file_to_read, coefsToExpand, '\n')){
 		if(err = expandGlobalLinkageTable(gFS, coefsToExpand, expandedCoefs))
 			goto done;
+		coefsToExpandTokens.clear();
+
+		Tokenize(coefsToExpand, coefsToExpandTokens, " \t", 2 * sizeof(char));
+		
+		mean.resize(coefsToExpandTokens.size());
+		standard_deviation.resize(coefsToExpandTokens.size());
+		
+		for(ii = 0 ; ii < coefsToExpandTokens.size() ; ii ++){
+			mean[ii] += strtod(coefsToExpandTokens.at(ii).c_str(), NULL);
+			standard_deviation[ii] += pow(strtod(coefsToExpandTokens.at(ii).c_str(), NULL), 2);
+		}
+		numiterations ++;
 		
 		for(ii = 0 ; ii < gFS.numDataSets ; ii++)
 			outputfiles[ii] << to_a_string(&((expandedCoefs[ii])[0]), expandedCoefs[ii].size()) << endl ;
 		
+	}
+	
+	for(ii = 0 ; ii < mean.size() ; ii++){
+		mean[ii] /= numiterations; 
+		standard_deviation[ii] /= numiterations;
+		standard_deviation[ii] = sqrt(standard_deviation[ii] - pow(mean[ii], 2));
+		cout << mean[ii] << " +/- " << standard_deviation[ii] << endl;
 	}
 	
 	for(ii = 0 ; ii<gFS.numDataSets ; ii++)
