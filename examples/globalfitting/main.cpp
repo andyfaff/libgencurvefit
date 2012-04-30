@@ -311,7 +311,7 @@ done:
 	MPI_Finalize(); /* MPI Programs end with MPI Finalize; this is a weak synchronization point */
 	#endif
 	time(&time2);
-	cout << difftime(time2, time1) << "\n";
+//	cout << difftime(time2, time1) << "\n";
 	
     return err;
 }
