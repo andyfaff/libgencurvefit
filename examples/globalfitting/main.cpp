@@ -22,7 +22,6 @@
 using namespace std;
 
 #define FIT_FUNCTION globalFitWrapper
-#define COST_FUNCTION globalCostWrapper
 #define GO_TOL 0.03
 #define GO_KM 0.7
 #define GO_RECOMB 0.5
@@ -145,7 +144,8 @@ int main (int argc, char *argv[]) {
 	double **fittedCoefs = NULL;
 	double *fittedChi2 = NULL;
 	fitWorkerParm *MC_arg = NULL;
-	void *fitfunctionlibrary = NULL;	
+	void *fitfunctionlibrary = NULL;
+	costfunction overallCostFunction = NULL;
 	
 	time_t time1, time2;
 	
@@ -216,6 +216,14 @@ int main (int argc, char *argv[]) {
 		
 	}
 	
+	overallCostFunction = gFS.globalFitIndividualArray[0].costfun;
+	for(ii = 1 ; ii < gFS.numDataSets ; ii++){
+		if(gFS.globalFitIndividualArray[ii].costfun != overallCostFunction){
+			overallCostFunction = &globalCostWrapper;
+			break;
+		}
+	}
+	
 	//we have to put the xdata for the global fit wave in an array that the globalfitwrapper can understant.
 	//currently they are in a vector.  We need them in a 2D array, where the rows are each dataset and the columns the datapoints
 	//I can't be bothered making a ragged array, so lets just make it square, with the largest number of datapoints determining the
@@ -261,7 +269,7 @@ int main (int argc, char *argv[]) {
 #pragma omp parallel for shared(MC_arg) private(ii) 
 	for (ii = 0 ; ii < myMCiters ; ii++){					
 		MC_arg[ii].fitfun = &FIT_FUNCTION;
-		MC_arg[ii].costfun = &COST_FUNCTION;
+		MC_arg[ii].costfun = overallCostFunction;
 		MC_arg[ii].holdvector = &bs[0];
 		MC_arg[ii].chi2Results = fittedChi2 + ii;
 		MC_arg[ii].coefResults = *(fittedCoefs + ii);
@@ -303,7 +311,7 @@ done:
 	MPI_Finalize(); /* MPI Programs end with MPI Finalize; this is a weak synchronization point */
 	#endif
 	time(&time2);
-	//	cout << difftime(time2, time1) << "\n";
+	cout << difftime(time2, time1) << "\n";
 	
     return err;
 }
