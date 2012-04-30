@@ -30,6 +30,7 @@ clean:
 	rm examples/processglobalfitting/processglobalfitting
 	rm examples/globalfitting/global_fitter
 	rm examples/gaussian/gaussian_fitter
+	rm examples/fitfunctions/myfitfunctions.so
 
 install-libs: $(LIBS)
 	-@if [ ! -d $(DESTDIR)$(exec_prefix)  ]; then mkdir -p $(DESTDIR)$(exec_prefix); fi
@@ -46,7 +47,7 @@ gaussian:
 	g++ -O3 examples/gaussian/*.cpp -Isrc -L. -fopenmp -o examples/gaussian/gaussian_fitter -lgencurvefit -lgomp -lpthread -lm
 	
 globalfitting:
-	g++ -O3 examples/globalfitting/*.cpp -Isrc -fopenmp -L. -o examples/globalfitting/global_fitter -lgencurvefit -lgomp -lpthread -lm
+	g++ -O3 examples/globalfitting/*.cpp -Isrc -fopenmp -L. -o examples/globalfitting/global_fitter -lgencurvefit -lgomp -lpthread -lm -ldl
 
 processglobalfitting:
 	g++ -O3 examples/processglobalfitting/*.cpp -Isrc -fopenmp -L. -o examples/processglobalfitting/processglobalfitting -lgencurvefit
