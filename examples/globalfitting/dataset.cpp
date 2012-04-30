@@ -71,10 +71,13 @@ int dataset::readDataFile(const char* filename){
 		//read the data
 		while(getline(file_to_read, linein, '\n')){
 			Tokenize(linein, columndata, " ,\t", 3 * sizeof(char));			
-			xx.push_back(strtod(columndata[0].c_str(), NULL));
-			yy.push_back(strtod(columndata[1].c_str(), NULL));
-			dy.push_back(fabs(strtod(columndata[2].c_str(), NULL)));
-			dx.push_back(fabs(strtod(columndata[3].c_str(), NULL)));
+			xx.push_back(strtod(columndata.at(0).c_str(), NULL));
+			yy.push_back(strtod(columndata.at(1).c_str(), NULL));
+			dy.push_back(fabs(strtod(columndata.at(2).c_str(), NULL)));
+			if(columndata.size() == 4)
+				dx.push_back(fabs(strtod(columndata.at(3).c_str(), NULL)));
+			else
+				dx.push_back(0);
 			
 			columndata.clear();
 		}
