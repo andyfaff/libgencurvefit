@@ -8,6 +8,7 @@
  */
 #include "dataset.h"
 #include "globalfitfunction.h"
+#include "math.h"
 
 #include <iostream>
 
@@ -299,6 +300,27 @@ done:
 	return err;
 }
 
+/**
+ a log10 cost function for reflectivity
+ */
+double log10chisquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts){
+	
+	long ii;
+	double chi2 = 0;
+	double val=0;
+	
+	for (ii = 0 ; ii < numpnts ; ii += 1){
+		val = log10(data[ii]) - log10(model[ii]);
+		val /= log10((data[ii] + errors[ii]) / data[ii]);
+		val = pow(val, 2);		
+		if(isfinite(val))
+			chi2 += val;
+	}
+	
+	return chi2;
+	
+}
+
 double globalCostWrapper(void *userdata, const double *coefs, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts){
 	globalFit *gFS = (globalFit*) userdata;	
 	int val = 0, ii = 0, jj = 0;
@@ -327,7 +349,8 @@ double globalCostWrapper(void *userdata, const double *coefs, unsigned int numpa
 		}
 		
 		if(gFI->costfun)
-			indivcost = (*(gFI->costfun))(gFI, (const double*) &individualCoefs[0], gFI->numcoefs, data + dataOffset, model + dataOffset, errors + dataOffset, numpoints);
+			indivcost = log10chisquared(gFI, (const double*) &individualCoefs[0], gFI->numcoefs, data + dataOffset, model + dataOffset, errors + dataOffset, numpoints);
+			//			indivcost = (*(gFI->costfun))(gFI, (const double*) &individualCoefs[0], gFI->numcoefs, data + dataOffset, model + dataOffset, errors + dataOffset, numpoints);
 		else
 			indivcost = chisquared(NULL, (const double*) &individualCoefs[0], gFI->numcoefs, data + dataOffset, model + dataOffset, errors + dataOffset, numpoints);
 
@@ -340,6 +363,6 @@ double globalCostWrapper(void *userdata, const double *coefs, unsigned int numpa
 	}
 	
 done:
-	return indivcost;
+	return overallCost;
 	
 }

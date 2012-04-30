@@ -15,7 +15,7 @@ includedir = ${prefix}/include
 
 OBJS = src/gencurvefit.o src/mt19937p.o src/levenbergMarquardt.o
 
-all: libgencurvefit.a gaussian globalfitting processglobalfitting
+all: libgencurvefit.a gaussian globalfitting processglobalfitting fitfunctions
 
 libgencurvefit.a: $(OBJS)
 	$(AR) $@ $(OBJS)
