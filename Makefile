@@ -50,3 +50,6 @@ globalfitting:
 
 processglobalfitting:
 	g++ -O3 examples/processglobalfitting/*.cpp -Isrc -fopenmp -L. -o examples/processglobalfitting/processglobalfitting -lgencurvefit
+
+fitfunctions:
+	g++ -O3 -dynamiclib -shared -fPIC examples/fitfunctions/*.cpp -Isrc -fopenmp -L. -o examples/fitfunctions/myfitfunctions.so -lgencurvefit -lgomp -lpthread
