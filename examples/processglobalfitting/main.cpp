@@ -115,6 +115,8 @@ int main (int argc, char *argv[]) {
 		numiterations ++;		
 	}
 	
+	cout.setf(ios::showpoint);
+
 	for(ii = 0 ; ii < gFS.numDataSets ; ii++){
 		cout << "dataset" << ii << endl;
 		
