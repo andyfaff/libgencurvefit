@@ -121,12 +121,13 @@ int main (int argc, char *argv[]) {
 	
 	for(ii = 0 ; ii < gFS.numDataSets ; ii++){
 		cout << "dataset" << ii << endl;
-		
+		cout << "mean" << endl;
 		for(jj = 0 ; jj < mean[ii].size() ; jj++){
 			mean[ii][jj]/=numiterations;
 			cout << setw(13) << scientific << mean[ii][jj] << " ";
 		}
 		cout << endl;
+		cout << "standard deviation" << endl;
 		for(jj = 0 ; jj < mean[ii].size() ; jj++){
 			val =  sqrt((standard_deviation[ii][jj]/numiterations) - pow(mean[ii][jj], 2));
 			if(!isfinite(val))
