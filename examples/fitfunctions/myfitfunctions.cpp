@@ -560,10 +560,11 @@ double log10chisquared(void *userdata, const double *params, unsigned int numpar
 	long ii;
 	double chi2 = 0;
 	double val=0;
+	double ln10 = log(10);
 	
 	for (ii = 0 ; ii < numpnts ; ii += 1){
 		val = log10(data[ii]) - log10(model[ii]);
-		val /= log10((data[ii] + errors[ii]) / data[ii]);
+		val /= fabs(errors[ii] / data[ii] / ln10);
 		val = pow(val, 2);		
 		if(isfinite(val))
 			chi2 += val;
