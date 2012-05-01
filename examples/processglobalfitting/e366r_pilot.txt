@@ -1,0 +1,1 @@
+../globalfitting/e366r_pilot.txt

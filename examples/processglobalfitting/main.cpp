@@ -5,6 +5,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <iomanip>
 #include "math.h"
 
 #include "dataset.h"
@@ -56,6 +57,7 @@ int main (int argc, char *argv[]) {
 	vector<double> coefs;
 	vector<double> lowlim;
 	vector<double> hilim;
+	double val;
 	
 	vector<unsigned int> bs;
 	string coefsToExpand;
@@ -115,19 +117,22 @@ int main (int argc, char *argv[]) {
 		numiterations ++;		
 	}
 	
-	cout.setf(ios::showpoint);
-
+	
+	
 	for(ii = 0 ; ii < gFS.numDataSets ; ii++){
 		cout << "dataset" << ii << endl;
 		
 		for(jj = 0 ; jj < mean[ii].size() ; jj++){
 			mean[ii][jj]/=numiterations;
-			cout << mean[ii][jj] << "\t";
+			cout << setw(13) << scientific << mean[ii][jj] << " ";
 		}
 		cout << endl;
-		for(jj = 0 ; jj < mean[ii].size() ; jj++)
-			cout << sqrt((standard_deviation[ii][jj]/numiterations) - pow(mean[ii][jj], 2)) << "\t";
-			
+		for(jj = 0 ; jj < mean[ii].size() ; jj++){
+			val =  sqrt((standard_deviation[ii][jj]/numiterations) - pow(mean[ii][jj], 2));
+			if(!isfinite(val))
+				val = 0;
+			cout << setw(13) << scientific << val << " ";
+		}
 		cout << endl;
 		cout << endl;
 	}
