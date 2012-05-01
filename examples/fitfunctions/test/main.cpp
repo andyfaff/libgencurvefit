@@ -24,7 +24,7 @@ int main (int argc, char *argv[]) {
 	double chi2;
 	
 	dataset ds;
-	ds.readDataFile("e361r.txt");
+	ds.readDataFile(argv[1]);
 	
 	yy.resize(ds.xx.size());
 	
