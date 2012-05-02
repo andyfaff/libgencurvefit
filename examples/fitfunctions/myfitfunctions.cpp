@@ -477,7 +477,7 @@ int stephenssamfloat_monolayer(void *userdata, const double *coefs, unsigned int
 	double bhead = 0.0002835;
 
 	//#layers
-	W_forreflectivity.push_back(5);
+	W_forreflectivity.push_back(4);
 	//scale
 	W_forreflectivity.push_back(coefs[0]);
 	//fronting
