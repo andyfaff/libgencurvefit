@@ -26,7 +26,7 @@ int abelesmodelwrapper(void *userdata, const double *coefs, unsigned int numcoef
 
 	
 int stephenssamfloat_monolayer(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims);
-
+	
 //costfunctions
 double smoother(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
 double log10chisquared(void *userdata, const double *params, unsigned int numparams, const double *data, const double *model, const double *errors, long numpnts);
