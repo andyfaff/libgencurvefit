@@ -54,3 +54,7 @@ processglobalfitting:
 
 fitfunctions:
 	g++ -O3 -dynamiclib -shared -fPIC examples/fitfunctions/*.cpp -Isrc -fopenmp -L. -o examples/fitfunctions/myfitfunctions.so -lgencurvefit -lgomp -lpthread
+
+mpiglobalfitting:
+    mpic++ -O3 -funroll-loops -DUSE_MPI -Isrc  -L. -fopenmp *.cpp  -o examples/globalfitting/global_fitter -lgomp -lpthread -lgencurvefit -ldl -lm
+    
