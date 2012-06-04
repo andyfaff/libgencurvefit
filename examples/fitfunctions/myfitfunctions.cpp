@@ -293,27 +293,29 @@ int smearedabeles(void *userdata, const double *coefs, unsigned int numcoefs, do
 	if(!ddxP)
 		err = NO_MEMORY;
 	
+	double FWHM = 4 * sqrt(2 * log(2.0));
+
 	for(ii = 0 ; ii < numpnts * respoints ; ii += 1)
-		*(ddxP + ii) = *(xP+ii/respoints) + (double)((ii%respoints)-(respoints-1)/2)*0.2*(*(dxP+ii/respoints));
+		*(ddxP + ii) = *(xP+ii/respoints) + (double)((ii%respoints)-(respoints-1)/2) / FWHM * (*(dxP+ii/respoints));
 		
 	if(err = abeles(userdata, coefs, numcoefs, dyP, (const double**) &ddxP, numpnts * respoints, 1))
 		goto done;
 	
-	for(ii=0 ; ii < numpnts ; ii += 1, yP++){
-		*yP = 0.056 * (*(dyP + ii * respoints));
-		*yP += 0.135 * (*(dyP + ii * respoints + 1));														
-		*yP += 0.278 * (*(dyP + ii * respoints + 2));
-		*yP += 0.487 * (*(dyP + ii * respoints + 3));
-		*yP += 0.726 * (*(dyP + ii * respoints + 4));
-		*yP += 0.923 * (*(dyP + ii * respoints + 5));
-		*yP += (*(dyP+ii*respoints + 6));
-		*yP += 0.923 * (*(dyP + ii * respoints + 7));
-		*yP += 0.726 * (*(dyP + ii * respoints + 8));
-		*yP += 0.487 * (*(dyP + ii * respoints + 9));
-		*yP += 0.278 * (*(dyP + ii * respoints + 10));
-		*yP += 0.135 * (*(dyP + ii * respoints + 11));
-		*yP += 0.056 * (*(dyP + ii * respoints + 12));
-		*yP /= 6.211;
+	for(ii=0 ; ii < numpnts ; ii += 1, yP++){		
+		*yP = 0.00443185 * (*(dyP + ii * respoints));
+		*yP += 0.0175283 * (*(dyP + ii * respoints + 1));														
+		*yP += 0.053991 * (*(dyP + ii * respoints + 2));
+		*yP += 0.129518 * (*(dyP + ii * respoints + 3));
+		*yP += 0.241971 * (*(dyP + ii * respoints + 4));
+		*yP += 0.352065 * (*(dyP + ii * respoints + 5));
+		*yP += 0.398942 * (*(dyP+ii*respoints + 6));
+		*yP += 0.352065 * (*(dyP + ii * respoints + 7));
+		*yP += 0.241971 * (*(dyP + ii * respoints + 8));
+		*yP += 0.129518 * (*(dyP + ii * respoints + 9));
+		*yP += 0.053991 * (*(dyP + ii * respoints + 10));
+		*yP += 0.0175283 * (*(dyP + ii * respoints + 11));
+		*yP += 0.00443185 * (*(dyP + ii * respoints + 12));
+		*yP *= 0.5;
 	}
 	
 done:
