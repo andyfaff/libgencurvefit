@@ -316,7 +316,7 @@ int smearedabeles(void *userdata, const double *coefs, unsigned int numcoefs, do
 		0.9841830547185881};
 	
 	
-	dyP = (double*)malloc(numpnts * sizeof(double));
+	dyP = (double*)malloc(numpnts * RESPOINTS * sizeof(double));
 	if(!dyP)
 		err = NO_MEMORY;
 
