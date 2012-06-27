@@ -277,47 +277,82 @@ typedef struct{
 int smearedabeles(void *userdata, const double *coefs, unsigned int numcoefs, double *model, const double **xdata, long numpnts, unsigned int numDataDims){
 	int err = 0;
 	int ii;
-	int respoints=13;
-	double *dyP = NULL;
+	double *dyP;
 	double *ddxP = NULL;
 	double *yP = model;
 	const double *xP = *xdata;
 	const double *dxP = *(xdata + 1);
+
+	int RESPOINTS = 13;
+	double INTLIMIT = 3.5;		//integration between -3.5 and 3 sigma
+	double FWHM = 2 * sqrt(2 * log(2.0));
+	double va, vb, sigma;
+	
+	double weights[13] = {0.0404840047653159,
+		0.0921214998377285,
+		0.1388735102197872,
+		0.1781459807619457,
+		0.2078160475368885,
+		0.2262831802628972,
+		0.2325515532308739,
+		0.2262831802628972,
+		0.2078160475368885,
+		0.1781459807619457,
+		0.1388735102197872,
+		0.0921214998377285,
+		0.0404840047653159};
+	double abscissa[13] = {-0.9841830547185881,
+		-0.9175983992229779,
+		-0.8015780907333099,
+		-0.6423493394403402,
+		-0.4484927510364469,
+		-0.2304583159551348,
+		0.,
+		0.2304583159551348,
+		0.4484927510364469,
+		0.6423493394403402,
+		0.8015780907333099,
+		0.9175983992229779,
+		0.9841830547185881};
 	
 	
-	dyP = (double*)malloc(numpnts * respoints * sizeof(double));
+	dyP = (double*)malloc(numpnts * sizeof(double));
 	if(!dyP)
 		err = NO_MEMORY;
 
-	ddxP = (double*)malloc(numpnts * respoints * sizeof(double));
+	ddxP = (double*)malloc(numpnts * RESPOINTS * sizeof(double));
 	if(!ddxP)
 		err = NO_MEMORY;
 	
-	double FWHM = 4 * sqrt(2 * log(2.0));
+	for(ii = 0 ; ii < numpnts * RESPOINTS ; ii ++){
+		sigma = dxP[ii/RESPOINTS] / FWHM;
+		va = -INTLIMIT * sigma + xP[ii / RESPOINTS];
+		vb = INTLIMIT * sigma + xP[ii / RESPOINTS];
+		ddxP[ii] = (abscissa[ii % RESPOINTS] * (vb-va) + vb + va)/2;
+	}	
 
-	for(ii = 0 ; ii < numpnts * respoints ; ii += 1)
-		*(ddxP + ii) = *(xP+ii/respoints) + (double)((ii%respoints)-(respoints-1)/2) / FWHM * (*(dxP+ii/respoints));
-		
-	if(err = abeles(userdata, coefs, numcoefs, dyP, (const double**) &ddxP, numpnts * respoints, 1))
+	if(err = abeles(userdata, coefs, numcoefs, dyP, (const double**) &ddxP, numpnts * RESPOINTS, 1))
 		goto done;
 	
-	for(ii=0 ; ii < numpnts ; ii += 1, yP++){		
-		*yP = 0.00443185 * (*(dyP + ii * respoints));
-		*yP += 0.0175283 * (*(dyP + ii * respoints + 1));														
-		*yP += 0.053991 * (*(dyP + ii * respoints + 2));
-		*yP += 0.129518 * (*(dyP + ii * respoints + 3));
-		*yP += 0.241971 * (*(dyP + ii * respoints + 4));
-		*yP += 0.352065 * (*(dyP + ii * respoints + 5));
-		*yP += 0.398942 * (*(dyP+ii*respoints + 6));
-		*yP += 0.352065 * (*(dyP + ii * respoints + 7));
-		*yP += 0.241971 * (*(dyP + ii * respoints + 8));
-		*yP += 0.129518 * (*(dyP + ii * respoints + 9));
-		*yP += 0.053991 * (*(dyP + ii * respoints + 10));
-		*yP += 0.0175283 * (*(dyP + ii * respoints + 11));
-		*yP += 0.00443185 * (*(dyP + ii * respoints + 12));
-		*yP *= 0.5;
+	for(ii = 0, yP = model ; ii < numpnts ; ii ++, yP++){
+		//assumes 13 point gaussian quadrature, over +/- 3.5 sigma
+		*yP = dyP[ii * RESPOINTS] * weights[0] * 0.001057642102668805;
+		*yP += dyP[ii * RESPOINTS + 1] * weights[1] * 0.002297100003792314;
+		*yP += dyP[ii * RESPOINTS + 2] * weights[2] *0.007793859679303332;
+		*yP += dyP[ii * RESPOINTS + 3] * weights[3] *0.0318667809686739;
+		*yP += dyP[ii * RESPOINTS + 4] * weights[4] *0.1163728244269813;
+		*yP += dyP[ii * RESPOINTS + 5] * weights[5] *0.288158781825899;
+		*yP += dyP[ii * RESPOINTS + 6] * weights[6] * 0.3989422804014327;
+		*yP += dyP[ii * RESPOINTS + 7] * weights[7] * 0.288158781825899;
+		*yP += dyP[ii * RESPOINTS + 8] * weights[8] * 0.1163728244269813;
+		*yP += dyP[ii * RESPOINTS + 9] * weights[9] * 0.0318667809686739;
+		*yP += dyP[ii * RESPOINTS + 10] * weights[10] * 0.007793859679303332;
+		*yP += dyP[ii * RESPOINTS + 11] * weights[11] *0.002297100003792314;
+		*yP += dyP[ii * RESPOINTS + 12] * weights[12] * 0.001057642102668805;
+		
+		*yP *= 3.5;
 	}
-	
+		
 done:
 	if(dyP)
 		free(dyP);
