@@ -410,6 +410,32 @@ void updateBeta(double *b, double **derivativeMatrix, int numvarparams, const do
 		b[ii] = calculateBetaElement(derivativeMatrix, ii, ydata, model, edata, datapoints);
 }
 
+int calculateFitAndCost(
+    void *userdata,
+    fitfunction fitfun,
+    costfunction costfun,
+    double *coefs,
+    int numcoefs,
+    const double *ydata,
+    const double *edata,
+    const double **xdata,
+    long datapoints,
+    int numDataDims,
+    double *cost,
+    double *model){
+    //calculate the model and cost of a fitfunction against the data
+    
+    int err = 0;
+    
+    if((err = fitfun(userdata, coefs, numcoefs, model, (const double**)xdata, datapoints, numDataDims)))
+		goto done;
+    
+    *cost = costfun(userdata, coefs, numcoefs, ydata, model, edata, datapoints);
+    
+done:
+    return err;
+}
+
 int HessianMatrix(double ***HessianMatrix,
                   void *userdata,
                   fitfunction fitfun,
@@ -540,31 +566,6 @@ done:
     return err;
 }
 
-int calculateFitAndCost(
-    void *userdata,
-    fitfunction fitfun,
-    costfunction costfun,
-    double *coefs,
-    int numcoefs,
-    const double *ydata,
-    const double *edata,
-    const double **xdata,
-    long datapoints,
-    int numDataDims,
-    double *cost,
-    double *model){
-    //calculate the model and cost of a fitfunction against the data
-    
-    int err = 0;
-    
-    if((err = fitfun(userdata, coefs, numcoefs, model, (const double**)xdata, datapoints, numDataDims)))
-		goto done;
-    
-    *cost = costfun(userdata, coefs, numcoefs, ydata, model, edata, datapoints);
-    
-done:
-    return err;
-}
 
 int getCovarianceMatrix(double ***covarianceMatrix,
 						double *hessianDeterminant,
