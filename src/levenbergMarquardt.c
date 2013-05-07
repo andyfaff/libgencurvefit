@@ -15,7 +15,7 @@
 #include "string.h"
 
 #define TINY 1.0e-20
-#define EPSILON 1.0e-6
+#define EPSILON 1.0e-5
 
 static double factorial(double num){
 	int ii;
@@ -410,11 +410,167 @@ void updateBeta(double *b, double **derivativeMatrix, int numvarparams, const do
 		b[ii] = calculateBetaElement(derivativeMatrix, ii, ydata, model, edata, datapoints);
 }
 
+int HessianMatrix(double ***HessianMatrix,
+                  void *userdata,
+                  fitfunction fitfun,
+                  costfunction costfun,
+                  double *coefs,
+                  int numcoefs,
+                  unsigned int *holdvector,
+                  const double *ydata,
+                  const double *edata,
+                  const double **xdata,
+                  long datapoints,
+                  int numDataDims){
+    int err = 0;
+    int ii = 0, jj = 0, numvarparams = 0;
+    unsigned int *varparams = NULL;
+    double *coefs_temp = NULL;
+    double *model = NULL;
+    double t0, t1,t2, t3, t4;
+    double **lHessianMatrix = NULL;
+	
+	for(ii = 0 ; ii < numcoefs ; ii++)
+		if(holdvector[ii] == 0)
+			numvarparams++;
+    
+    //which are the parameters that are varying
+	varparams = (unsigned int*) malloc (sizeof(unsigned int) * numvarparams);
+	if(!varparams){
+		err = NO_MEMORY;
+		goto done;
+	}
+    for(ii = 0, jj = 0 ; ii < numcoefs ; ii++)
+		if(holdvector[ii] == 0){
+			varparams[jj] = ii;
+			jj++;
+		}
+    
+    //make a copy of coefs, just in case
+    coefs_temp = (double*) malloc (sizeof(double) * numcoefs);
+	if(!coefs_temp){
+		err = NO_MEMORY;
+		goto done;
+	}
+    //make an array for the model
+    model = (double*) malloc (sizeof(double) * datapoints);
+	if(!model){
+		err = NO_MEMORY;
+		goto done;
+	}
+    lHessianMatrix = (double**) malloc2d(numvarparams, numvarparams, sizeof(double));
+	if(!lHessianMatrix){
+		err = NO_MEMORY;
+		goto done;
+	}
+    
+    //now work out the Hessian Matrix
+    for(ii = 0 ; ii < numvarparams ; ii++){
+        for(jj = ii ; jj < numvarparams ; jj++){
+            memcpy(coefs_temp, coefs, sizeof(double) * numcoefs);
+            if(ii == jj){
+                //calculate the leading diagonal
+                coefs_temp[ii] = coefs[ii] * (1 - 2 * EPSILON);
+                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t0, model))
+                    goto done;
+
+                coefs_temp[ii] = coefs[ii] * (1 - EPSILON);
+                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t1, model))
+                    goto done;
+
+                coefs_temp[ii] = coefs[ii];
+                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t2, model))
+                    goto done;
+
+                coefs_temp[ii] = coefs[ii] * (1 + EPSILON);
+                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t3, model))
+                    goto done;
+
+                coefs_temp[ii] = coefs[ii] * (1 + 2 * EPSILON);
+                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t4, model))
+                    goto done;
+                
+                lHessianMatrix[ii][ii] =  (-t0 + 16 * t1 - 30 * t2 + 16 * t3 - t4) / 12/EPSILON/EPSILON/coefs[ii]/coefs[ii];
+            } else {
+                //f -1,-1
+				coefs_temp[ii] = coefs[ii] * (1 - EPSILON);
+				coefs_temp[jj] = coefs[jj] * (1 - EPSILON);
+                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t0, model))
+                    goto done;
+
+                //f +1,+1
+				coefs_temp[ii] = coefs[ii] * (1 + EPSILON);
+				coefs_temp[jj] = coefs[jj] * (1 + EPSILON);
+                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t1, model))
+                    goto done;
+
+                //f +1,-1
+				coefs_temp[ii] = coefs[ii] * (1 + EPSILON);
+				coefs_temp[jj] = coefs[jj] * (1 - EPSILON);
+                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t2, model))
+                    goto done;
+
+                //f -1,+1
+				coefs_temp[ii] = coefs[ii] * (1 - EPSILON);
+				coefs_temp[jj] = coefs[jj] * (1 + EPSILON);
+                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t3, model))
+                    goto done;
+
+				lHessianMatrix[ii][jj] = (t0 + t1 - t2 - t3)/4/EPSILON/EPSILON/coefs[ii]/coefs[jj];
+				lHessianMatrix[jj][ii] = lHessianMatrix[ii][jj];
+            }
+
+        }
+    }
+    
+    
+done:
+    
+    if(coefs_temp)
+        free(coefs_temp);
+    if(varparams)
+        free(varparams);
+    if(model)
+        free(model);
+    if(err && lHessianMatrix){
+        free(lHessianMatrix);
+        lHessianMatrix = NULL;
+    }
+    *HessianMatrix = lHessianMatrix;
+    return err;
+}
+
+int calculateFitAndCost(
+    void *userdata,
+    fitfunction fitfun,
+    costfunction costfun,
+    double *coefs,
+    int numcoefs,
+    const double *ydata,
+    const double *edata,
+    const double **xdata,
+    long datapoints,
+    int numDataDims,
+    double *cost,
+    double *model){
+    //calculate the model and cost of a fitfunction against the data
+    
+    int err = 0;
+    
+    if((err = fitfun(userdata, coefs, numcoefs, model, (const double**)xdata, datapoints, numDataDims)))
+		goto done;
+    
+    *cost = costfun(userdata, coefs, numcoefs, ydata, model, edata, datapoints);
+    
+done:
+    return err;
+}
 
 int getCovarianceMatrix(double ***covarianceMatrix,
 						double *hessianDeterminant,
 						void *userdata,
 						fitfunction fitfun,
+                        costfunction costfun,
 						double cost,
 						double *coefs,
 						int numcoefs,
@@ -427,76 +583,63 @@ int getCovarianceMatrix(double ***covarianceMatrix,
 						int unitSD){
 	int err;
 	double **derivativeMatrix = NULL;
-	double **reducedCovarianceMatrix = NULL;
 	double hess = 0;
 	unsigned int *varparams = NULL;
 	int ii,jj, numvarparams = 0;
-	err = 0;
+	double val;
+    err = 0;
+    
 	
-	//fit function must exist
-	if(!fitfun)
-		return NO_FIT_FUNCTION_SPECIFIED;
-	
-	for(ii = 0 ; ii < numcoefs ; ii++)
+    for(ii = 0 ; ii < numcoefs ; ii++)
 		if(holdvector[ii] == 0)
 			numvarparams++;
-
+    
+    //which are the parameters that are varying
 	varparams = (unsigned int*) malloc (sizeof(unsigned int) * numvarparams);
 	if(!varparams){
 		err = NO_MEMORY;
 		goto done;
 	}
-
-	jj = 0;
-	for(ii = 0 ; ii < numcoefs ; ii++)
+    for(ii = 0, jj = 0 ; ii < numcoefs ; ii++)
 		if(holdvector[ii] == 0){
 			varparams[jj] = ii;
 			jj++;
 		}
-
-	reducedCovarianceMatrix = (double**) malloc2d(numvarparams, numvarparams, sizeof(double));
-	if(reducedCovarianceMatrix == NULL){
-		err = NO_MEMORY;
-		goto done;
-	}
-
-	derivativeMatrix = (double**) malloc2d(numvarparams, datapoints, sizeof(double));
-	if(derivativeMatrix == NULL){
-		err = NO_MEMORY;
-		goto done;
-	}
-	
-	if((err = updatePartialDerivative(userdata, fitfun, derivativeMatrix, coefs, numcoefs, varparams, numvarparams, xdata, datapoints, numDataDims)))
-	   goto done;
-	   	
-	updateAlpha(reducedCovarianceMatrix, derivativeMatrix, numvarparams, edata, datapoints, 0);
-
-	if((err = matrixInversion_chol(reducedCovarianceMatrix, numvarparams, &hess)))
+    
+    //calculate the Hessian matrix.
+    if(err = HessianMatrix(&derivativeMatrix, userdata, fitfun, costfun, coefs, numcoefs, holdvector, ydata, edata, xdata, datapoints, numDataDims))
+        goto done;
+    
+    //divide the Hessian matrix by a factor of 2.
+    for(ii = 0 ; ii < numvarparams ; ii++)
+        for(jj = 0 ; jj < numvarparams ; jj++){
+            derivativeMatrix[ii][jj] /= 2.;
+        }
+    //invert the Hessian Matrix, in place
+	if((err = matrixInversion_chol(derivativeMatrix, numvarparams, &hess)))
 		goto done;
 		
-	if(unitSD)
-		for(ii = 0; ii < numvarparams ; ii++)
-			for(jj = 0 ; jj < numvarparams ; jj += 1)
-				reducedCovarianceMatrix[ii][jj] *= cost/(datapoints - numvarparams);
+    for(ii = 0; ii < numvarparams ; ii++)
+        for(jj = 0 ; jj < numvarparams ; jj += 1)
+            derivativeMatrix[ii][jj] *= cost/(datapoints - numvarparams);
 	
 	*covarianceMatrix = (double**) malloc2d(numcoefs, numcoefs, sizeof(double));
 	if(!covarianceMatrix){
 		err = NO_MEMORY;
 		goto done;
 	}
-	
+
 	for (ii = 0; ii < numvarparams; ii++)
-		for(jj = 0 ; jj < numvarparams ; jj++)
-			(*covarianceMatrix)[varparams[ii]][varparams[jj]] =  reducedCovarianceMatrix[ii][jj];
-	
+		for(jj = 0 ; jj < numvarparams ; jj++){
+			(*covarianceMatrix)[varparams[ii]][varparams[jj]] =  derivativeMatrix[ii][jj];
+            val = derivativeMatrix[ii][jj];
+        }
 	if(hessianDeterminant)
 		*hessianDeterminant = hess;
 			
 done:
 	if(varparams != NULL)
 		free(varparams);
-	if(reducedCovarianceMatrix != NULL)
-		free(reducedCovarianceMatrix);
 	if(derivativeMatrix != NULL)
 		free(derivativeMatrix);
 	
