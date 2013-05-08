@@ -454,6 +454,7 @@ int HessianMatrix(double ***HessianMatrix,
     double *coefs_temp = NULL;
     double *model = NULL;
     double t0, t1,t2, t3, t4;
+    int p1, p2;
     double **lHessianMatrix = NULL;
 	
 	for(ii = 0 ; ii < numcoefs ; ii++)
@@ -494,55 +495,57 @@ int HessianMatrix(double ***HessianMatrix,
     for(ii = 0 ; ii < numvarparams ; ii++){
         for(jj = ii ; jj < numvarparams ; jj++){
             memcpy(coefs_temp, coefs, sizeof(double) * numcoefs);
+            p1 = varparams[ii];
+            p2 = varparams[jj];
             if(ii == jj){
                 //calculate the leading diagonal
-                coefs_temp[ii] = coefs[ii] * (1 - 2 * EPSILON);
+                coefs_temp[p1] = coefs[p1] * (1 - 2 * EPSILON);
                 if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t0, model))
                     goto done;
 
-                coefs_temp[ii] = coefs[ii] * (1 - EPSILON);
+                coefs_temp[p1] = coefs[p1] * (1 - EPSILON);
                 if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t1, model))
                     goto done;
 
-                coefs_temp[ii] = coefs[ii];
+                coefs_temp[p1] = coefs[p1];
                 if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t2, model))
                     goto done;
 
-                coefs_temp[ii] = coefs[ii] * (1 + EPSILON);
+                coefs_temp[p1] = coefs[p1] * (1 + EPSILON);
                 if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t3, model))
                     goto done;
 
-                coefs_temp[ii] = coefs[ii] * (1 + 2 * EPSILON);
+                coefs_temp[p1] = coefs[p1] * (1 + 2 * EPSILON);
                 if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t4, model))
                     goto done;
                 
-                lHessianMatrix[ii][ii] =  (-t0 + 16 * t1 - 30 * t2 + 16 * t3 - t4) / 12/EPSILON/EPSILON/coefs[ii]/coefs[ii];
+                lHessianMatrix[ii][ii] =  (-t0 + 16 * t1 - 30 * t2 + 16 * t3 - t4) / 12/EPSILON/EPSILON/coefs[p1]/coefs[p2];
             } else {
                 //f -1,-1
-				coefs_temp[ii] = coefs[ii] * (1 - EPSILON);
-				coefs_temp[jj] = coefs[jj] * (1 - EPSILON);
+				coefs_temp[p1] = coefs[p1] * (1 - EPSILON);
+				coefs_temp[p2] = coefs[p2] * (1 - EPSILON);
                 if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t0, model))
                     goto done;
 
                 //f +1,+1
-				coefs_temp[ii] = coefs[ii] * (1 + EPSILON);
-				coefs_temp[jj] = coefs[jj] * (1 + EPSILON);
+				coefs_temp[p1] = coefs[p1] * (1 + EPSILON);
+				coefs_temp[p2] = coefs[p2] * (1 + EPSILON);
                 if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t1, model))
                     goto done;
 
                 //f +1,-1
-				coefs_temp[ii] = coefs[ii] * (1 + EPSILON);
-				coefs_temp[jj] = coefs[jj] * (1 - EPSILON);
+				coefs_temp[p1] = coefs[p1] * (1 + EPSILON);
+				coefs_temp[p2] = coefs[p2] * (1 - EPSILON);
                 if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t2, model))
                     goto done;
 
                 //f -1,+1
-				coefs_temp[ii] = coefs[ii] * (1 - EPSILON);
-				coefs_temp[jj] = coefs[jj] * (1 + EPSILON);
+				coefs_temp[p1] = coefs[p1] * (1 - EPSILON);
+				coefs_temp[p2] = coefs[p2] * (1 + EPSILON);
                 if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t3, model))
                     goto done;
 
-				lHessianMatrix[ii][jj] = (t0 + t1 - t2 - t3)/4/EPSILON/EPSILON/coefs[ii]/coefs[jj];
+				lHessianMatrix[ii][jj] = (t0 + t1 - t2 - t3)/4/EPSILON/EPSILON/coefs[p1]/coefs[p2];
 				lHessianMatrix[jj][ii] = lHessianMatrix[ii][jj];
             }
 
@@ -612,7 +615,7 @@ int getCovarianceMatrix(double ***covarianceMatrix,
         goto done;
     
     //divide the Hessian matrix by a factor of 2.
-    for(ii = 0 ; ii < numvarparams ; ii++)
+    for(ii = 0 ; ii < numvarparams; ii++)
         for(jj = 0 ; jj < numvarparams ; jj++){
             derivativeMatrix[ii][jj] /= 2.;
         }
