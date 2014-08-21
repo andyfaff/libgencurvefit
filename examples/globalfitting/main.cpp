@@ -74,7 +74,9 @@ void fitWorker(fitWorkerParm* p) {
 	string outputString;
 	double chi2;
 
-	//copy the coefficients from the supplied coefficient vector into the results.
+	/*
+	copy the coefficients from the supplied coefficient vector into the results.
+	*/
 	memcpy(p->coefResults, p->coefP, sizeof(double) * p->numcoefs);
 
 	memset(&gco, 0, sizeof(gencurvefitOptions));
@@ -89,9 +91,10 @@ void fitWorker(fitWorkerParm* p) {
 	gco.monteCarlo = GO_MONTECARLO;
 	gco.seed = p->seed;
 
-	//at this point we have 3 columns of data and the coefficients
-	//we can start doing the fit.
-	//do a load of montecarlo iterations
+	/*
+	at this point we have 3 columns of data and the coefficients we can start
+	doing the fit. do a load of montecarlo iterations.
+	*/
 
 	err = genetic_optimisation(p->fitfun,
 							   p->costfun,
