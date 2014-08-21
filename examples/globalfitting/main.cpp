@@ -38,10 +38,10 @@ typedef struct{
 	const double **xP;
 	const double *eP;
 	const unsigned int *holdvector;
-	
+
 	long datapoints;
 	int dimensions;
-	
+
 	fitfunction fitfun;
 	costfunction costfun;
 	long popsizeMultiplier;
@@ -50,7 +50,7 @@ typedef struct{
 	float tol;
 	int gen_iters;
 	int seed;
-	
+
 	double *coefResults;	//this is going to be where the coefficients for the fit are put
 	double *chi2Results;
 	void* userdata;
@@ -62,27 +62,28 @@ std::string to_a_string(double *nums, long numthings)
 	long ii;
 	for(ii=0 ; ii< numthings ; ii+=1)
 		oss << nums[ii] << " ";
-	
+
 	return oss.str();
-}	
+}
 
 
-void fitWorker(fitWorkerParm* p) { 
+void fitWorker(fitWorkerParm* p) {
 	int err = 0;
 	gencurvefitOptions gco;
-	
-	string outputString;	
+
+	string outputString;
 	double chi2;
-	
+
 	//copy the coefficients from the supplied coefficient vector into the results.
 	memcpy(p->coefResults, p->coefP, sizeof(double) * p->numcoefs);
-		
+
 	memset(&gco, 0, sizeof(gencurvefitOptions));
 	gco.tolerance = p->tol;
 	gco.k_m = p->k_m;
 	gco.recomb = p->k_recomb;
 	gco.popsizeMultiplier = p->popsizeMultiplier;
-	gco.temp = -1;
+	gco.dither[0] = 0.7;
+	gco.dither[1] = 1.5;
 	gco.iterations = p->gen_iters;
 	gco.strategy = GO_STRATEGY;
 	gco.monteCarlo = GO_MONTECARLO;
@@ -102,17 +103,17 @@ void fitWorker(fitWorkerParm* p) {
 							   p->yP,
 							   p->xP,
 							   p->eP,
-							   2, 
+							   2,
 							   &chi2,
 							   &gco,
 							   p->userdata);
-	
+
 	//output the results
 	if(err){
 		cout << err;
 	}
 	outputString.clear();
-	
+
 	outputString.append(to_a_string(&chi2, 1));
 	outputString.append(" ");
 //	outputString.append(to_a_string((double*)p->userdata, 1));
@@ -121,18 +122,18 @@ void fitWorker(fitWorkerParm* p) {
 	outputString.append("\n");
 	cout << outputString;
 	cout.flush();
-	
+
 };
 
 
 int main (int argc, char *argv[]) {
 	int err = 0;
 	long ii, highestNumberOfPoints = 0, pointOffset = 0;
-	
+
 	globalFit gFS;
 	dataset theDataSet;
-	
-	vector<double> fityy;	
+
+	vector<double> fityy;
 
 	vector<double> coefs;
 	vector<double> lowlim;
@@ -146,12 +147,12 @@ int main (int argc, char *argv[]) {
 	fitWorkerParm *MC_arg = NULL;
 	void *fitfunctionlibrary = NULL;
 	costfunction overallCostFunction = NULL;
-	
+
 	time_t time1, time2;
-	
+
 	int numprocs = 1;
-	int myid = 0;	
-	
+	int myid = 0;
+
 #ifdef USE_MPI
 	MPI_Init(&argc,&argv); /* all MPI programs start with MPI_Init; all 'N' processes exist thereafter */
 	MPI_Comm_size(MPI_COMM_WORLD,&numprocs); /* find out how big the SPMD world is */
@@ -160,25 +161,25 @@ int main (int argc, char *argv[]) {
 	numprocs = 1;
 	myid = 0;
 #endif
-	
+
 	if(argc != 3){
 		cout << "Useage:\n ./motoMC globalpilot iterations\n";
 		err = WRONG_NUMBER_OF_PARAMS;
 		goto done;
 	}
-	
+
 	MCiters = (int) strtol(argv[2], NULL, 10);
 	myMCiters = MCiters / numprocs;
 
 	if(myid == numprocs - 1)
 		myMCiters += MCiters - numprocs * myMCiters;
-	
+
 	time(&time1);
-	
+
 	//set up global fit structure
 	if(err = parseGlobalPilotFile(argv[1], gFS, theDataSet, coefs, bs, lowlim, hilim))
 		goto done;
-	
+
 	//setup the limits array
 	limits = (double**)malloc2d(2, coefs.size(), sizeof(double));
 	if(!limits){
@@ -187,21 +188,21 @@ int main (int argc, char *argv[]) {
 	}
 	for(ii=0 ; ii<coefs.size(); ii+=1){
 		limits[0][ii] = lowlim[ii];
-		limits[1][ii] = hilim[ii];		
+		limits[1][ii] = hilim[ii];
 	}
-	
+
 	fitfunctionlibrary = dlopen("myfitfunctions.so", RTLD_LAZY);
 	if(!fitfunctionlibrary){
 		err = NO_FIT_FUNCTION_SPECIFIED;
 		cout << dlerror() << endl;
 		goto done;
 	}
-	
+
 	//load in the fitfunction at runtime. THis is so that you only need to recompile the fitfunctions, not the entire thing.
 	//also specify the costfunction
 	for(ii = 0 ; ii < gFS.numDataSets ; ii++){
 		dlerror();
-		
+
 		*(void **)(&(gFS.globalFitIndividualArray[ii].ffp)) = dlsym(fitfunctionlibrary, gFS.globalFitIndividualArray[ii].fitfunctionname.c_str());
 
 		if(!gFS.globalFitIndividualArray[ii].ffp){
@@ -213,9 +214,9 @@ int main (int argc, char *argv[]) {
 		*(void **)(&(gFS.globalFitIndividualArray[ii].costfun)) = dlsym(fitfunctionlibrary, gFS.globalFitIndividualArray[ii].costfunctionname.c_str());
 		if(!gFS.globalFitIndividualArray[ii].costfun)
 			gFS.globalFitIndividualArray[ii].costfun = &chisquared;
-		
+
 	}
-	
+
 	overallCostFunction = gFS.globalFitIndividualArray[0].costfun;
 	for(ii = 1 ; ii < gFS.numDataSets ; ii++){
 		if(gFS.globalFitIndividualArray[ii].costfun != overallCostFunction){
@@ -223,7 +224,7 @@ int main (int argc, char *argv[]) {
 			break;
 		}
 	}
-	
+
 	//we have to put the xdata for the global fit wave in an array that the globalfitwrapper can understant.
 	//currently they are in a vector.  We need them in a 2D array, where the rows are each dataset and the columns the datapoints
 	//I can't be bothered making a ragged array, so lets just make it square, with the largest number of datapoints determining the
@@ -243,21 +244,21 @@ int main (int argc, char *argv[]) {
 		memcpy(*(xdata + (2 * ii) + 1), &(theDataSet.dx[pointOffset]), datasetpoints * sizeof(double));
 		pointOffset += datasetpoints;
 	}
-	
+
 	//allocate memory for the fit parameter results.
 	fittedCoefs = (double**) malloc2d(myMCiters, coefs.size(), sizeof(double));
 	if(!fittedCoefs){
 		err = NO_MEMORY;
 		goto done;
 	}
-	
+
 	//and allocate memory for the fitted chi2 value.
 	fittedChi2 = (double*)malloc(myMCiters * sizeof(double));
 	if(!fittedChi2){
 		err = NO_MEMORY;
 		goto done;
 	}
-	
+
 	//allocate memory for the (openMP) thread arguments.
 	MC_arg = (fitWorkerParm *) malloc(sizeof(fitWorkerParm) * myMCiters);
 	if(!MC_arg){
@@ -266,8 +267,8 @@ int main (int argc, char *argv[]) {
 	}
 	memset(MC_arg, 0, sizeof(fitWorkerParm));
 
-#pragma omp parallel for shared(MC_arg) private(ii) 
-	for (ii = 0 ; ii < myMCiters ; ii++){					
+#pragma omp parallel for shared(MC_arg) private(ii)
+	for (ii = 0 ; ii < myMCiters ; ii++){
 		MC_arg[ii].fitfun = &FIT_FUNCTION;
 		MC_arg[ii].costfun = overallCostFunction;
 		MC_arg[ii].holdvector = &bs[0];
@@ -282,7 +283,7 @@ int main (int argc, char *argv[]) {
 
 		MC_arg[ii].eP = &(theDataSet.dy[0]);
 		MC_arg[ii].limits = (const double **) limits;
-		
+
 		MC_arg[ii].tol = GO_TOL;
 		MC_arg[ii].k_m = GO_KM;
 		MC_arg[ii].k_recomb = GO_RECOMB;
@@ -290,10 +291,10 @@ int main (int argc, char *argv[]) {
 		MC_arg[ii].gen_iters = GO_ITERS;
 		MC_arg[ii].userdata = &gFS;
 		MC_arg[ii].seed = clock() + ii + myid;
-		
+
 		fitWorker(MC_arg + ii);
 	}
-	
+
 done:
 
 	if(fitfunctionlibrary)
@@ -306,13 +307,13 @@ done:
 		free(fittedCoefs);
 	if(fittedChi2)
 		free(fittedChi2);
-	
-	#ifdef USE_MPI	
+
+	#ifdef USE_MPI
 	MPI_Finalize(); /* MPI Programs end with MPI Finalize; this is a weak synchronization point */
 	#endif
 	time(&time2);
 //	cout << difftime(time2, time1) << "\n";
-	
+
     return err;
 }
 
