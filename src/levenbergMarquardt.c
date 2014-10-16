@@ -15,7 +15,7 @@
 #include "string.h"
 
 #define TINY 1.0e-20
-#define EPSILON 1.0e-5
+#define EPS 2.2204460492503131e-16
 
 static double factorial(double num){
 	int ii;
@@ -294,120 +294,114 @@ done:
 	return err;
 }
 
+int mrqcof(void *userdata, fitfunction fitfun, costfunction costfun, const double *coefs, int numcoefs, const unsigned int *varparams, int numvarparams,
+            const double *ydata, const double *edata, const double **xdata, long datapoints, int numDataDims, double *cost,
+            double **alpha, double lambda, double *beta)
+{
+    int err = 0;
+    long ii = 0;
+    long jj = 0;
+    long kk = 0;
+    double val = 0;
+    double lcost, rcost;
+    double **derivmatrix = NULL;
+    double *epsilon = NULL;
+    double *temp_coef = NULL;
+    double *model_left = NULL;
+    double *model_right = NULL;
 
-static int partialDerivative(void *userdata, fitfunction fitfun, double** derivativeMatrix, int derivativeMatrixRow, int parameterIndex, const double* coefs, int numcoefs, const double **xdata, long datapoints, int numDataDims){
-	int err = 0;
-	double param, diff;
-	int jj;
-	double *dataTemp = NULL;
-	double *coefs_temp = NULL;
-	
-	coefs_temp = (double*)malloc(sizeof(double) * numcoefs);
-	 if(!coefs_temp){
-		err = NO_MEMORY;
-		goto done;
-	 }
-	memcpy(coefs_temp, coefs, numcoefs * sizeof(double));
+    //allocate memory for derivative matrix of each datapoint with respect to each parameter
+    derivmatrix = (double**) malloc2d(numvarparams, datapoints, sizeof(double));
+    if(!derivmatrix){
+        err = NO_MEMORY;
+        goto done;
+    }
+    //an array for epsilon values
+    epsilon = (double *) malloc(numvarparams * sizeof(double));
+    if(!epsilon){
+        err = NO_MEMORY;
+        goto done;
+    }
+    //an array for temporary copy of coefficients
+    temp_coef = (double*) malloc(numcoefs * sizeof(double));
+    if(!temp_coef){
+        err = NO_MEMORY;
+        goto done;
+    }
+    memcpy(temp_coef, coefs, sizeof(double) * numcoefs);
+    
+    //an array for temporary model calculation
+    model_left = (double*) malloc(datapoints * sizeof(double));
+    if(!model_left){
+        err = NO_MEMORY;
+        goto done;
+    }
+    //an array for temporary model calculation
+    model_right = (double*) malloc(datapoints * sizeof(double));
+    if(!model_right){
+        err = NO_MEMORY;
+        goto done;
+    }
 
-	param = coefs[parameterIndex];	
-	diff = EPSILON * param;
-	coefs_temp[parameterIndex] = param + diff;
-	
-	if((err = fitfun(userdata, coefs_temp, numcoefs, *(derivativeMatrix + derivativeMatrixRow), (const double**)xdata, datapoints, numDataDims)))
-		goto done;
-	
-	coefs_temp[parameterIndex] = param - diff;
-	
-	dataTemp = (double*)malloc(sizeof(double) * datapoints);
-	if(!dataTemp){
-		err = NO_MEMORY;
-		goto done;
-	}
-	
-	if((err = fitfun(userdata, coefs_temp, numcoefs, dataTemp, (const double**)xdata, datapoints, numDataDims)))
-		goto done;
-	
-	for(jj = 0 ; jj < datapoints ; jj++)
-		derivativeMatrix[derivativeMatrixRow][jj] = (derivativeMatrix[derivativeMatrixRow][jj] - dataTemp[jj]) / (2 * diff);
-	
+    //calculate the cost and fit
+    if(err = calculateFitAndCost(userdata, fitfun, costfun, temp_coef, numcoefs, ydata, edata, xdata, datapoints, numDataDims, cost, model_left))
+        goto done;
+    
+    for(ii = 0 ; ii < numvarparams ; ii++){
+        epsilon[ii] = pow(EPS, 1. / 3) * fmax(fabs(coefs[varparams[ii]]), 0.1);
+        //perturb coefficient to the left
+        temp_coef[varparams[ii]] = coefs[varparams[ii]] - epsilon[ii];
+
+        //calculate the fit to the left
+        if(err = calculateFitAndCost(userdata, fitfun, costfun, temp_coef, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &lcost, model_left))
+            goto done;
+
+        //perturb coefficient to the right
+        temp_coef[varparams[ii]] = coefs[varparams[ii]] + epsilon[ii];
+        
+        //calculate the fit to the right
+        if(err = calculateFitAndCost(userdata, fitfun, costfun, temp_coef, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &rcost, model_right))
+            goto done;
+        
+        volatile double h = ((coefs[varparams[ii]] + epsilon[ii]) - (coefs[varparams[ii]] - epsilon[ii]));
+        //now we can calculate Beta
+        beta[ii] = (rcost - lcost) / h;
+        
+        //fill out the derivative for each _model_ datapoint (eqn 8.35 in Bevington) with respect to each parameter
+        for(jj = 0 ; jj < datapoints; jj++){
+            derivmatrix[ii][jj] = (model_right[jj] - model_left[jj]) / h;
+            val =  (model_right[jj] - model_left[jj]) / h;
+        }
+        //remember to reset the values in temp_coef
+        temp_coef[ii] = coefs[ii];
+    }
+    for(ii = 0 ; ii < numvarparams ; ii++){
+
+        for(jj = 0 ; jj <= ii ; jj++){
+            val = 0;
+            for(kk = 0 ; kk < datapoints; kk++)
+                val += derivmatrix[ii][kk] * derivmatrix[jj][kk] / edata[kk] / edata[kk];
+            if(ii == jj)
+                val += lambda;
+            alpha[ii][jj] = val;
+            alpha[jj][ii] = val;
+        }
+    }
+    
+
 done:
-	if(coefs_temp)
-		free(coefs_temp);
-	if(dataTemp)
-		free(dataTemp);
-	
-	return err;
-}
-
-
-static int updatePartialDerivative(void *userdata, fitfunction fitfun, double **derivativeMatrix, double *coefs, int numcoefs, unsigned int *varparams, int numvarparams, const double **xdata, long datapoints, int numDataDims){
-	int err = 0;
-	int ii;
-	for(ii = 0 ; ii < numvarparams ; ii++){
-		if((err = partialDerivative(userdata, fitfun, derivativeMatrix, ii, varparams[ii], coefs, numcoefs, xdata, datapoints, numDataDims)))
-			return err;
-	} 
-	return err;
-}
-
-
-void calculateAlphaElement(int row, int col, double **alpha, double **derivativeMatrix, const double *edata, long datapoints, double lambda) {
-	int ii;
-	double result = 0;
-	double num = 0;
-	
-	for (ii = 0; ii < datapoints ; ii++) {
-		num = derivativeMatrix[row][ii]	* derivativeMatrix[col][ii];
-		num /= edata[ii] * edata[ii];
-		
-		result += num;
-	}
-	if(row == col)
-		result *= 1 + lambda;
-	
-	alpha[row][col] = result;
-}
-
-
-/** packs the upper right elements of the alpha matrix, because the alpha matrix should be symmetrical*/
-void packAlphaSymmetric(double** alpha, unsigned int numvarparams){  
-	unsigned int ii,jj;
-	
-	for(ii = 0 ; ii < numvarparams ; ii++)
-		for(jj = numvarparams - 1 ; jj > ii ; jj--)
-			alpha[ii][jj] = alpha[jj][ii];	
-}
-
-/** Calculates the lower left elements for <code>alpha</code>. */
-void updateAlpha(double **alpha, double **derivativeMatrix,  unsigned int numvarparams, const double *edata, long datapoints, double lambda) {
-	unsigned int ii, jj;
-	for (ii = 0; ii < numvarparams; ii++) {
-		for (jj = 0; jj < ii+1 ; jj++)
-			calculateAlphaElement(ii, jj, alpha, derivativeMatrix, edata, datapoints, lambda);
-	}
-	packAlphaSymmetric(alpha, numvarparams);
-}
-
-/** 
- * @return An calculated element for the beta-matrix.
- * NOTE: Does not change the value of beta-matrix.
- */
-double calculateBetaElement(double **derivativeMatrix, int row, const double *ydata, const double *model, const double *edata, long datapoints) {
-	int ii;
-	double result = 0;
-	for (ii = 0 ; ii < datapoints ; ii++){
-		result +=  (ydata[ii] - model[ii]) * derivativeMatrix[row][ii];
-		result /= edata[ii] * edata[ii];
-	}
-
-	return result;
-}
-
-/** Calculates all elements for <code>beta</code>. */
-void updateBeta(double *b, double **derivativeMatrix, int numvarparams, const double *ydata, const double *model, const double *edata, long datapoints) {
-	int ii;
-	for (ii = 0; ii < numvarparams; ii++)
-		b[ii] = calculateBetaElement(derivativeMatrix, ii, ydata, model, edata, datapoints);
+    if(derivmatrix)
+        free(derivmatrix);
+    if(epsilon)
+        free(epsilon);
+    if(temp_coef)
+        free(temp_coef);
+    if(model_left)
+        free(model_left);
+    if(model_right)
+        free(model_right);
+    return err;
+    
 }
 
 int calculateFitAndCost(
@@ -436,146 +430,11 @@ done:
     return err;
 }
 
-int HessianMatrix(double ***HessianMatrix,
-                  void *userdata,
-                  fitfunction fitfun,
-                  costfunction costfun,
-                  double *coefs,
-                  int numcoefs,
-                  unsigned int *holdvector,
-                  const double *ydata,
-                  const double *edata,
-                  const double **xdata,
-                  long datapoints,
-                  int numDataDims){
-    int err = 0;
-    int ii = 0, jj = 0, numvarparams = 0;
-    unsigned int *varparams = NULL;
-    double *coefs_temp = NULL;
-    double *model = NULL;
-    double t0, t1,t2, t3, t4;
-    int p1, p2;
-    double **lHessianMatrix = NULL;
-	
-	for(ii = 0 ; ii < numcoefs ; ii++)
-		if(holdvector[ii] == 0)
-			numvarparams++;
-    
-    //which are the parameters that are varying
-	varparams = (unsigned int*) malloc (sizeof(unsigned int) * numvarparams);
-	if(!varparams){
-		err = NO_MEMORY;
-		goto done;
-	}
-    for(ii = 0, jj = 0 ; ii < numcoefs ; ii++)
-		if(holdvector[ii] == 0){
-			varparams[jj] = ii;
-			jj++;
-		}
-    
-    //make a copy of coefs, just in case
-    coefs_temp = (double*) malloc (sizeof(double) * numcoefs);
-	if(!coefs_temp){
-		err = NO_MEMORY;
-		goto done;
-	}
-    //make an array for the model
-    model = (double*) malloc (sizeof(double) * datapoints);
-	if(!model){
-		err = NO_MEMORY;
-		goto done;
-	}
-    lHessianMatrix = (double**) malloc2d(numvarparams, numvarparams, sizeof(double));
-	if(!lHessianMatrix){
-		err = NO_MEMORY;
-		goto done;
-	}
-    
-    //now work out the Hessian Matrix
-    for(ii = 0 ; ii < numvarparams ; ii++){
-        for(jj = ii ; jj < numvarparams ; jj++){
-            memcpy(coefs_temp, coefs, sizeof(double) * numcoefs);
-            p1 = varparams[ii];
-            p2 = varparams[jj];
-            if(ii == jj){
-                //calculate the leading diagonal
-                coefs_temp[p1] = coefs[p1] * (1 - 2 * EPSILON);
-                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t0, model))
-                    goto done;
-
-                coefs_temp[p1] = coefs[p1] * (1 - EPSILON);
-                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t1, model))
-                    goto done;
-
-                coefs_temp[p1] = coefs[p1];
-                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t2, model))
-                    goto done;
-
-                coefs_temp[p1] = coefs[p1] * (1 + EPSILON);
-                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t3, model))
-                    goto done;
-
-                coefs_temp[p1] = coefs[p1] * (1 + 2 * EPSILON);
-                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t4, model))
-                    goto done;
-                
-                lHessianMatrix[ii][ii] =  (-t0 + 16 * t1 - 30 * t2 + 16 * t3 - t4) / 12/EPSILON/EPSILON/coefs[p1]/coefs[p2];
-            } else {
-                //f -1,-1
-				coefs_temp[p1] = coefs[p1] * (1 - EPSILON);
-				coefs_temp[p2] = coefs[p2] * (1 - EPSILON);
-                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t0, model))
-                    goto done;
-
-                //f +1,+1
-				coefs_temp[p1] = coefs[p1] * (1 + EPSILON);
-				coefs_temp[p2] = coefs[p2] * (1 + EPSILON);
-                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t1, model))
-                    goto done;
-
-                //f +1,-1
-				coefs_temp[p1] = coefs[p1] * (1 + EPSILON);
-				coefs_temp[p2] = coefs[p2] * (1 - EPSILON);
-                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t2, model))
-                    goto done;
-
-                //f -1,+1
-				coefs_temp[p1] = coefs[p1] * (1 - EPSILON);
-				coefs_temp[p2] = coefs[p2] * (1 + EPSILON);
-                if(err = calculateFitAndCost(userdata, fitfun, costfun, coefs_temp, numcoefs, ydata, edata, xdata, datapoints, numDataDims, &t3, model))
-                    goto done;
-
-				lHessianMatrix[ii][jj] = (t0 + t1 - t2 - t3)/4/EPSILON/EPSILON/coefs[p1]/coefs[p2];
-				lHessianMatrix[jj][ii] = lHessianMatrix[ii][jj];
-            }
-
-        }
-    }
-    
-    
-done:
-    
-    if(coefs_temp)
-        free(coefs_temp);
-    if(varparams)
-        free(varparams);
-    if(model)
-        free(model);
-    if(err && lHessianMatrix){
-        free(lHessianMatrix);
-        lHessianMatrix = NULL;
-    }
-    *HessianMatrix = lHessianMatrix;
-    return err;
-}
-
-
 int getCovarianceMatrix(double ***covarianceMatrix,
 						double *hessianDeterminant,
 						void *userdata,
 						fitfunction fitfun,
                         costfunction costfun,
-						double cost,
 						double *coefs,
 						int numcoefs,
 						unsigned int *holdvector,
@@ -586,11 +445,12 @@ int getCovarianceMatrix(double ***covarianceMatrix,
 						int numDataDims,
 						int unitSD){
 	int err;
-	double **derivativeMatrix = NULL;
 	double hess = 0;
 	unsigned int *varparams = NULL;
 	int ii,jj, numvarparams = 0;
-	double val;
+    double **alpha = NULL;
+    double *beta = NULL;
+    double cost;
     err = 0;
     
 	
@@ -610,23 +470,40 @@ int getCovarianceMatrix(double ***covarianceMatrix,
 			jj++;
 		}
     
-    //calculate the Hessian matrix.
-    if(err = HessianMatrix(&derivativeMatrix, userdata, fitfun, costfun, coefs, numcoefs, holdvector, ydata, edata, xdata, datapoints, numDataDims))
+    alpha = (double**) malloc2d(numvarparams, numvarparams, sizeof(double));
+    if(!alpha){
+        err = NO_MEMORY;
         goto done;
+    }
+    beta = (double*) malloc(numvarparams * sizeof(double));
+    if(!beta){
+        err = NO_MEMORY;
+        goto done;
+    }
     
-    //divide the Hessian matrix by a factor of 2.
-    for(ii = 0 ; ii < numvarparams; ii++)
-        for(jj = 0 ; jj < numvarparams ; jj++){
-            derivativeMatrix[ii][jj] /= 2.;
-        }
+    if(err = mrqcof(userdata, fitfun, costfun, coefs, numcoefs, varparams, numvarparams, ydata, edata, xdata, datapoints, numDataDims, &cost, alpha, 0, beta))
+        goto done;
+
+    for(ii = 0 ; ii < numvarparams ; ii++)
+        if(alpha[ii][ii] < 0)
+            alpha[ii][ii] = fabs(alpha[ii][ii]);
+        
     //invert the Hessian Matrix, in place
-	if((err = matrixInversion_chol(derivativeMatrix, numvarparams, &hess)))
+	if((err = matrixInversion_lu(alpha, numvarparams)))
 		goto done;
-		
-    for(ii = 0; ii < numvarparams ; ii++)
-        for(jj = 0 ; jj < numvarparams ; jj += 1)
-            derivativeMatrix[ii][jj] *= cost/(datapoints - numvarparams);
-	
+    
+    for(ii = 0 ; ii < numvarparams ; ii++){
+        if(alpha[ii][ii] < 0)
+            alpha[ii][ii] = fabs(alpha[ii][ii]);
+    }
+    
+    //if the data is unit weighted then multiply all entries by the cost/ddof
+    for(ii = 0; ii < numvarparams && unitSD; ii++)
+        for(jj = 0 ; jj <=ii ; jj += 1){
+            alpha[ii][jj] *= cost/(datapoints - numvarparams);
+            alpha[jj][ii] *= cost/(datapoints - numvarparams);
+        }
+
 	*covarianceMatrix = (double**) malloc2d(numcoefs, numcoefs, sizeof(double));
 	if(!covarianceMatrix){
 		err = NO_MEMORY;
@@ -634,18 +511,21 @@ int getCovarianceMatrix(double ***covarianceMatrix,
 	}
 
 	for (ii = 0; ii < numvarparams; ii++)
-		for(jj = 0 ; jj < numvarparams ; jj++){
-			(*covarianceMatrix)[varparams[ii]][varparams[jj]] =  derivativeMatrix[ii][jj];
-            val = derivativeMatrix[ii][jj];
+		for(jj = 0 ; jj <= ii ; jj++){
+			(*covarianceMatrix)[varparams[ii]][varparams[jj]] =  alpha[ii][jj];
+            (*covarianceMatrix)[varparams[jj]][varparams[ii]] =  alpha[ii][jj];
         }
+    
 	if(hessianDeterminant)
 		*hessianDeterminant = hess;
 			
 done:
 	if(varparams != NULL)
 		free(varparams);
-	if(derivativeMatrix != NULL)
-		free(derivativeMatrix);
+    if(alpha)
+        free(alpha);
+    if(beta)
+        free(beta);
 	
 	return err;
 }
@@ -661,7 +541,7 @@ insertVaryingParams(double *coefs, const unsigned int* varparams, unsigned int n
 	unsigned int ii;
 	
 	for(ii = 0 ; ii < numvarparams ; ii += 1)
-		*(coefs + *(varparams + ii)) =  *(vector + ii);
+		coefs[varparams[ii]] =  vector[ii];
 		
 }
 
@@ -733,7 +613,6 @@ int levenberg_marquardt(fitfunction fitfun,
 	unsigned int ii, jj, numvarparams = 0, iterations;
 	unsigned int *varparams = NULL;
 	double cost = -1, incrementedCost = -1, lambda = 0.001;
-	double **derivativeMatrix = NULL;
 	double **alpha = NULL;
 	double *reducedParameters = NULL;
 	double *beta = NULL;
@@ -779,12 +658,6 @@ int levenberg_marquardt(fitfunction fitfun,
 
 	varparams = (unsigned int*) malloc(sizeof(unsigned int) * numvarparams);
 	if(!varparams){
-		err = NO_MEMORY;
-		goto done;
-	}
-	
-	derivativeMatrix = (double**) malloc2d(numvarparams, datapoints, sizeof(double));
-	if(!derivativeMatrix){
 		err = NO_MEMORY;
 		goto done;
 	}
@@ -838,19 +711,9 @@ int levenberg_marquardt(fitfunction fitfun,
 	iterations = 0;
 	do {
 		insertVaryingParams(temp_coefs, varparams, numvarparams, reducedParameters);
-		
-		if((err = fitfun(userdata, temp_coefs, numcoefs, model, xdata, datapoints, numDataDims)))
-			goto done;
-		
-
-		cost = mycostfun(userdata, temp_coefs, numcoefs, model, ydata, edata, datapoints);
-		
-		if((err = updatePartialDerivative(userdata, fitfun, derivativeMatrix, temp_coefs, numcoefs, varparams, numvarparams, xdata, datapoints, numDataDims)))
-			goto done;
-		
-		updateAlpha(alpha, derivativeMatrix, numvarparams, edata, datapoints, lambda);
-		   
-		updateBeta(beta, derivativeMatrix, numvarparams, ydata, model, edata, datapoints);
+				
+        if(err = mrqcof(userdata, fitfun, mycostfun, temp_coefs, numcoefs, varparams, numvarparams, ydata, edata, xdata, datapoints, numDataDims, &cost, alpha, lambda, beta))
+            goto done;
 		
 		if((err = matrixInversion_lu(alpha, numvarparams)))
 			goto done;
@@ -893,8 +756,6 @@ done:
 		free(alpha);
 	if(model)
 		free(model);
-	if(derivativeMatrix)
-		free(derivativeMatrix);
 	if(beta)
 		free(beta);
 	if(reducedParameters)

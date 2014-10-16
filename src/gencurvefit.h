@@ -520,9 +520,8 @@ int genetic_optimisation(fitfunction fitfun,
 	  fitfunction with this pointer.
 
 	 @param fitfun			-	your fitfunction.
-
-	 @param cost			-	the value of the cost function for the
-	  parameters specified.
+     
+     @param costfun         -   your costfunction
 
 	 @param coefs[numcoefs]	-	an array containing the coefficients.  The
 	  covariance matrix is assessed for these values.
@@ -553,7 +552,6 @@ int genetic_optimisation(fitfunction fitfun,
 							void *userdata,
 							fitfunction fitfun,
                             costfunction costfun,
-							double cost,
 							double *coefs,
 							int numcoefs,
 							unsigned int *holdvector,
