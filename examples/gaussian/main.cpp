@@ -27,7 +27,7 @@ int NUM_CPUS = 1;
 #define GO_RECOMB 0.5
 #define GO_POPSIZEMULTIPLIER 20
 #define GO_ITERS 500
-#define GO_MONTECARLO 1 
+#define GO_MONTECARLO 1
 
 typedef struct{
 	const double *coefP;
@@ -38,13 +38,13 @@ typedef struct{
 	const double *eP;
 	bool useErrors;
 	const unsigned int *holdvector;
-	
+
 	long datapoints;
 	int dimensions;
-	
+
 	fitfunction fitfun;
 	costfunction costfun;
-	
+
 	double *coefResults;	//this is going to be successive fits, line after line.  i.e. have dimensions [numiters][coefnum];
 	double *chi2Results;
 	int iterationsToPerform;
@@ -59,47 +59,48 @@ std::string to_a_string(double *nums, long numthings)
 	long ii;
 	for(ii=0 ; ii< numthings ; ii+=1)
 		oss << nums[ii] << " ";
-	
-	return oss.str();
-}	
 
-void fitWorker(void* arg) { 
+	return oss.str();
+}
+
+void fitWorker(void* arg) {
 	int err = 0;
 	int jj = 0;
 	int ii = 0;
-	
+
 	fitWorkerParm *p = (fitWorkerParm *) arg;
 	gencurvefitOptions gco;
-	
+
 	double *coefsTemp = NULL;
-	
-	string outputString;	
+
+	string outputString;
 	double chi2;
-	
+
 	coefsTemp = (double *)malloc(sizeof(double)*p->numcoefs);
 	if(!coefsTemp){
 		err= NO_MEMORY;
 		goto done;
 	}
 	memcpy(coefsTemp, p->coefP, sizeof(double) * p->numcoefs);
-		
+
 	gco.iterations = GO_ITERS;
 	gco.popsizeMultiplier = GO_POPSIZEMULTIPLIER;
 	gco.k_m = GO_KM;
 	gco.recomb = GO_RECOMB;
 	gco.tolerance = GO_TOL;
 	gco.strategy = 0;
-	gco.temp = 1;
+    gco.dither[0] = 0.7;
+    gco.dither[1] = 1.5;
 	gco.updatefun = NULL;
 	gco.updatefrequency = 0;
 	gco.seed = -1;
 	gco.useinitialguesses = 0;
 	gco.monteCarlo = GO_MONTECARLO;
-	
+
 	//at this point we have 3 columns of data and the coefficients
 	//we can start doing the fit.
 	//do a load of montecarlo iterations
-	for(jj= 0 ; jj < p->iterationsToPerform ; jj+=1){		
+	for(jj= 0 ; jj < p->iterationsToPerform ; jj+=1){
 		//do the genetic optimisation
 /*		err = levenberg_marquardt(p->fitfun,
 								  p->costfun,
@@ -113,8 +114,8 @@ void fitWorker(void* arg) {
 								  1,
 								  &chi2,
 								  NULL,
-								  p->userdata); 
-*/		
+								  p->userdata);
+*/
 		err = genetic_optimisation(p->fitfun,
 								   p->costfun,
 								   p->numcoefs,
@@ -125,18 +126,18 @@ void fitWorker(void* arg) {
 								   p->yP,
 								   p->xP,
 								   p->eP,
-								   1, 
+								   1,
 								   &chi2,
 								   &gco,
 								   p->userdata);
-	
+
 		//output the results
 		if(err){
 			cout << err;
 			goto done;
 		}
 		outputString.clear();
-		
+
 		outputString.append(to_a_string(&chi2, 1));
 		outputString.append(" ");
 		outputString.append(to_a_string(coefsTemp, p->numcoefs));
@@ -144,22 +145,22 @@ void fitWorker(void* arg) {
 		cout << outputString;
 		cout.flush();
 	}
-	
+
 done:
 	if(coefsTemp)
 		free(coefsTemp);
-	
+
 };
 
 
 int main (int argc, char *argv[]) {
 	int err = 0;
 	long ii;
-	
+
 	vector<double> xx;
 	vector<double> yy;
-	
-	vector<double> fityy;	
+
+	vector<double> fityy;
 	vector<double> ee;
 	vector<double> coefs;
 	vector<double> lowlim;
@@ -170,18 +171,18 @@ int main (int argc, char *argv[]) {
 	vector<unsigned int> bs;
 	ifstream file_to_read;
 	bool useErrors;
-	
+
 	int MCiters, myMCiters;
-	
+
 	double **xdata = NULL;
 	double **fittedCoefs = NULL;
 	double *fittedChi2 = NULL;
-	
+
 	//create threads to do each fit.
 	fitWorkerParm *MC_arg = NULL;
-	
+
 	int numprocs = 1;
-	int myid = 0;	
+	int myid = 0;
 #ifdef USE_MPI
 	MPI_Init(&argc,&argv); /* all MPI programs start with MPI_Init; all 'N' processes exist thereafter */
 	MPI_Comm_size(MPI_COMM_WORLD,&numprocs); /* find out how big the SPMD world is */
@@ -190,27 +191,27 @@ int main (int argc, char *argv[]) {
 	numprocs = 1;
 	myid = 0;
 #endif
-	
+
 	if(argc != 5){
 		cout << "Useage:\n ./motoMC data.txt pilot useErrors mciters\n";
 		err = WRONG_NUMBER_OF_PARAMS;
 		goto done;
 	}
-	
+
 	useErrors = strtol(argv[3], NULL, 10);
 	MCiters = (int) strtol(argv[4], NULL, 10);
 	myMCiters = MCiters / numprocs;
-	
+
 	if(myid == numprocs - 1)
 		myMCiters += MCiters - numprocs * myMCiters;
-	
+
 	ii=0;
 	//read the data
 	file_to_read.open(argv[1], ios::in);
-	if(file_to_read.is_open()){		
+	if(file_to_read.is_open()){
 		while(getline(file_to_read, linein, '\n')){
-			Tokenize(linein, columndata, "\t", sizeof(char));			
-		
+			Tokenize(linein, columndata, "\t", sizeof(char));
+
 			xx.push_back(strtod(columndata[0].c_str(), NULL));
 			yy.push_back(strtod(columndata[1].c_str(), NULL));
 			ee.push_back(fabs(strtod(columndata[2].c_str(), NULL)));
@@ -221,19 +222,19 @@ int main (int argc, char *argv[]) {
 	} else {
 		goto done;
 	}
-	
+
 	//read the coefficient file, 1st two lines are headers.
 	file_to_read.open(argv[2], ios::in);
 	columndata.clear();
 	if(file_to_read.is_open()){
 		getline(file_to_read, linein, '\n');		//chi2value header
 		getline(file_to_read, linein, '\n');		//header describing columns
-		
+
 		while(getline(file_to_read, linein, '\n')){
 			Tokenize(linein, columndata, " ", sizeof(char));
-			
+
 			coefs.push_back(strtod(columndata[0].c_str(), NULL));
-			bs.push_back(strtol(columndata[1].c_str(), NULL, 10));			
+			bs.push_back(strtol(columndata[1].c_str(), NULL, 10));
 			lowlim.push_back(strtod(columndata[2].c_str(), NULL));
 			hilim.push_back(strtod(columndata[3].c_str(), NULL));
 			columndata.clear();
@@ -242,7 +243,7 @@ int main (int argc, char *argv[]) {
 	} else {
 		goto done;
 	}
-	
+
 	//setup the limits array
 	limits = (double**)malloc2d(2, coefs.size(), sizeof(double));
 	if(!limits){
@@ -251,9 +252,9 @@ int main (int argc, char *argv[]) {
 	}
 	for(ii=0 ; ii<coefs.size(); ii+=1){
 		limits[0][ii] = lowlim[ii];
-		limits[1][ii] = hilim[ii];		
+		limits[1][ii] = hilim[ii];
 	}
-	
+
 	//set up the xpoints
 	xdata = (double**)malloc2d(1, yy.size(), sizeof(double));
 	if(!xdata){
@@ -262,7 +263,7 @@ int main (int argc, char *argv[]) {
 	}
 	for(ii=0 ; ii < yy.size(); ii+=1)
 		xdata[0][ii] = xx[ii];
-	
+
 	//allocate memory for the fit parameter results.
 	fittedCoefs = (double**)malloc2d(myMCiters, coefs.size(), sizeof(double));
 	if(!fittedCoefs){
@@ -275,7 +276,7 @@ int main (int argc, char *argv[]) {
 		err = NO_MEMORY;
 		goto done;
 	}
-	
+
 	//allocate memory for the thread arguments.
 	MC_arg = (fitWorkerParm *) malloc(sizeof(fitWorkerParm) * myMCiters);
 	if(!MC_arg){
@@ -283,9 +284,9 @@ int main (int argc, char *argv[]) {
 		goto done;
 	}
 	memset(MC_arg, 0, sizeof(fitWorkerParm));
-	
-#pragma omp parallel for shared(MC_arg) private(ii) 
-	for (ii = 0 ; ii < myMCiters ; ii++){					
+
+#pragma omp parallel for shared(MC_arg) private(ii)
+	for (ii = 0 ; ii < myMCiters ; ii++){
 		MC_arg[ii].iterationsToPerform = 1;
 		MC_arg[ii].useErrors = useErrors;
 		MC_arg[ii].iterationOffset = ii;
@@ -303,15 +304,15 @@ int main (int argc, char *argv[]) {
 		MC_arg[ii].eP = &ee[0];
 		MC_arg[ii].limits = (const double **) limits;
 		MC_arg[ii].userdata = NULL;
-		
+
 		fitWorker((void*)(MC_arg + ii));
 	}
-	
-#ifdef USE_MPI	
+
+#ifdef USE_MPI
 	MPI_Finalize(); /* MPI Programs end with MPI Finalize; this is a weak synchronization point */
 #endif
 done:
-	
+
 	if(file_to_read.is_open())
 		file_to_read.close();
 	if(limits)
@@ -322,7 +323,7 @@ done:
 		free(fittedCoefs);
 	if(fittedChi2)
 		free(fittedChi2);
-	
+
     return err;
 }
 
