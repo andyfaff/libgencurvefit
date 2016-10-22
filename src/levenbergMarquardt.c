@@ -294,8 +294,35 @@ done:
 	return err;
 }
 
-int mrqcof(void *userdata, fitfunction fitfun, costfunction costfun, const double *coefs, int numcoefs, const unsigned int *varparams, int numvarparams,
-            const double *ydata, const double *edata, const double **xdata, long datapoints, int numDataDims, double *cost,
+
+int calculateFitAndCost(
+    void *userdata,
+    fitfunction fitfun,
+    costfunction costfun,
+    double *coefs,
+    int numcoefs,
+    const double *ydata,
+    const double *edata,
+    const double **xdata,
+    long datapoints,
+    int numDataDims,
+    double *cost,
+    double *model){
+    //calculate the model and cost of a fitfunction against the data
+    
+    int err = 0;
+    
+    if((err = fitfun(userdata, coefs, numcoefs, model, (const double**)xdata, datapoints, numDataDims)))
+		goto done;
+    
+    *cost = costfun(userdata, coefs, numcoefs, ydata, model, edata, datapoints);
+    
+done:
+    return err;
+}
+
+
+int mrqcof(void *userdata, fitfunction fitfun, costfunction costfun, const double *coefs, int numcoefs, const unsigned int *varparams, int numvarparams, const double *ydata, const double *edata, const double **xdata, long datapoints, int numDataDims, double *cost,
             double **alpha, double lambda, double *beta)
 {
     int err = 0;
@@ -303,6 +330,7 @@ int mrqcof(void *userdata, fitfunction fitfun, costfunction costfun, const doubl
     long jj = 0;
     long kk = 0;
     double val = 0;
+    
     double lcost, rcost;
     double **derivmatrix = NULL;
     double *epsilon = NULL;
@@ -404,31 +432,6 @@ done:
     
 }
 
-int calculateFitAndCost(
-    void *userdata,
-    fitfunction fitfun,
-    costfunction costfun,
-    double *coefs,
-    int numcoefs,
-    const double *ydata,
-    const double *edata,
-    const double **xdata,
-    long datapoints,
-    int numDataDims,
-    double *cost,
-    double *model){
-    //calculate the model and cost of a fitfunction against the data
-    
-    int err = 0;
-    
-    if((err = fitfun(userdata, coefs, numcoefs, model, (const double**)xdata, datapoints, numDataDims)))
-		goto done;
-    
-    *cost = costfun(userdata, coefs, numcoefs, ydata, model, edata, datapoints);
-    
-done:
-    return err;
-}
 
 int getCovarianceMatrix(double ***covarianceMatrix,
 						double *hessianDeterminant,
