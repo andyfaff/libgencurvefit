@@ -157,27 +157,30 @@ typedef struct genoptStruct genoptStruct;
  *(*(p+i)+j) is equivalent to p[i][j]
  In addition *(p+i) points to a whole row.
  */
-
  void* malloc2d(int ii, int jj, int sz){
-	void** p;
-	int sz_ptr_array;
-	int sz_elt_array;
-	int sz_allocation;
-	long i;
-
-	sz_ptr_array = ii * sizeof(void*);
-	sz_elt_array = jj * sz;
-	sz_allocation = sz_ptr_array + ii * sz_elt_array;
-
-	p = (void**) malloc(sz_allocation);
-	if (p == NULL)
-		return p;
-	memset(p, 0, sz_allocation);
-	for (i = 0; i < ii; ++i)
-	{
-		*(p+i) = (void*) ((long)p + sz_ptr_array + i * sz_elt_array);
-	}
-	return p;
+    void** p;
+    size_t sz_ptr_array;
+    size_t sz_elt_array;
+    size_t sz_allocation;
+    long i = 0;
+    char *c = NULL;
+    
+    sz_ptr_array = ii * sizeof(void*);
+    sz_elt_array = jj * sz;
+    sz_allocation = sz_ptr_array + ii * sz_elt_array;
+    
+    p = (void**) malloc(sz_allocation);
+    if (p == NULL)
+        return p;
+    memset(p, 0, sz_allocation);
+    
+    c = ((char*) p) + sz_ptr_array;
+    for (i = 0; i < ii; ++i)
+    {
+        //*(p+i) = (void*) ((long)p + sz_ptr_array + i * sz_elt_array);
+        p[i] = (void*) (c + i * sz_elt_array);
+    }
+    return p;
 }
 
 
