@@ -178,13 +178,13 @@ int matrixInversion_lu(double **a, int N){
 	double d;
 	
 	
-	indx = (int*)malloc(sizeof(int)*N);
+	indx = (int*)malloc(sizeof(int) * N);
 	if(indx == NULL){
 		err = 0;
 		goto done;
 	}
 	
-	tempA = (double**)malloc2d(N,N,sizeof(double));
+	tempA = (double**)malloc2d(N, N, sizeof(double));
 	if(tempA == NULL){
 		err = 0;
 		goto done;
@@ -195,25 +195,32 @@ int matrixInversion_lu(double **a, int N){
 		}	
 	}
 	
-	col = (double*)malloc(sizeof(double)*N);
+	col = (double*)malloc(sizeof(double) * N);
 	if(col == NULL){
 		err = 0;
 		goto done;
 	}
 	
-	if((err = ludcmp(tempA,N,indx,&d)))
+	if((err = ludcmp(tempA, N, indx, &d)))
 		goto done;
 	
 	for(j=0 ; j<N ; j++){
 		for(i=0 ; i<N ; i++) col[i] = 0.0;
 		col[j] = 1.0;
-		lubksb(tempA,N,indx,col);
+		lubksb(tempA, N, indx, col);
 		for(i=0 ; i<N ; i++){
 			d = col[i];
 			a[i][j] = col[i];
 		};
 	}
 done:
+    if(indx)
+        free(indx);
+    if(col)
+        free(col);
+    if(tempA)
+        free(tempA);
+        
 	return err;
 }
 
