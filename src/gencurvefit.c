@@ -104,6 +104,9 @@ struct genoptStruct {
 	/*an individual genetic guess.*/
 	double *gen_trial;
 
+    /*scale factors*/
+    double **scale_factors;
+    
 	/*which genetic strategy do you want?*/
 	int strategy;
 
@@ -574,7 +577,7 @@ scale_parameters(double *coefs,
                  const unsigned int* varparams,
                  unsigned int numvarparams,
                  const double *scaledVector,
-                 const double **limits){
+                 const double **scale_factors){
 	unsigned int ii;
 	int ival;
 	double dval,scale0, scale1, dval4;
@@ -582,8 +585,8 @@ scale_parameters(double *coefs,
 	for(ii = 0 ; ii < numvarparams ; ii += 1){
 		ival = varparams[ii];
 		dval = scaledVector[ii];
-        scale0 = 0.5 * (limits[0][varparams[ii]] + limits[1][varparams[ii]]);
-        scale1 = fabs(limits[0][varparams[ii]] - limits[1][varparams[ii]]);
+        scale0 = scale_factors[0][ii];
+        scale1 = scale_factors[1][ii];
 
         dval4 = coefs[varparams[ii]] = scale0 + (dval - 0.5) * scale1;
 	}
@@ -598,7 +601,7 @@ unscale_parameters(double *scaledVector,
                    const unsigned int* varparams,
                    unsigned int numvarparams,
                    const double *coefs,
-                   const double **limits){
+                   const double **scale_factors){
 	unsigned int ii;
 	int ival;
 	double dval,scale0, scale1, dval4;
@@ -606,8 +609,8 @@ unscale_parameters(double *scaledVector,
 	for(ii = 0 ; ii < numvarparams ; ii += 1){
 		ival = varparams[ii];
 		dval = coefs[ival];
-        scale0 = 0.5 * (limits[0][varparams[ii]] + limits[1][varparams[ii]]);
-        scale1 = fabs(limits[0][varparams[ii]] - limits[1][varparams[ii]]);
+        scale0 = scale_factors[0][ii];
+        scale1 = scale_factors[1][ii];
 
         dval4 = scaledVector[ii] = (dval - scale0) / scale1 + 0.5;
 	}
@@ -663,6 +666,12 @@ static int initialiseFit(genoptStruct *p){
 	double chi2 = 0.;
 	waveStats wavStats;
 
+    /*initialise scale_factors*/
+    for(ii = 0 ; ii < p->numvarparams ; ii += 1){
+        p->scale_factors[0][ii] = 0.5 * (p->limits[0][p->varparams[ii]] + p->limits[1][p->varparams[ii]]);
+        p->scale_factors[1][ii] = fabs(p->limits[0][p->varparams[ii]] - p->limits[1][p->varparams[ii]]);
+    }
+    
 	/*
 	 initialise population vector guesses
 	 if you want to seed with the initial guesses, you have to insert them into
@@ -672,7 +681,8 @@ static int initialiseFit(genoptStruct *p){
 	 If the limits are the same than the value will be NaN (divide by 0), so set
 	 the value to one of the limits.
 	 */
-	val = *(p->gen_populationvector);
+    val = *(p->gen_populationvector);
+    
 	if(p->useinitialguesses){
         /*
         if you want to use the initial guesses to start the fit, then they need
@@ -683,8 +693,8 @@ static int initialiseFit(genoptStruct *p){
                            p->varparams,
                            p->numvarparams,
                            p->coefs,
-                           p->limits);
-        for(ii = 0 ; ii < p->numvarparams ; ii++)
+                           (const double **) p->scale_factors);
+        for(ii = 0 ; ii < p->numvarparams ; ii++){
             if(p->gen_trial[ii] > 1. || p->gen_trial[ii] < 0.){
                 err = COEFS_MUST_BE_WITHIN_LIMITS;
                 goto done;
@@ -693,7 +703,7 @@ static int initialiseFit(genoptStruct *p){
 				p->gen_trial[ii] = p->limits[1][p->varparams[ii]];
 
 			*val++ = p->gen_trial[ii];
-
+        }
         startIt = p->numvarparams;
 	} else {
 		startIt = 0;
@@ -705,9 +715,9 @@ static int initialiseFit(genoptStruct *p){
 	 want to use the initial guesses to seed the fit.
 	 If so, then it is initialised to p->numvarparams, which should correspond
 	 to the second row of the population vector
-	 (p->gen_populationvector[numvarparams][p->totalpopsize])
+	 (p->gen_populationvector[p->totalpopsize][p->numvarparams])
 	 */
-	for(ii = startIt; ii < p->numvarparams * p->totalpopsize - startIt ; ii++)
+	for(ii = startIt; ii < p->numvarparams * p->totalpopsize ; ii++)
 		*val++ = randomDouble(&(p->myMT19937), 0, 1);
 
 	/*
@@ -716,10 +726,10 @@ static int initialiseFit(genoptStruct *p){
 	*/
 	for(ii = 0 ; ii < p->totalpopsize ; ii += 1){
 		scale_parameters(p->temp_coefs,
-		                 p->varparams,
+		                 (const unsigned int*) p->varparams,
 		                 p->numvarparams,
-		                 *(p->gen_populationvector + ii),
-		                 p->limits);
+		                 (const double*) *(p->gen_populationvector + ii),
+		                 (const double**) p->scale_factors);
 
 		//calculate the model
 		if((err = (*(p->fitfun))(p->userdata,
@@ -754,7 +764,7 @@ static int initialiseFit(genoptStruct *p){
 	                 p->varparams,
 	                 p->numvarparams,
 	                 *(p->gen_populationvector),
-	                 p->limits);
+	                 (const double **)p->scale_factors);
 
 	if(p->updatefun && (4 & p->updatefrequency))
 		if((err = (*(p->updatefun))(p->userdata,
@@ -868,7 +878,7 @@ static int optimiseloop(genoptStruct *p){
 			                 p->varparams,
 			                 p->numvarparams,
 			                 p->gen_trial,
-			                 p->limits);
+			                 p->scale_factors);
 
 			if((err = (*(p->fitfun))(p->userdata,
 									 p->temp_coefs,
@@ -1148,6 +1158,14 @@ int genetic_optimisation(fitfunction fitfun,
 		err = NO_MEMORY;
 		goto done;
 	}
+    
+    /* initialise the scale factors */
+    gos.scale_factors = (double**)malloc2d(2, gos.numvarparams,
+                                           sizeof(double));
+    if(gos.scale_factors == NULL){
+        err = NO_MEMORY;
+        goto done;
+    }
 
 	/*
 	initialise space for a full array copy of the coefficients
@@ -1210,7 +1228,7 @@ int genetic_optimisation(fitfunction fitfun,
 		                 gos.varparams,
 		                 gos.numvarparams,
 		                 *(gos.gen_populationvector),
-		                 limits);
+		                 gos.scale_factors);
 		memcpy(gos.coefs, gos.temp_coefs, gos.numcoefs * sizeof(double));
 	}
 
@@ -1229,6 +1247,8 @@ done:
 		free(gos.temp_coefs);
 	if(gos.varparams)
 		free(gos.varparams);
+    if(gos.scale_factors)
+        free(gos.scale_factors);
 
 	return err;
 }
