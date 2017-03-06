@@ -605,7 +605,7 @@ unscale_parameters(double *scaledVector,
 
 	for(ii = 0 ; ii < numvarparams ; ii += 1){
 		ival = varparams[ii];
-		dval = coefs[ii];
+		dval = coefs[ival];
         scale0 = 0.5 * (limits[0][varparams[ii]] + limits[1][varparams[ii]]);
         scale1 = fabs(limits[0][varparams[ii]] - limits[1][varparams[ii]]);
 
