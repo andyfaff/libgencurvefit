@@ -757,7 +757,7 @@ static int initialiseFit(genoptStruct *p){
 
 	swapChi2values(p, 0, wavStats.V_minloc);
 	swapPopVector(p, p->totalpopsize, 0, wavStats.V_minloc);
-		goto done;
+
 
 	//put the best fit from the intialisation into the coeffcients to return
 	scale_parameters(p->temp_coefs,
