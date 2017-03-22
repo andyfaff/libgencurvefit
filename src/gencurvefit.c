@@ -90,6 +90,10 @@ struct genoptStruct {
 
 	/*did you want to use the intial guesses to initialise the fit*/
 	int useinitialguesses;
+    
+    /*did you supply an initial population  to use*/
+    const double *initial_population;
+    unsigned int initial_population_rows;
 
 	/*which parameters are varying*/
 	unsigned int *varparams;
@@ -717,9 +721,26 @@ static int initialiseFit(genoptStruct *p){
 	 to the second row of the population vector
 	 (p->gen_populationvector[p->totalpopsize][p->numvarparams])
 	 */
-	for(ii = startIt; ii < p->numvarparams * p->totalpopsize ; ii++)
-		*val++ = randomDouble(&(p->myMT19937), 0, 1);
-
+    for(ii = startIt; ii < p->numvarparams * p->totalpopsize ; ii++)
+        *val++ = randomDouble(&(p->myMT19937), 0, 1);
+    
+    if(p->initial_population) {
+        /* an initial population was specified, go through and initialise
+         the population with it.
+         */
+        val = (double*) p->initial_population;
+        for(ii = 0 ; ii < MIN(p->initial_population_rows, p->totalpopsize) ; ii++){
+            unscale_parameters(p->gen_trial,
+                               p->varparams,
+                               p->numvarparams,
+                               val,
+                               (const double **) p->scale_factors);
+            val += p->numcoefs;
+            ensureConstraints(p);
+            setPopVector(p, p->gen_trial, p->numvarparams, ii);
+        }
+    }
+    
 	/*
 	initialise Chi2array, will require a bit of calculation of the model
 	function for each of the initial guesses.
@@ -1031,7 +1052,7 @@ int genetic_optimisation(fitfunction fitfun,
 	if(!limits)
 		return NO_LIMITS_ARRAY;
 
-
+    // the options structure is zeroed out to start with
 	memset(&gos, 0, sizeof(gos));
 
 	//initialise the random number generators
@@ -1126,6 +1147,8 @@ int genetic_optimisation(fitfunction fitfun,
 		gos.useinitialguesses = gco->useinitialguesses;
 		gos.dither[0] = gco->dither[0];
 		gos.dither[1] = gco->dither[1];
+        gos.initial_population = gco->initial_population;
+        gos.initial_population_rows = gco->initial_population_rows;
 	}
 	gos.totalpopsize = gos.numvarparams * popsizeMultiplier;
 
@@ -1140,7 +1163,8 @@ int genetic_optimisation(fitfunction fitfun,
 		err = NO_MEMORY;
 		goto done;
 	}
-	/*
+    
+    /*
 	 initialise Chi2array
 	 */
 	gos.chi2Array = (double*) malloc (gos.totalpopsize * sizeof(double));

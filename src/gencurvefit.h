@@ -317,6 +317,17 @@ typedef int (*updatefunction)(void *userdata,
 		 Default = useinitialguesses = 0.
 		 */
 		unsigned int useinitialguesses;
+        
+        /**
+         initial_population - specifies the initial population for the fit.
+         The array is assumed to be contiguous, and have total length
+         `initial_population_rows * numcoefs`. The shape of the array is
+         assumed to be (initial_population_rows, numcoefs), i.e. the coefficients
+         for a given population member are sequential.
+         This array is only used if initial_population is not NULL.
+         */
+        const double *initial_population;
+        unsigned int initial_population_rows;
 
 		/**
 		monteCarlo          - when a fit is initialised a dataset is synthesised
