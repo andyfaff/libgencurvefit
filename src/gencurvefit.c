@@ -21,6 +21,8 @@
 #endif
 #endif
 
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 /**
  A structure to hold statistics of an array
  */
@@ -195,8 +197,8 @@ typedef struct genoptStruct genoptStruct;
  randomInteger returns an integer between 0 and upper EXclusive
  i.e. you will never get upper returned.
  */
-int randomInteger (mt19937p *myMT19937, int upper){
-	int val;
+unsigned long randomInteger (mt19937p *myMT19937, unsigned long upper){
+	unsigned long val;
 	while (upper <= (val = genrand_int(myMT19937) / (0xffffffff / upper)));
 //	while (upper <= (val = random() / (RAND_MAX/upper)));
 	return val;
@@ -275,7 +277,7 @@ static void SelectSamples(mt19937p *myMT19937,
 
 static void Best1Bin(genoptStruct *p, long candidate){
 	long r1, r2;
-	unsigned int n, i;
+	unsigned long n, i;
 
 	SelectSamples(&(p->myMT19937),
 	              p->totalpopsize,
@@ -303,7 +305,7 @@ static void Best1Bin(genoptStruct *p, long candidate){
 
 static void Best1Exp(genoptStruct *p, long candidate){
 	long r1, r2;
-	unsigned int n, i;
+	unsigned long n, i;
 
 	SelectSamples(&(p->myMT19937),  p->totalpopsize, candidate, &r1, &r2, NULL, NULL, NULL);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -320,7 +322,7 @@ static void Best1Exp(genoptStruct *p, long candidate){
 
 static void Rand1Exp(genoptStruct *p, long candidate){
 	long r1, r2, r3;
-	unsigned int n, i;
+	unsigned long n, i;
 
 	SelectSamples(&(p->myMT19937),  p->totalpopsize, candidate,&r1,&r2,&r3, NULL, NULL);
 	n = randomInteger(&(p->myMT19937),  p->numvarparams);
@@ -337,7 +339,7 @@ static void Rand1Exp(genoptStruct *p, long candidate){
 
 static void RandToBest1Exp(genoptStruct *p, long candidate){
 	long r1, r2;
-	unsigned int n,  i;
+	unsigned long n,  i;
 
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2, NULL, NULL, NULL);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -354,7 +356,7 @@ static void RandToBest1Exp(genoptStruct *p, long candidate){
 
 static void Best2Exp(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4;
-	unsigned int n, i;
+	unsigned long n, i;
 
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,&r4, NULL);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -373,7 +375,7 @@ static void Best2Exp(genoptStruct *p, long candidate){
 
 static void Rand2Exp(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4, r5;
-	unsigned int n, i;
+	unsigned long n, i;
 
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,&r4,&r5);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -392,7 +394,7 @@ static void Rand2Exp(genoptStruct *p, long candidate){
 
 static void RandToBest1Bin(genoptStruct *p, long candidate){
 	long r1, r2;
-	unsigned int n, i;
+	unsigned long n, i;
 
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate, &r1, &r2, NULL, NULL, NULL);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -410,7 +412,7 @@ static void RandToBest1Bin(genoptStruct *p, long candidate){
 
 static void Best2Bin(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4;
-	unsigned int n, i;
+	unsigned long n, i;
 
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,&r4, NULL);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -430,7 +432,7 @@ static void Best2Bin(genoptStruct *p, long candidate){
 
 static void Rand2Bin(genoptStruct *p, long candidate){
 	long r1, r2, r3, r4, r5;
-	unsigned int n, i;
+	unsigned long n, i;
 
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,&r4,&r5);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -450,7 +452,7 @@ static void Rand2Bin(genoptStruct *p, long candidate){
 
 static void Rand1Bin(genoptStruct *p, long candidate){
 	long r1, r2, r3;
-	unsigned int n, i;
+	unsigned long n, i;
 
 	SelectSamples(&(p->myMT19937), p->totalpopsize, candidate,&r1,&r2,&r3,NULL, NULL);
 	n = randomInteger(&(p->myMT19937), p->numvarparams);
@@ -898,8 +900,8 @@ static int optimiseloop(genoptStruct *p){
 			scale_parameters(p->temp_coefs,
 			                 p->varparams,
 			                 p->numvarparams,
-			                 p->gen_trial,
-			                 p->scale_factors);
+			                 (const double*) p->gen_trial,
+			                 (const double**) p->scale_factors);
 
 			if((err = (*(p->fitfun))(p->userdata,
 									 p->temp_coefs,
@@ -1251,8 +1253,8 @@ int genetic_optimisation(fitfunction fitfun,
 		scale_parameters(gos.temp_coefs,
 		                 gos.varparams,
 		                 gos.numvarparams,
-		                 *(gos.gen_populationvector),
-		                 gos.scale_factors);
+		                 (const double*) *(gos.gen_populationvector),
+		                 (const double**) gos.scale_factors);
 		memcpy(gos.coefs, gos.temp_coefs, gos.numcoefs * sizeof(double));
 	}
 
